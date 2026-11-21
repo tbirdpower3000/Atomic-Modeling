@@ -245,7 +245,7 @@ sup{font-size:max(11px,0.72em)}
       <div class="sl" id="gParB"><label for="gB">Parameter</label><input type="range" id="gB"><output id="gBo"></output></div>
       <div class="sl" id="gKRow" style="grid-template-columns:7em minmax(0,1fr)"><label for="gK">States to find</label><select id="gK"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
       <label class="chk" style="min-height:36px" id="gLatRow" hidden><input type="checkbox" id="gLat" checked>Self-repulsion fix (Latter tail): an electron no longer repels its own charge</label><label class="chk" style="min-height:36px"><input type="checkbox" id="gMom" checked>Momentum acceleration (the “heavy-ball” trick from training neural networks)</label>
-      <label class="chk" style="min-height:36px"><input type="checkbox" id="gWarm" checked>Warm start from the last solution when you change a setting</label><label class="chk" style="min-height:36px"><input type="checkbox" id="gUp" checked>Upscale (the FSR trick): on the 128³ grid, solve on 64³ first and enlarge that answer as the starting guess</label>
+      <label class="chk" style="min-height:36px"><input type="checkbox" id="gWarm" checked>Warm start from the last solution when you change a setting</label><label class="chk" style="min-height:36px"><input type="checkbox" id="gOnGpu" checked>Keep the whole solve on the GPU: energy, normalization and orthogonalization run as GPU reductions, and the field is copied back only to redraw</label><label class="chk" style="min-height:36px"><input type="checkbox" id="gUp" checked>Upscale (the FSR trick): on the 128³ grid, solve on 64³ first and enlarge that answer as the starting guess</label>
       <div class="chips" style="margin-top:10px"><button id="gGo">Solve</button><button id="gStop">Stop</button></div>
       <div id="gTdBox" style="margin-top:12px"><h3 class="trh">Evolve in real time</h3><p class="note" style="margin:0 0 6px">Solves the time-dependent Schrödinger equation on the GPU and draws straight from graphics memory.</p>
         <div class="sl"><label for="gKp">Packet speed</label><input type="range" id="gKp" min="0" max="3" step="0.1" value="1"><output id="gKpo">1</output></div>
@@ -1102,7 +1102,7 @@ function gSetGrid(G){GS.G=G;gStop();GS.states=[];GS.tdse=null;gDispose();}
 $$('[data-gg]').forEach(b=>b.addEventListener('click',()=>{GS.chain=null;GS.up=null;gSetGrid(+b.dataset.gg);$$('[data-gg]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));gRender();}));
 const gScene=new THREE.Scene(),gCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);let gRT=null,gMat=null,gTd=null,gCopy=null,gQuad=null,gTex=null,gBuf=null,GI=null;
 function gDims(){const G=GS.G,T=G===64?8:16;return {G,T,Wx:T*G,Wy:(G/T)*G,N:G*G*G};}
-function gDispose(){if(gRT){gRT.forEach(r=>r.dispose());gRT=null;}if(gTex){gTex.dispose();gTex=null;}GI=null;if(gTex3){gTex3.dispose();gTex3=null;if(gVolMesh){scene.remove(gVolMesh);disposeObj(gVolMesh);gVolMesh=null;}}}
+function gDispose(){gRedFree();if(gRT){gRT.forEach(r=>r.dispose());gRT=null;}if(gTex){gTex.dispose();gTex=null;}GI=null;if(gTex3){gTex3.dispose();gTex3=null;if(gVolMesh){scene.remove(gVolMesh);disposeObj(gVolMesh);gVolMesh=null;}}}
 const GL_ATLAS=`uniform sampler2D uPsi;uniform float uG,uT,uWx,uWy;
 vec2 atv(float i,float j,float k){if(i<0.0||j<0.0||k<0.0||i>uG-1.0||j>uG-1.0||k>uG-1.0)return vec2(0.0);float tx=mod(k,uT),ty=floor(k/uT);return texture2D(uPsi,vec2((tx*uG+i+0.5)/uWx,(ty*uG+j+0.5)/uWy)).rg;}
 float at(float i,float j,float k){return atv(i,j,k).r;}`;
@@ -1166,9 +1166,39 @@ function gEig(){const pr=GS.pr,u=gMat.uniforms,batch=GS.G===128?60:40;gQuad.mate
  for(let s2=0;s2<batch;s2++){u.uPsi.value=gRT[0].texture;renderer.setRenderTarget(gRT[1]);renderer.render(gScene,gCam);gRT.reverse();}renderer.setRenderTarget(null);GS.it+=batch;GS.itTot=(GS.itTot||0)+batch;
  const list=GS.task==='scf'?GS.scf.cur:GS.states;let psi=gOrtho(gRead(),list);const E=gEnergy(psi,pr);gUpload(psi);gVol(psi);
  const tol=GS.task==='scf'?2e-5:2e-6,conv=GS.lastE!==null&&Math.abs(E-GS.lastE)<Math.max(1e-6,Math.abs(E)*tol);GS.stable=conv?GS.stable+1:0;GS.lastE=E;return {psi,E,done:GS.stable>=(GS.task==='scf'?2:3)||GS.it>=40000};}
+
+/* ---- on-GPU reductions: energy, norm and orthogonalization without copying the field back ---- */
+let gRed=null;
+function gRedInit(){const d=gDims();if(gRed&&gRed.Wx===d.Wx)return;gRedFree();const o={type:THREE.FloatType,format:THREE.RGBAFormat,minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter,depthBuffer:false,stencilBuffer:false};
+ const VS='void main(){gl_Position=vec4(position.xy,0.0,1.0);}';const u=gMat.uniforms;
+ const prod=new THREE.ShaderMaterial({uniforms:Object.assign({},u,{uMode:{value:0},uPack:{value:null}}),vertexShader:VS,fragmentShader:GL_ATLAS+GL_POT+GL_LAP+`uniform float uD,uMode;uniform sampler2D uPack;void main(){float i,j,k;vox(i,j,k);float c=at(i,j,k);
+  if(uMode<0.5){float v=pot(posOf(i,j,k));gl_FragColor=vec4(c*(-uD*lapc(i,j,k,0)+v*c),c*c,0.0,0.0);}else gl_FragColor=c*texture2D(uPack,gl_FragCoord.xy/vec2(uWx,uWy));}`});
+ const red=new THREE.ShaderMaterial({uniforms:{uSrc:{value:null},uIn:{value:new THREE.Vector2()}},vertexShader:VS,fragmentShader:`uniform sampler2D uSrc;uniform vec2 uIn;void main(){vec2 b=floor(gl_FragCoord.xy)*4.0;vec4 s=vec4(0.0);for(int y=0;y<4;y++)for(int x=0;x<4;x++){vec2 p=b+vec2(float(x),float(y));if(p.x<uIn.x&&p.y<uIn.y)s+=texture2D(uSrc,(p+0.5)/uIn);}gl_FragColor=s;}`});
+ const axpy=new THREE.ShaderMaterial({uniforms:{uPsi:{value:null},uPack:{value:null},uC:{value:new THREE.Vector4()},uS:{value:1},uWx:u.uWx,uWy:u.uWy},vertexShader:VS,fragmentShader:`uniform sampler2D uPsi,uPack;uniform vec4 uC;uniform float uS,uWx,uWy;void main(){vec2 t=gl_FragCoord.xy/vec2(uWx,uWy);vec4 r=texture2D(uPsi,t);float p=dot(uC,texture2D(uPack,t));gl_FragColor=vec4((r.r-p)*uS,0.0,(r.b-p)*uS,1.0);}`});
+ const full=new THREE.WebGLRenderTarget(d.Wx,d.Wy,o),lv=[];let w=d.Wx,h=d.Wy;while(w>1||h>1){w=Math.ceil(w/4);h=Math.ceil(h/4);lv.push(new THREE.WebGLRenderTarget(w,h,o));}
+ const zero=new THREE.DataTexture(new Float32Array(4),1,1,THREE.RGBAFormat,THREE.FloatType);zero.needsUpdate=true;gRed={Wx:d.Wx,prod,red,axpy,full,lv,zero,px:new Float32Array(4),packs:[],packKey:null};}
+function gRedFree(){if(!gRed)return;[gRed.full,...gRed.lv].forEach(r=>r.dispose());[gRed.prod,gRed.red,gRed.axpy,gRed.zero].forEach(m=>m.dispose());gRed.packs.forEach(t=>t.dispose());gRed=null;}
+function gReduce(){const d=gDims();let src=gRed.full.texture,w=d.Wx,h=d.Wy;gQuad.material=gRed.red;
+ for(const rt of gRed.lv){gRed.red.uniforms.uSrc.value=src;gRed.red.uniforms.uIn.value.set(w,h);renderer.setRenderTarget(rt);renderer.render(gScene,gCam);src=rt.texture;w=rt.width;h=rt.height;}
+ renderer.readRenderTargetPixels(gRed.lv[gRed.lv.length-1],0,0,1,1,gRed.px);renderer.setRenderTarget(null);return Array.from(gRed.px);}
+function gProdReduce(mode,pack){const P=gRed.prod;P.uniforms.uPsi.value=gRT[0].texture;P.uniforms.uMode.value=mode;P.uniforms.uPack.value=pack||null;gQuad.material=P;renderer.setRenderTarget(gRed.full);renderer.render(gScene,gCam);return gReduce();}
+function gAxpy(pack,c,sc){const A=gRed.axpy;A.uniforms.uPsi.value=gRT[0].texture;A.uniforms.uPack.value=pack;A.uniforms.uC.value.set(c[0],c[1],c[2],c[3]);A.uniforms.uS.value=sc;gQuad.material=A;renderer.setRenderTarget(gRT[1]);renderer.render(gScene,gCam);renderer.setRenderTarget(null);gRT.reverse();}
+function gPacks(list){const key=GS.G+':'+list.map(x=>x.E).join(',');if(gRed.packKey===key)return gRed.packs;gRed.packs.forEach(t=>t.dispose());gRed.packs=[];const d=gDims();
+ for(let p=0;p<list.length;p+=4){const a=new Float32Array(d.Wx*d.Wy*4);for(let c=0;c<4&&p+c<list.length;c++){const ps=list[p+c].psi;for(let q=0;q<d.N;q++)a[(GI.Yy[q]*d.Wx+GI.X[q])*4+c]=ps[q];}
+  const t=new THREE.DataTexture(a,d.Wx,d.Wy,THREE.RGBAFormat,THREE.FloatType);t.minFilter=t.magFilter=THREE.NearestFilter;t.needsUpdate=true;gRed.packs.push(t);}
+ gRed.packKey=key;return gRed.packs;}
+function gEigGPU(){const pr=GS.pr,u=gMat.uniforms,batch=GS.G===128?60:40;gRedInit();gQuad.material=gMat;gSetU(pr);
+ for(let s2=0;s2<batch;s2++){u.uPsi.value=gRT[0].texture;renderer.setRenderTarget(gRT[1]);renderer.render(gScene,gCam);gRT.reverse();}renderer.setRenderTarget(null);GS.it+=batch;GS.itTot=(GS.itTot||0)+batch;
+ const list=GS.task==='scf'?GS.scf.cur:GS.states;
+ for(const pk of gPacks(list)){const dt=gProdReduce(1,pk);gAxpy(pk,dt,1);}
+ const en=gProdReduce(0),E=en[0]/en[1];gAxpy(gRed.zero,[0,0,0,0],1/Math.sqrt(en[1]));gQuad.material=gMat;
+ const tol=GS.task==='scf'?2e-5:2e-6,conv=GS.lastE!==null&&Math.abs(E-GS.lastE)<Math.max(1e-6,Math.abs(E)*tol);GS.stable=conv?GS.stable+1:0;GS.lastE=E;
+ const done=GS.stable>=(GS.task==='scf'?2:3)||GS.it>=40000,now=performance.now();let psi=null;
+ if(done||now-(GS.lastVolT||0)>900){psi=gOrtho(gRead(),list);gVol(psi);GS.lastVolT=performance.now();}
+ return {psi,E,done};}
 function gStep(){if(!GS.run||mode!=='gpu')return;
  if(GS.task==='tdse'){tdStep();return;}
- const r=gEig();
+ const r=$('#gOnGpu').checked?gEigGPU():gEig();
  if(GS.task==='eig'){$('#gStat').textContent='Finding state '+(GS.states.length+1)+' of '+$('#gK').value+' · '+GS.it.toLocaleString()+' GPU steps · energy now '+fE(r.E*GS.pr.P.unit);
   if(r.done){GS.states.push({psi:r.psi,E:r.E,steps:GS.it,mom:$('#gMom').checked,warm:!!GS.warmUsed});gCacheE(GS.states.length-1,r.E);GS.view=GS.states.length-1;gRender();if(GS.states.length>=+$('#gK').value){GS.run=false;$('#gStat').textContent='Done: '+GS.states.length+' states found.';gChainNext();}else gBegin();}return;}
  const S=GS.scf;$('#gStat').textContent='Self-consistency cycle '+(S.cycle+1)+' · orbital '+ORBN[S.cur.length]+' · '+GS.it.toLocaleString()+' GPU steps · ε = '+fE(r.E*27.211386);
