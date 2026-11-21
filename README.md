@@ -2,6 +2,8 @@
 
 *Orbitals in your compass*
 
+**Live app:** it runs at **[https://tbirdpower3000.github.io/Atomic-Modeling/](https://tbirdpower3000.github.io/Atomic-Modeling/)** (GitHub Pages, served from the `main` branch).
+
 An interactive 3D atom explorer that grew out of a hand-drawn compass construction: a 32-ray rosette (11.25° steps) with a square and circles of radius 4 and 5.7. That drawing became the frame for hydrogen orbitals and grew from there.
 
 Open `index.html` in a modern browser (WebGL 2 needed for the GPU features). It loads `nuclear.json` from the same folder, so serve the folder over HTTP rather than opening the file directly:
