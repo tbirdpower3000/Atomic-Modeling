@@ -187,6 +187,18 @@ button.small{min-height:34px;font-size:var(--f2)}
 .helpdlg{width:min(1100px,94vw);max-height:86vh;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);padding:18px 20px 22px}
 .helpdlg::backdrop{background:rgba(0,0,0,.45)}
 .hdhead{display:flex;align-items:center;gap:12px;margin-bottom:6px}.hdhead h2{font-size:var(--f6);margin:0;flex:1}
+/* ---- fuse and split ---- */
+.becurve{position:relative;height:clamp(210px,30vh,300px);background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:10px}
+.becurve canvas{position:absolute;inset:0;width:100%;height:100%}
+.ffgrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;align-items:start;margin-top:12px}
+@media(max-width:860px){.ffgrid{grid-template-columns:minmax(0,1fr)}}
+.ffstage{position:relative;aspect-ratio:16/10;background:light-dark(#101317,#0b0d10);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ffstage canvas{position:absolute;inset:0;width:100%;height:100%}
+.ffcap{position:absolute;left:12px;right:12px;bottom:10px;color:#e9e7e2;font-size:var(--f2);text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.ffbars{display:grid;gap:5px;margin:8px 0 2px}
+.ffbar{display:grid;grid-template-columns:7.5em minmax(0,1fr) auto;gap:8px;align-items:center;font-size:var(--f2)}
+.ffnm::first-letter{text-transform:uppercase}
+.ffbar i{height:9px;border-radius:5px;background:var(--acc);display:block}
 /* ---- primary actions stand out ---- */
 button.go{background:var(--acc);color:var(--onacc);border-color:var(--acc);font-weight:600}
 button.go:hover{filter:brightness(1.08)}

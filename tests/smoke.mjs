@@ -43,7 +43,7 @@ check('share link restores element and orbital', /Sodium.*3s orbital/.test(await
 check('the top bar shows what is loaded', /Na-23/.test(await text('#ctxChip')), await text('#ctxChip'));
 
 // 1b. each tab opens, shows only its own panel, and fits in a few screens
-for (const t of ['pt', 'spec', 'nuc', 'trans', 'sm', 'atom']) {
+for (const t of ['pt', 'spec', 'nuc', 'ff', 'trans', 'sm', 'atom']) {
   await tab(t);
   const r = await page.evaluate(() => ({ shown: [...document.querySelectorAll('.tabpanel')].filter(x => !x.hidden).map(x => x.dataset.panel), screens: document.documentElement.scrollHeight / innerHeight }));
   check(`tab ${t}: one panel, ${r.screens.toFixed(1)} screens`, r.shown.length === 1 && r.shown[0] === t && r.screens < 6, r.shown.join());
@@ -103,6 +103,24 @@ const ms = await text('#msCard');
 check('picking carbon completes the first mission', /Mission complete/.test(ms) && /1 of 10/.test(await text('#msProg')), ms.split('\n')[0]);
 await page.evaluate(() => document.querySelector('[data-lvl="lab"]').click());
 check('Lab shows the solver views again', await page.evaluate(() => getComputedStyle(document.querySelector('[data-mode="gpu"]')).display !== 'none'));
+
+// 9. fuse and split: energies straight from the measured masses
+await tab('ff');
+const dt = num((await text('#ffOut')).match(/Energy released\s+([\d.]+) MeV/)?.[1]);
+check('D + T releases the measured 17.59 MeV', Math.abs(dt - 17.59) < 0.05, dt);
+await page.evaluate(() => document.querySelector('[data-fu="3a"]').click());
+await sleep(400);
+const ta = num((await text('#ffOut')).match(/Energy released\s+([\d.]+) MeV/)?.[1]);
+check('triple alpha releases the measured 7.27 MeV', Math.abs(ta - 7.275) < 0.02, ta);
+await page.evaluate(() => { document.querySelector('[data-ff="split"]').click(); document.querySelector('[data-fi="u235"]').click(); });
+await sleep(500);
+const fi = await text('#ffOut');
+const fq = num(fi.match(/Energy released\s+([\d.]+) MeV/)?.[1]);
+check('U-235 fission releases 160-200 MeV', fq > 150 && fq < 205, fq);
+check('U-235 splits with a slow neutron, U-238 does not', /Yes\./.test(fi));
+await page.evaluate(() => document.querySelector('[data-fi="u238"]').click());
+await sleep(500);
+check('U-238 needs a fast neutron', /No\./.test(await text('#ffOut')));
 
 check('no errors during the whole run', errors.length === 0, errors.join(' | ') || 'ok');
 await browser.close(); server.close();

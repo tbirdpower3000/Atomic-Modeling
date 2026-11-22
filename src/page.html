@@ -14,7 +14,7 @@
   <div class="tbin">
     <span class="brand">Atomic Modeling</span>
     <nav class="tabs" id="tabs" aria-label="Sections">
-      <button data-tab="atom" aria-pressed="true">Atom</button><button data-tab="pt" aria-pressed="false">Table</button><button data-tab="spec" aria-pressed="false">Light</button><button data-tab="nuc" aria-pressed="false">Nuclei</button><button data-tab="trans" aria-pressed="false">Transmute</button><button data-tab="sm" aria-pressed="false">Particles</button>
+      <button data-tab="atom" aria-pressed="true">Atom</button><button data-tab="pt" aria-pressed="false">Table</button><button data-tab="spec" aria-pressed="false">Light</button><button data-tab="nuc" aria-pressed="false">Nuclei</button><button data-tab="ff" aria-pressed="false">Fuse &amp; split</button><button data-tab="trans" aria-pressed="false">Transmute</button><button data-tab="sm" aria-pressed="false">Particles</button>
     </nav>
     <button class="ctx" id="ctxChip" title="What is loaded right now. Tap to open it in the Atom view."></button>
     <button class="icon" id="helpBtn" aria-label="How to use this page" title="How to use this page">?</button>
@@ -57,6 +57,7 @@
         <dt><a href="#pt">Table</a></dt><dd>Colour by any property, see trends, and change temperature, pressure and gravity.</dd>
         <dt><a href="#spec">Light</a></dt><dd>The colours an element gives off: measured lines, and exact lines for one-electron ions.</dd>
         <dt><a href="#nuc">Nuclei</a></dt><dd>Every known isotope, research elements and predicted new ones, plus the 253 that never decay and a tunable experiment that predicts stability.</dd>
+        <dt><a href="#ff">Fuse &amp; split</a></dt><dd>Where nuclear energy comes from: the binding-energy curve, fusion in stars and reactors, and fission with its chain reaction.</dd>
         <dt><a href="#trans">Transmute</a></dt><dd>Cheapest nuclear routes between isotopes (lead → gold, americium → moscovium), on an absolute or Gold = 1 scale.</dd>
         <dt><a href="#sm">Particles</a></dt><dd>Quarks, leptons and bosons, a detector simulation that fires any of them, and the quantum mechanics behind the page.</dd>
       </dl></div>
@@ -286,6 +287,31 @@
   </div>
   <p class="nucinfo" id="stInfo">Hover over the map to see an isotope.</p>
   <div class="scroll"><div class="nucfig" id="stFig" style="height:clamp(720px,90vh,980px);min-width:640px"><canvas id="stCv" aria-label="Map of stable isotopes: extra neutrons across, protons up"></canvas></div></div>
+</section>
+</div>
+</div>
+<div class="tabpanel" data-panel="ff" hidden>
+<section class="ptband" id="ff">
+  <h2>Fuse and split</h2>
+  <p class="lede">All nuclear energy comes from one curve. Nuclei in the middle of it, around iron, are held together most tightly. Light nuclei release energy when they are <b>fused</b> together and heavy ones release energy when they are <b>split</b>, because both move toward the middle. Pick an element in the Table tab and this page shows which way releases energy for it.</p>
+  <p class="tbrow"><span class="tb tb-m">Measured</span>Energies come from measured nuclear masses (AME2020), so every number below is what really happens. <span class="tb tb-g">Rough guess</span>Which fragments appear, and how hot a fusion reaction must be, come from simple models.</p>
+  <div class="becurve"><canvas id="beCv" aria-label="Binding energy per nucleon against mass number, peaking at iron and nickel"></canvas></div>
+  <div class="tools" style="margin-top:12px"><span style="font-weight:600">Show</span><span class="chips" id="ffMode"><button data-ff="fuse" aria-pressed="true">Fusion: join two light nuclei</button><button data-ff="split" aria-pressed="false">Fission: split one heavy nucleus</button></span></div>
+  <div class="ffgrid">
+    <div class="ffstage"><canvas id="ffCv" aria-label="Animation of the reaction"></canvas><div class="ffcap" id="ffCap"></div></div>
+    <div>
+      <div id="ffFuseBox">
+        <div class="tools"><span style="font-weight:600">Reaction</span><span class="chips" id="fuPre"></span></div>
+        <p class="note" id="fuNote" style="margin-top:8px"></p>
+      </div>
+      <div id="ffSplitBox" hidden>
+        <div class="tools"><span style="font-weight:600">Nucleus</span><span class="chips" id="fiPre"></span></div>
+        <label class="chk" style="min-height:36px;margin-top:8px"><input type="checkbox" id="fiChain">Show the chain reaction: let the neutrons hit more nuclei</label>
+      </div>
+      <div class="chips" style="margin-top:10px"><button id="ffGo" class="go">Run it again</button><button id="ffSlow" aria-pressed="false">Slow motion</button></div>
+      <div class="read" id="ffOut" style="margin-top:10px" aria-live="polite"></div>
+    </div>
+  </div>
 </section>
 </div>
 <div class="tabpanel" data-panel="trans" hidden>
