@@ -44,6 +44,52 @@ function applyState(str){const o={};str.replace(/^#/,'').split('&').forEach(kv=>
 $('#shLink').addEventListener('click',()=>{let base='https://tbirdpower3000.github.io/Atomic-Modeling/';try{if(window.top===window.self&&/^https?:/.test(location.protocol))base=location.origin+location.pathname;}catch(e){}const url=base+'#'+viewState();
  const done=ok=>{$('#shNote').innerHTML=ok?'Link copied. Anyone who opens it sees this element, view and orbital.':'Copy this link: <input readonly value="'+url+'" style="width:min(100%,420px)" onfocus="this.select()">';};
  try{navigator.clipboard.writeText(url).then(()=>done(true),()=>done(false));}catch(e){done(false);}try{if(window.top===window.self)history.replaceState(null,'','#'+viewState());}catch(e){}});
+
+/* ---- Learn / Lab level ---- */
+let ULV='learn';try{ULV=localStorage.getItem('lvl')||'learn';}catch(e){}
+function setLvl(v,save){ULV=v;document.documentElement.classList.toggle('learn',v==='learn');$$('[data-lvl]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lvl===v)));
+ $('#lvlNote').textContent=v==='learn'?'Learn shows the essentials. Switch to Lab for the solvers, Monte Carlo, hardware settings and data downloads.':'Lab shows every tool.';
+ if(v==='learn'&&['vol','gpu','qmc'].includes(mode)){const b=document.querySelector('[data-mode="cloud"]');if(b)b.click();}
+ if(save){try{localStorage.setItem('lvl',v);}catch(e){}}if(typeof msRender==='function')msRender();}
+$$('[data-lvl]').forEach(b=>b.addEventListener('click',()=>setLvl(b.dataset.lvl,true)));
+/* ---- guided missions ---- */
+const MSF={island:false,spec:false};
+const go=id=>{const e=document.querySelector(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'});};
+const MS=[
+ {id:'atom',t:'Meet an atom',goal:'Find carbon, the element all living things are built from.',steps:['Scroll to the periodic table.','Tap the square marked C (number 6).'],go:()=>go('#pt'),ok:()=>sel===6,
+  won:'Carbon has 6 protons in its nucleus and 6 electrons around it. The number on each square is its proton count, and that number alone decides which element it is.'},
+ {id:'cloud',t:'Where is the electron?',goal:'Make a dumbbell-shaped electron cloud.',steps:['Next to the 3D view, choose “Dot cloud”.','Set the shape number l to 1 (a p orbital).','Drag the picture to turn it around.'],go:()=>go('#fig'),ok:()=>l===1&&(mode==='cloud'||mode==='shape'),
+  won:'An electron is not a tiny ball on a track. Each dot is one place it could turn up, and more dots mean more likely. The two colours are the two halves of its wave, not two electrons.'},
+ {id:'shells',t:'Count the shells',goal:'See why sodium is so reactive.',steps:['Pick sodium (Na, number 11) in the periodic table.','Choose the “Shells” view.','Count the electrons in each ring.'],go:()=>go('#pt'),ok:()=>sel===11&&mode==='shell',
+  won:'Sodium’s electrons sit 2, 8, 1. That one lonely outer electron is easy to give away, which is why sodium reacts so fiercely and why it pairs up with chlorine to make salt.'},
+ {id:'light',t:'Fingerprints of light',goal:'Find a metal that makes fireworks green.',steps:['Scroll to “Spectrum”.','Try elements in the periodic table and watch the lines.','Look for one whose lines are mostly green: try barium (Ba) or copper (Cu).'],go:()=>go('#spec'),ok:()=>MSF.spec&&(sel===56||sel===29),
+  won:'Every element glows in its own exact colours. That is how firework makers choose their metals, and how astronomers know what stars are made of without ever visiting one.'},
+ {id:'iso',t:'Heavy hydrogen',goal:'Find the hydrogen that weighs twice as much.',steps:['Pick hydrogen (H, number 1).','In its card, find the isotope list.','Choose hydrogen-2 (deuterium).'],go:()=>go('#pt'),ok:()=>!!selIso&&selIso.z===1&&selIso.a===2,
+  won:'Isotopes are the same element with extra neutrons. Deuterium has one proton and one neutron, so it weighs twice as much as ordinary hydrogen but behaves almost the same chemically.'},
+ {id:'gold',t:'The alchemist’s dream',goal:'Turn mercury into gold.',steps:['Scroll to the Transmutation lab.','Set the start to mercury (Hg) and the target to gold (Au).','Read the route it finds.'],go:()=>go('#trans'),ok:()=>!!ROUTE&&ROUTE[0][0]===80&&ROUTE[ROUTE.length-1][0]===79,
+  won:'It really can be done: knock one proton out of a mercury nucleus and it becomes gold. But each atom needs millions of times more energy than a chemical reaction, so the gold costs far more than it is worth.'},
+ {id:'island',t:'Find the island',goal:'Visit a place on the map that nobody has reached.',steps:['Scroll to the Chart of nuclides.','Tap “Island of stability”.','Tap inside the shaded oval.'],go:()=>go('#nuc'),ok:()=>MSF.island,
+  won:'The heaviest atoms ever made fall apart in less than a second. Scientists predict that a little further on, around 184 neutrons, some could last much longer. Nobody has got there yet: we are about 7 neutrons short.'},
+ {id:'muon',t:'Catch a muon',goal:'Fire a muon through a particle detector.',steps:['Scroll to Fundamental particles.','Tap the muon (μ).','Watch its track in the detector, then try an electron and compare.'],go:()=>go('#sm'),ok:()=>smSel==='μ'&&SIM.tracks.length>0&&SIM.vis,
+  won:'A muon is a heavy cousin of the electron. It punches through every layer of the detector, while an electron stops in the first thick one. That difference is how detectors tell them apart.'},
+ {id:'grid',lab:true,t:'Solve the atom yourself',goal:'Make the computer find hydrogen’s ground state.',steps:['Switch to Lab.','Choose the “Solve on GPU” view and press Solve.','Compare its answer with the exact −13.6 eV.'],go:()=>go('#fig'),ok:()=>gPotK==='h'&&GS.states.length>0,
+  won:'The solver knew nothing about orbitals: it only followed the Schrödinger equation on a grid, and the 1s cloud appeared on its own. The small error comes from the grid being too coarse near the nucleus.'},
+ {id:'mc',lab:true,t:'Beat the textbook',goal:'Get helium’s energy right to three decimal places.',steps:['Switch to Lab and open “Monte Carlo electrons”.','Choose Helium and Full Monte Carlo, then press Run.','Wait until the result is within 0.005 hartree of the exact value.'],go:()=>go('#fig'),ok:()=>{if(Q.Z!==2||!Q.A)return false;const st=qmcStats(Q.A.es,Q.m==='dmc'?100:50);return !!st&&Math.abs(st[0]-QMCA[2].ref)<0.005&&st[1]<0.005;},
+  won:'The simple textbook picture, where each electron ignores the other, is off by about 1 eV. By tracking both electrons at once and letting them dodge each other, you recovered nearly all of it.'}];
+let msDone=[],msCur=null;try{msDone=JSON.parse(localStorage.getItem('missions')||'[]');}catch(e){}
+function msNext(){return MS.find(x=>!msDone.includes(x.id)&&(!x.lab||ULV==='lab'))||MS.find(x=>!msDone.includes(x.id))||null;}
+function msRender(){const el=$('#msCard');if(!el)return;if(!msCur||(msDone.includes(msCur.id)&&!msCur.just))msCur=msNext();const M=msCur,avail=MS.filter(x=>!x.lab||ULV==='lab');
+ $('#msProg').textContent=msDone.length+' of '+MS.length+' done';
+ $('#msList').innerHTML=MS.map((x,i)=>'<button data-ms="'+x.id+'" class="'+(msDone.includes(x.id)?'ok':'')+'" aria-pressed="'+(M&&M.id===x.id)+'">'+(msDone.includes(x.id)?'✓ ':'')+(i+1)+'. '+x.t+(x.lab?' (Lab)':'')+'</button>').join('');
+ if(!M){el.innerHTML='<h3>All missions complete</h3><p>You have explored electrons, light, isotopes, nuclei and particles. Everything is open to you now: switch to Lab and experiment.</p>';return;}
+ if(M.just||msDone.includes(M.id)){el.innerHTML='<h3>'+M.t+'</h3><p class="done">✓ Mission complete</p><p>'+M.won+'</p><div class="chips"><button id="msGoNext">'+(msNext()?'Next mission':'Finish')+'</button></div>';$('#msGoNext').onclick=()=>{M.just=false;msCur=msNext();msRender();};return;}
+ el.innerHTML='<h3>'+M.t+'</h3><p>'+M.goal+'</p><ol>'+M.steps.map(x=>'<li>'+x+'</li>').join('')+'</ol><div class="chips"><button id="msGo">Take me there</button>'+(M.lab&&ULV!=='lab'?'<button id="msLab">Switch to Lab</button>':'')+'</div>';
+ $('#msGo').onclick=()=>M.go();const lb=$('#msLab');if(lb)lb.onclick=()=>setLvl('lab',true);}
+$('#msList').addEventListener('click',e=>{const b=e.target.closest('[data-ms]');if(!b)return;if(msCur)msCur.just=false;msCur=MS.find(x=>x.id===b.dataset.ms);msRender();});
+$('#msReset').addEventListener('click',()=>{msDone=[];MS.forEach(x=>x.just=false);MSF.island=false;msCur=null;try{localStorage.removeItem('missions');}catch(e){}msRender();});
+new IntersectionObserver(es=>{if(es[0].isIntersecting)MSF.spec=true;}).observe($('#specCv'));
+setInterval(()=>{const M=msCur;if(!M||msDone.includes(M.id)||document.hidden)return;let ok=false;try{ok=M.ok();}catch(e){}if(ok){msDone.push(M.id);M.just=true;try{localStorage.setItem('missions',JSON.stringify(msDone));}catch(e){}msRender();}},500);
 cv.addEventListener('webglcontextlost',e=>{e.preventDefault();GS.run=false;Q.run=false;const n=document.createElement('div');n.id='ctxLost';n.className='ctxlost';n.innerHTML='<p>The browser reset the graphics (this happens on phones when the app is in the background or memory runs low).</p><button>Reload the 3D view</button>';n.querySelector('button').onclick=()=>location.reload();fig.appendChild(n);},false);
-try{if(location.hash.length>1)applyState(location.hash);}catch(e){}
+try{if(location.hash.length>1){if(/mode=(vol|gpu|qmc)/.test(location.hash))ULV='lab';applyState(location.hash);}}catch(e){}
+setLvl(ULV,false);
 tick();
