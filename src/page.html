@@ -41,6 +41,7 @@
       <div class="mcard"><h3>Good to know</h3><ul>
         <li><b>Energy units</b> (below) change every energy on the page.</li>
         <li><b>Every number has a label:</b> <span class="tb tb-m">Measured</span> from experiment, <span class="tb tb-x">Exact</span> solved from the equations, <span class="tb tb-c">Computed</span> calculated with a known error, <span class="tb tb-g">Rough guess</span> a simple model.</li>
+        <li><b>Learn or Lab:</b> Learn shows the essentials and guided missions; Lab adds the solvers, Monte Carlo and downloads.</li>
         <li><b>Share and export</b> (below the hardware switch): copy a link to the exact view, save a picture, or download the data.</li>
         <li><b>Heavy modes</b> (GPU grids, Monte Carlo) run on your graphics card. 256³ needs a desktop GPU. The <b>Hardware</b> switch below picks Light or Full for you, and the solver falls back to the main processor on devices without a suitable graphics card.</li>
         <li><b>Simulations pause</b> when you scroll away from them and pick up again when you come back.</li>
@@ -48,10 +49,16 @@
       </ul></div>
     </div>
   </details>
-  <div class="tools" style="margin-top:12px"><span style="font-weight:600">Energy units</span><span class="chips" id="eUnits"><button data-eu="eV" aria-pressed="true">electronvolts</button><button data-eu="J" aria-pressed="false">joules</button><button data-eu="cal" aria-pressed="false">calories</button><button data-eu="kJmol" aria-pressed="false">kJ per mole</button><button data-eu="kcalmol" aria-pressed="false">kcal per mole</button></span></div>
-  <div class="tools" style="margin-top:8px"><span style="font-weight:600">Hardware</span><span class="chips" id="gfxChips"><button data-gfx="auto" aria-pressed="true">Auto</button><button data-gfx="light" aria-pressed="false">Light (any device)</button><button data-gfx="full" aria-pressed="false">Full (strong graphics card)</button></span><span class="note" id="gfxNote" style="margin:0"></span></div>
+  <div class="tools" style="margin-top:12px"><span style="font-weight:600">Level</span><span class="chips" id="lvlChips"><button data-lvl="learn" aria-pressed="true">Learn</button><button data-lvl="lab" aria-pressed="false">Lab</button></span><span class="note" id="lvlNote" style="margin:0"></span></div>
+  <div class="tools" style="margin-top:8px"><span style="font-weight:600">Energy units</span><span class="chips" id="eUnits"><button data-eu="eV" aria-pressed="true">electronvolts</button><button data-eu="J" aria-pressed="false">joules</button><button data-eu="cal" aria-pressed="false">calories</button><button data-eu="kJmol" aria-pressed="false">kJ per mole</button><button data-eu="kcalmol" aria-pressed="false">kcal per mole</button></span></div>
+  <div class="tools" style="margin-top:8px" id="gfxRow"><span style="font-weight:600">Hardware</span><span class="chips" id="gfxChips"><button data-gfx="auto" aria-pressed="true">Auto</button><button data-gfx="light" aria-pressed="false">Light (any device)</button><button data-gfx="full" aria-pressed="false">Full (strong graphics card)</button></span><span class="note" id="gfxNote" style="margin:0"></span></div>
   <div class="tools" style="margin-top:8px"><span style="font-weight:600">Share and export</span><span class="chips"><button id="shLink">Copy link to this view</button><button id="shPng">Save picture</button><button id="shCsv">Elements (CSV)</button><button id="shIso">Isotopes (CSV)</button></span><span class="note" id="shNote" style="margin:0" aria-live="polite"></span></div>
 </header>
+<section class="missions" id="missions" aria-label="Missions">
+  <div class="mhead"><h2 style="margin:0">Missions</h2><span id="msProg" class="note" style="margin:0"></span><button id="msReset" style="margin-left:auto;min-height:36px">Start over</button></div>
+  <div class="mscard" id="msCard" aria-live="polite"></div>
+  <div class="mslist" id="msList"></div>
+</section>
 <div class="wrap">
   <div class="stagecol">
     <div class="fig" id="fig">

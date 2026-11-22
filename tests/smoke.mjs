@@ -63,7 +63,7 @@ const balmer = num((await text('#specOut')).match(/3 → 2\s+Balmer\s+([\d.]+) n
 check('hydrogen Balmer line within 0.02 nm of 656.28', Math.abs(balmer - 656.28) < 0.02, balmer);
 
 // 6. Schrödinger solver (CPU path, runs anywhere): harmonic oscillator ground state is 1.5 ħω = 40.8 eV
-await page.evaluate(() => { scrollTo(0, 0); document.querySelector('[data-mode="gpu"]').click(); document.querySelector('[data-gg="32"]').click(); const s = document.getElementById('gPot'); s.value = 'ho'; s.dispatchEvent(new Event('change')); document.getElementById('gK').value = '2'; document.getElementById('gGo').click(); });
+await page.evaluate(() => { document.querySelector('[data-lvl="lab"]').click(); document.getElementById('fig').scrollIntoView(); document.querySelector('[data-mode="gpu"]').click(); document.querySelector('[data-gg="32"]').click(); const s = document.getElementById('gPot'); s.value = 'ho'; s.dispatchEvent(new Event('change')); document.getElementById('gK').value = '2'; document.getElementById('gGo').click(); });
 for (let i = 0; i < 90 && !(await text('#gStat')).startsWith('Done'); i++) await sleep(1000);
 const res = await text('#gRes');
 const e0 = num(res.match(/State 1\s+([\d.]+) eV/)?.[1]), e1 = num(res.match(/State 2\s+([\d.]+) eV/)?.[1]);
@@ -75,6 +75,18 @@ await page.evaluate(() => { document.querySelector('[data-mode="qmc"]').click();
 let q = ''; for (let i = 0; i < 60 && !/Total energy/.test(q = await text('#qRes')); i++) await sleep(1000);
 const eq = num(q.match(/Total energy\s+(-?[\d.]+)/)?.[1]);
 check('Monte Carlo lithium energy near -7.4 hartree', Math.abs(eq + 7.45) < 0.15, eq);
+
+// 8. Learn level hides the advanced views; a mission completes when its goal is met
+await page.evaluate(() => { document.getElementById('msReset').click(); document.querySelector('[data-lvl="learn"]').click(); });
+await sleep(300);
+const hid = await page.evaluate(() => getComputedStyle(document.querySelector('[data-mode="gpu"]')).display === 'none' && getComputedStyle(document.querySelector('[data-mode="cloud"]')).display !== 'none');
+check('Learn hides the solver views and keeps the basic ones', hid);
+await page.evaluate(() => document.querySelector('[data-z="6"]').click());
+await sleep(1200);
+const ms = await text('#msCard');
+check('picking carbon completes the first mission', /Mission complete/.test(ms) && /1 of 10/.test(await text('#msProg')), ms.split('\n')[0]);
+await page.evaluate(() => document.querySelector('[data-lvl="lab"]').click());
+check('Lab shows the solver views again', await page.evaluate(() => getComputedStyle(document.querySelector('[data-mode="gpu"]')).display !== 'none'));
 
 check('no errors during the whole run', errors.length === 0, errors.join(' | ') || 'ok');
 await browser.close(); server.close();
