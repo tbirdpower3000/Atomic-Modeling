@@ -1,6 +1,6 @@
 // Checks the Monte Carlo solver against exact non-relativistic energies.
-// Run: node tests/qmc.test.js
-const {QMCA,qmcMake,qmcNew,qmcStep,qmcStats}=require('./qmc.js');
+// Run: node tests/qmc.test.cjs
+const {QMCA,qmcMake,qmcNew,qmcStep,qmcStats}=require('./qmc.cjs');
 let fail=0;
 for(const Z of [2,3]){const A=QMCA[Z],S=qmcNew(qmcMake(Z,A.cfg,Object.assign({},A.P.dmc,{jas:true})),400),tau=0.02/Z;
  for(let i=0;i<250;i++)qmcStep(S,0.05,false);for(let i=0;i<2500;i++){const r=qmcStep(S,tau,true);if(i>300)S.es.push(r[0]);}

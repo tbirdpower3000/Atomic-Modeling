@@ -193,3 +193,103 @@ def solve_atom_extrapolated(Z: int, dx: float = 0.004, **kw) -> AtomResult:
     ext = lambda p, q: (4 * q - p) / 3
     eig = {k: ext(a.eigenvalues[k], b.eigenvalues[k]) for k in b.eigenvalues}
     return AtomResult(Z, b.occupations, eig, ext(a.total_energy, b.total_energy), b.iterations, b.r, b.density, b.orbitals)
+
+
+# ---------------------------------------------------------------- spin-polarized (LSD)
+def _vwn_g(rs, A, b, c, x0):
+    Q = np.sqrt(4 * c - b * b)
+    x = np.sqrt(rs)
+    X = x * x + b * x + c
+    X0 = x0 * x0 + b * x0 + c
+    at = np.arctan(Q / (2 * x + b))
+    return A * (np.log(x * x / X) + 2 * b / Q * at
+                - b * x0 / X0 * (np.log((x - x0) ** 2 / X) + 2 * (b + 2 * x0) / Q * at))
+
+
+def _lsd_energy_density(nu, nd):
+    """Exchange-correlation energy per volume for spin densities (Slater exchange + VWN5)."""
+    nu = np.maximum(nu, 1e-30); nd = np.maximum(nd, 1e-30)
+    n = nu + nd
+    ex = -0.75 * np.cbrt(3 / np.pi) * 2 ** (1 / 3) * (nu ** (4 / 3) + nd ** (4 / 3))
+    rs = np.cbrt(3.0 / (4.0 * np.pi * n))
+    z = np.clip((nu - nd) / n, -1 + 1e-14, 1 - 1e-14)
+    ecp = _vwn_g(rs, 0.0310907, 3.72744, 12.9352, -0.10498)
+    ecf = _vwn_g(rs, 0.01554535, 7.06042, 18.0578, -0.32500)
+    alp = _vwn_g(rs, -1.0 / (6 * np.pi**2), 1.13107, 13.0045, -0.0047584)
+    f = ((1 + z) ** (4 / 3) + (1 - z) ** (4 / 3) - 2) / (2 ** (4 / 3) - 2)
+    f2 = 4.0 / (9.0 * (2 ** (1 / 3) - 1))
+    ec = ecp + alp * f / f2 * (1 - z**4) + (ecf - ecp) * f * z**4
+    return ex + n * ec
+
+
+def lsd_xc(nu, nd):
+    """Return (energy per volume, v_up, v_down); potentials by central differences."""
+    e = _lsd_energy_density(nu, nd)
+    h = 1e-4 * (nu + nd) + 1e-30
+    vu = (_lsd_energy_density(nu + h, nd) - _lsd_energy_density(np.maximum(nu - h, 0), nd)) / (nu + h - np.maximum(nu - h, 0))
+    vd = (_lsd_energy_density(nu, nd + h) - _lsd_energy_density(nu, np.maximum(nd - h, 0))) / (nd + h - np.maximum(nd - h, 0))
+    return e, vu, vd
+
+
+def hund(occ: dict) -> tuple[dict, dict]:
+    """Split subshell occupations into spin-up and spin-down following Hund's first rule."""
+    up, dn = {}, {}
+    for nl, f in occ.items():
+        cap = 2 * LETTERS.index(nl[-1]) + 1
+        u = min(f, cap)
+        up[nl], dn[nl] = u, f - u
+    return up, dn
+
+
+def solve_atom_lsd(Z: int, dx: float = 0.004, tol: float = 1e-9, mix: float = 0.3, maxit: int = 500,
+                   occupations: dict | None = None) -> AtomResult:
+    """Spin-polarized version of solve_atom (local spin density approximation)."""
+    occ = occupations or configuration(Z)
+    ou, od = hund(occ)
+    x, r = _grid(Z, dx)
+    V = [np.maximum(-Z / r * np.exp(-r * Z ** (1 / 3) / 1.5), -Z / r) for _ in range(2)]
+    prev = {}
+    hist_in, hist_out = [], []
+    dV = 4 * np.pi * r**3 * dx
+    for it in range(1, maxit + 1):
+        eps, orbs, rho = {}, {}, [np.zeros_like(r), np.zeros_like(r)]
+        band = 0.0
+        for sp, o in enumerate((ou, od)):
+            byl = {}
+            for nl, f in o.items():
+                if f > 0:
+                    byl.setdefault(LETTERS.index(nl[-1]), []).append((int(nl[:-1]), nl, f))
+            for l, lst in byl.items():
+                nmax = max(n for n, _, _ in lst)
+                w, u = _solve_l(r, dx, V[sp], l, nmax - l, Z, prev.get((sp, l)))
+                prev[(sp, l)] = w
+                for n, nl, f in lst:
+                    k = n - l - 1
+                    eps[nl + ("↑" if sp == 0 else "↓")] = float(w[k])
+                    if sp == 0 or nl not in orbs:
+                        orbs[nl] = u[:, k]
+                    rho[sp] += f * u[:, k] ** 2 / (4 * np.pi * r * r)
+                    band += f * w[k]
+        vh = _hartree(r, dx, rho[0] + rho[1])
+        exc, vu, vd = lsd_xc(rho[0], rho[1])
+        Vn = [-Z / r + vh + vu, -Z / r + vh + vd]
+        E = band - np.sum((0.5 * vh * (rho[0] + rho[1]) + vu * rho[0] + vd * rho[1] - exc) * dV)
+        vin, vout = np.concatenate(V), np.concatenate(Vn)
+        wgt = np.concatenate([r**3 * (rho[0] + rho[1])] * 2)
+        err = np.sqrt(np.sum((vout - vin) ** 2 * wgt) * dx * 4 * np.pi)
+        hist_in.append(vin); hist_out.append(vout)
+        if len(hist_in) >= 2:
+            f1, f0 = hist_out[-1] - hist_in[-1], hist_out[-2] - hist_in[-2]
+            df = f1 - f0
+            w3 = np.concatenate([r**3] * 2)
+            beta = np.sum(f1 * df * w3) / max(np.sum(df * df * w3), 1e-300)
+            a = hist_in[-1] - beta * (hist_in[-1] - hist_in[-2])
+            b = hist_out[-1] - beta * (hist_out[-1] - hist_out[-2])
+            vnew = (1 - mix) * a + mix * b
+        else:
+            vnew = (1 - mix) * vin + mix * vout
+        hist_in, hist_out = hist_in[-2:], hist_out[-2:]
+        V = [vnew[: r.size], vnew[r.size:]]
+        if it > 1 and err < tol:
+            break
+    return AtomResult(Z, dict(occ), eps, float(E), it, r, rho[0] + rho[1], orbs)
