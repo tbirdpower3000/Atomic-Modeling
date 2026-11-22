@@ -23,6 +23,13 @@ python3 -m http.server 8000
 - **Monte Carlo electrons:** variational and diffusion Monte Carlo for He, Li and Be, with live error bars and ionization energies.
 - **Fundamental particles:** quarks, leptons and what is inside a nucleon.
 
+## Python and CUDA
+
+The careful math lives in [`python/`](python/README.md):
+
+- **Radial atoms:** an all-electron density-functional solver for hydrogen to krypton, checked against the NIST reference tables. It writes `data/radial_atoms.json`, which the web app uses for computed ionization energies.
+- **3D solver on CUDA:** an FFT Schrödinger solver that runs on an NVIDIA GPU through CuPy, and on NumPy everywhere else. Run `python -m atomic_modeling.grid3d 64 128 256` to benchmark it.
+
 ## Accuracy checks
 
 | Test | Result | Reference |
@@ -32,6 +39,8 @@ python3 -m http.server 8000
 | Li total energy, DMC | −7.4834 ± 0.0033 Ha | −7.4781 Ha |
 | Li ionization energy, DMC | 5.40 ± 0.14 eV | 5.39 eV |
 | Mass formula fit (2,359 nuclides) | rms 2.35 MeV | AME masses |
+| Krypton LDA total energy, Python radial solver | −2750.1488 Ha | −2750.1479 Ha (NIST) |
+| Ionization energies H–Kr, E(ion) − E(atom) | mean error 0.77 eV | NIST measured values |
 
 `node tests/qmc.test.js` reruns the Monte Carlo checks.
 
