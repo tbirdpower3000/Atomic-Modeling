@@ -162,6 +162,12 @@ select{font:inherit;font-size:16px;min-height:44px;padding:0 10px;border-radius:
 .trsteps li.arrow b{font-size:14px;color:var(--ink)}
 sup{font-size:max(11px,0.72em)}
 [hidden]{display:none!important}
+.manual{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:0 16px}
+.manual>summary{cursor:pointer;font-weight:600;font-size:16px;min-height:44px;display:flex;align-items:center}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px 22px;padding:0 0 14px}
+.mcard h3{margin:4px 0 6px;font-size:15px}.mcard ol,.mcard ul{margin:0;padding-left:20px;font-size:14px;line-height:1.45}.mcard li{margin-bottom:4px}
+.mcard dl{margin:0;font-size:14px;line-height:1.4}.mcard dt{font-weight:600;margin-top:6px}.mcard dd{margin:0;color:var(--mut)}
+.mcard a{color:inherit;text-decoration-color:var(--mut);text-underline-offset:2px}
 .ctxlost{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center;background:color-mix(in srgb,var(--card) 92%,transparent);font-size:15px}
 @media(max-width:600px){.fig{height:clamp(300px,52vh,520px)}.simlab{right:12px;font-size:12.5px}.simlab b{font-size:15px}.simlab span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.fig .hint{display:none}}
 #probeInk{color:var(--ink)}#probeMut{color:var(--mut)}#probeAcc{color:var(--acc)}
@@ -171,6 +177,38 @@ sup{font-size:max(11px,0.72em)}
 <header class="band">
   <h1>Orbitals inside your compass frame</h1>
   <p class="lede">Hydrogen orbitals from the real equations, set by the quantum numbers n, l and m. They sit inside your 32 rays at 11.25°, the square and the r = 4 and r = 5.7 circles. Drag to turn, scroll or pinch to zoom. The top view is your notebook page.</p>
+  <details class="manual" id="manual" open>
+    <summary>How to use this page</summary>
+    <div class="mgrid">
+      <div class="mcard"><h3>Quick start</h3><ol>
+        <li><b>Pick an element</b> in the <a href="#pt">periodic table</a>. The 3D view, its label and the readout switch to it.</li>
+        <li><b>Choose a view</b> under <i>Show</i>, next to the 3D view.</li>
+        <li><b>Set the orbital</b> with n, l and m, or swap the electron for a muon or another particle.</li>
+        <li><b>Drag</b> to rotate, <b>pinch or scroll</b> to zoom. <i>Top</i> matches your notebook page.</li>
+      </ol></div>
+      <div class="mcard"><h3>The views</h3><dl>
+        <dt>Shape · Dot cloud · Volume</dt><dd>One electron, exact and instant. Teal and orange are the two signs of the wavefunction.</dd>
+        <dt>Shells</dt><dd>Every shell of the element, with sizes from Slater’s rules (carbon’s outer shell = your r = 4 circle).</dd>
+        <dt>Nucleus</dt><dd>Protons and neutrons, their shell-model orbitals and the nuclear shape.</dd>
+        <dt>Solve on GPU</dt><dd>Solves the Schrödinger equation numerically on a 64³–256³ grid, including atoms up to neon.</dd>
+        <dt>Monte Carlo electrons</dt><dd>The most accurate mode: all electrons of He, Li or Be at once. Press Run and let the error bar shrink.</dd>
+        <dt>Inside a nucleon</dt><dd>Quarks and gluons in a proton or neutron.</dd>
+      </dl></div>
+      <div class="mcard"><h3>Further down</h3><dl>
+        <dt><a href="#pt">Periodic table</a></dt><dd>Colour by any property, see trends, and change temperature, pressure and gravity.</dd>
+        <dt><a href="#nuc">Chart of nuclides</a></dt><dd>Every known isotope, research elements and predicted new ones.</dd>
+        <dt><a href="#stab">Stable isotopes</a></dt><dd>The 253 that never decay, plus a tunable experiment that predicts stability.</dd>
+        <dt><a href="#trans">Transmutation lab</a></dt><dd>Cheapest nuclear routes between isotopes (lead → gold, americium → moscovium), on an absolute or Gold = 1 scale.</dd>
+        <dt><a href="#sm">Fundamental particles</a></dt><dd>Quarks, leptons and bosons, plus the quantum mechanics behind the page.</dd>
+      </dl></div>
+      <div class="mcard"><h3>Good to know</h3><ul>
+        <li><b>Energy units</b> (below) change every energy on the page.</li>
+        <li><b>Measured vs model:</b> numbers from data are plain; anything a model computed or predicted says so, with its error where known.</li>
+        <li><b>Heavy modes</b> (GPU grids, Monte Carlo) run on your graphics card. 256³ needs a desktop GPU; phones get a lighter mode automatically.</li>
+        <li><b>Pause</b> a long run any time; results so far stay on screen.</li>
+      </ul></div>
+    </div>
+  </details>
   <div class="tools" style="margin-top:12px"><span style="font-weight:600">Energy units</span><span class="chips" id="eUnits"><button data-eu="eV" aria-pressed="true">electronvolts</button><button data-eu="J" aria-pressed="false">joules</button><button data-eu="cal" aria-pressed="false">calories</button><button data-eu="kJmol" aria-pressed="false">kJ per mole</button><button data-eu="kcalmol" aria-pressed="false">kcal per mole</button></span></div>
 </header>
 <div class="wrap">
@@ -409,6 +447,7 @@ sup{font-size:max(11px,0.72em)}
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 /* ---- mobile / low-power profile ---- */
 const MOB=(()=>{try{const coarse=matchMedia('(pointer:coarse)').matches,small=Math.min(screen.width,screen.height)<900,lowMem=(navigator.deviceMemory||8)<=4,save=!!(navigator.connection&&navigator.connection.saveData);return (coarse&&small)||lowMem||save||/[?&]mobile=1/.test(location.search);}catch(e){return false;}})();
+{const mn=document.getElementById('manual');if(mn){let st=null;try{st=localStorage.getItem('manualOpen');}catch(e){}mn.open=st!=null?st==='1':!matchMedia('(max-width:700px)').matches;mn.addEventListener('toggle',()=>{try{localStorage.setItem('manualOpen',mn.open?'1':'0');}catch(e){}});}}
 if(MOB){document.documentElement.classList.add('mob');const p=document.getElementById('pts');if(p){p.value=15000;document.getElementById('ptsV').textContent=(15000).toLocaleString();}}
 const LET='spdfgh';
 let EU='eV';try{EU=localStorage.getItem('eunit')||'eV';}catch(e){}
