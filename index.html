@@ -162,6 +162,9 @@ select{font:inherit;font-size:16px;min-height:44px;padding:0 10px;border-radius:
 .trsteps li.arrow b{font-size:14px;color:var(--ink)}
 sup{font-size:max(11px,0.72em)}
 [hidden]{display:none!important}
+.smsim{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.smgridsim{display:grid;grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:18px;align-items:start}@media(max-width:860px){.smgridsim{grid-template-columns:minmax(0,1fr)}}
+.smcvwrap{position:relative;aspect-ratio:1;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}.smcvwrap canvas{position:absolute;inset:0;width:100%;height:100%}
 .nuczb{position:absolute;right:8px;bottom:44px;display:flex;flex-direction:column;gap:6px}.nuczb button{width:40px;height:40px;border-radius:10px;font-size:20px;line-height:1;padding:0}
 .nuctip{position:absolute;max-width:min(320px,80%);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13.5px;line-height:1.4;box-shadow:0 4px 14px rgba(0,0,0,0.12);pointer-events:none;z-index:2}.nuctip small{color:var(--mut);font-size:12px}
 @media(max-width:600px){.nuczb{right:6px;bottom:40px;gap:4px}.nuczb button{width:36px;height:36px;font-size:18px}}
@@ -202,17 +205,19 @@ sup{font-size:max(11px,0.72em)}
         <dt><a href="#nuc">Chart of nuclides</a></dt><dd>Every known isotope, research elements and predicted new ones.</dd>
         <dt><a href="#stab">Stable isotopes</a></dt><dd>The 253 that never decay, plus a tunable experiment that predicts stability.</dd>
         <dt><a href="#trans">Transmutation lab</a></dt><dd>Cheapest nuclear routes between isotopes (lead → gold, americium → moscovium), on an absolute or Gold = 1 scale.</dd>
-        <dt><a href="#sm">Fundamental particles</a></dt><dd>Quarks, leptons and bosons, plus the quantum mechanics behind the page.</dd>
+        <dt><a href="#sm">Fundamental particles</a></dt><dd>Quarks, leptons and bosons, a detector simulation that fires any of them, and the quantum mechanics behind the page.</dd>
       </dl></div>
       <div class="mcard"><h3>Good to know</h3><ul>
         <li><b>Energy units</b> (below) change every energy on the page.</li>
         <li><b>Measured vs model:</b> numbers from data are plain; anything a model computed or predicted says so, with its error where known.</li>
-        <li><b>Heavy modes</b> (GPU grids, Monte Carlo) run on your graphics card. 256³ needs a desktop GPU; phones get a lighter mode automatically.</li>
+        <li><b>Heavy modes</b> (GPU grids, Monte Carlo) run on your graphics card. 256³ needs a desktop GPU. The <b>Hardware</b> switch below picks Light or Full for you, and the solver falls back to the main processor on devices without a suitable graphics card.</li>
+        <li><b>Simulations pause</b> when you scroll away from them and pick up again when you come back.</li>
         <li><b>Pause</b> a long run any time; results so far stay on screen.</li>
       </ul></div>
     </div>
   </details>
   <div class="tools" style="margin-top:12px"><span style="font-weight:600">Energy units</span><span class="chips" id="eUnits"><button data-eu="eV" aria-pressed="true">electronvolts</button><button data-eu="J" aria-pressed="false">joules</button><button data-eu="cal" aria-pressed="false">calories</button><button data-eu="kJmol" aria-pressed="false">kJ per mole</button><button data-eu="kcalmol" aria-pressed="false">kcal per mole</button></span></div>
+  <div class="tools" style="margin-top:8px"><span style="font-weight:600">Hardware</span><span class="chips" id="gfxChips"><button data-gfx="auto" aria-pressed="true">Auto</button><button data-gfx="light" aria-pressed="false">Light (any device)</button><button data-gfx="full" aria-pressed="false">Full (strong graphics card)</button></span><span class="note" id="gfxNote" style="margin:0"></span></div>
 </header>
 <div class="wrap">
   <div class="stagecol">
@@ -283,7 +288,7 @@ sup{font-size:max(11px,0.72em)}
       <h2>GPU Schrödinger solver</h2>
       <p class="note" style="margin:0 0 8px">Solves for the lowest-energy states numerically on a 64³ or 128³ grid. The graphics card relaxes the wavefunction toward its ground state (imaginary-time evolution); the main processor keeps each new state separate from the ones already found and measures its energy. You can watch it converge.</p>
       <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><label for="gPot">System</label><select id="gPot"><option value="h">Hydrogen-like atom (check vs exact)</option><option value="h2">H₂⁺ molecule ion: two protons, one electron</option><option value="ws">Deformed nucleus: one neutron in a Woods–Saxon well</option><option value="ho">Harmonic oscillator (check vs exact)</option><option value="scf">Many-electron atom, helium to neon (mean field)</option></select></div>
-      <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><span>Grid</span><span class="chips"><button data-gg="64" aria-pressed="true">64³ (fast)</button><button data-gg="128" aria-pressed="false">128³ (8× finer)</button><button data-gg="256" aria-pressed="false" id="gg256">256³ (big GPUs)</button></span></div>
+      <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><span>Grid</span><span class="chips"><button data-gg="32" aria-pressed="false">32³ on the CPU (any device)</button><button data-gg="64" aria-pressed="true">64³ (fast)</button><button data-gg="128" aria-pressed="false">128³ (8× finer)</button><button data-gg="256" aria-pressed="false" id="gg256">256³ (big GPUs)</button></span></div>
       <div class="sl" id="gParA"><label for="gA">Parameter</label><input type="range" id="gA"><output id="gAo"></output></div>
       <div class="sl" id="gParB"><label for="gB">Parameter</label><input type="range" id="gB"><output id="gBo"></output></div>
       <div class="sl" id="gKRow" style="grid-template-columns:7em minmax(0,1fr)"><label for="gK">States to find</label><select id="gK"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
@@ -346,7 +351,7 @@ sup{font-size:max(11px,0.72em)}
     <button id="resBtn" aria-pressed="false">Superheavy research (104–120)</button>
   </div>
   <div class="tools"><label for="cby" style="font-weight:600">Colour and chart by</label>
-    <select id="cby"><option value="block">Block (s, p, d, f)</option><option value="state">State of matter (temperature and pressure)</option><option value="cov">Atomic size</option><option value="ie">Ionization energy</option><option value="en">Electronegativity</option><option value="ea">Electron affinity</option><option value="mp">Melting point</option><option value="den">Density</option><option value="zeff">Effective nuclear charge (model)</option><option value="shell">Outer shell size (model)</option><option value="iem">Ionization energy (model prediction)</option><option value="val">Outer-shell electrons</option><option value="nst">Number of stable isotopes</option></select>
+    <select id="cby"><option value="block">Block (s, p, d, f)</option><option value="state">State of matter (temperature and pressure)</option><option value="cov">Atomic size</option><option value="ie">Ionization energy</option><option value="en">Electronegativity</option><option value="ea">Electron affinity</option><option value="mp">Melting point</option><option value="den">Density</option><option value="zeff">Effective nuclear charge (model)</option><option value="shell">Outer shell size (model)</option><option value="iepy">Ionization energy (computed, DFT)</option><option value="iem">Ionization energy (model prediction)</option><option value="val">Outer-shell electrons</option><option value="nst">Number of stable isotopes</option></select>
     <span class="chips" id="scaleCtl" hidden><button data-sc="lin" aria-pressed="true">Linear</button><button data-sc="rank" aria-pressed="false">Rank</button><button id="valBtn" aria-pressed="false">Values on tiles</button><button id="aiBtn" aria-pressed="false">AI gap-fill</button></span></div>
   <div class="legendbar" id="scale" hidden></div>
   <div class="cond" id="cond" hidden>
@@ -371,7 +376,7 @@ sup{font-size:max(11px,0.72em)}
     <div class="scroll"><div class="ptgrid" id="ptg"></div></div>
     <div class="trend" id="trend" hidden>
       <div class="trhead"><div><h3 id="trName"></h3><p id="trWhat" class="trw"></p></div>
-        <div class="cmp"><label for="cmp">Compare with</label><select id="cmp"><option value="">Nothing</option><option value="zeff">Effective nuclear charge</option><option value="shell">Outer shell size</option><option value="cov">Atomic size</option><option value="ie">Ionization energy</option><option value="iem">Ionization energy (model)</option><option value="en">Electronegativity</option></select></div></div>
+        <div class="cmp"><label for="cmp">Compare with</label><select id="cmp"><option value="">Nothing</option><option value="zeff">Effective nuclear charge</option><option value="shell">Outer shell size</option><option value="cov">Atomic size</option><option value="ie">Ionization energy</option><option value="iepy">Ionization energy (computed, DFT)</option><option value="iem">Ionization energy (model)</option><option value="en">Electronegativity</option></select></div></div>
       <p class="trw" id="trAxis" style="font-size:13px"></p>
       <div class="tfig"><svg id="trSvg" role="img" aria-label="Property plotted against atomic number"></svg></div>
       <div class="why"><b>Why it happens</b><p id="trWhy"></p><p id="trCorr" class="trw"></p></div>
@@ -431,6 +436,22 @@ sup{font-size:max(11px,0.72em)}
   <p class="lede">Everything on this page is built from a few of these 17 particles. Atoms use only three of them directly: up quarks, down quarks and electrons, held together by gluons and photons. Tap a particle to see what it does.</p>
   <div class="smgrid" id="smGrid"></div>
   <div class="read" id="smRead" style="margin-top:14px;max-width:820px"></div>
+  <div class="smsim" id="smSim">
+    <h3 style="margin:0 0 4px;font-size:18px">Particle detector simulation</h3>
+    <p class="note" style="margin:0 0 8px;max-width:820px">Fire the selected particle from the centre of a detector like the ones at CERN. A magnet bends charged particles (positive one way, negative the other; slower ones curl tighter). Each layer stops different particles, which is how physicists tell them apart. Pick a particle above, then change its momentum and the magnet.</p>
+    <div class="smgridsim">
+      <div class="smcvwrap"><canvas id="smCv" aria-label="Simulated particle detector seen end-on, with particle tracks"></canvas></div>
+      <div>
+        <div class="sl"><label for="smP">Momentum</label><input type="range" id="smP" min="-1.3" max="2.3" step="0.05" value="1"><output id="smPo"></output></div>
+        <div class="sl"><label for="smB">Magnet</label><input type="range" id="smB" min="0" max="4" step="0.1" value="2"><output id="smBo"></output></div>
+        <label class="chk" style="min-height:36px"><input type="checkbox" id="smAnti">Fire the antiparticle (opposite charge)</label>
+        <label class="chk" style="min-height:36px"><input type="checkbox" id="smInv" checked>Draw invisible particles (neutrinos) as faint dots</label>
+        <div class="chips" style="margin-top:8px"><button id="smFire">Fire again</button></div>
+        <div class="phkey" id="smKey" style="font-size:14px"></div>
+        <div class="read" id="smOut" style="margin-top:10px" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
   <details class="grav" style="max-width:860px"><summary>The quantum mechanics behind this page</summary>
     <p><b>The Schrödinger equation.</b> An electron in an atom is a wave, ψ. Solving Ĥψ = Eψ for one particle around a nucleus gives ψ = R<sub>nl</sub>(r) · Y<sub>lm</sub>(θ, φ). The radial part sets the size and the rings (radial nodes), and the angular part sets the lobes. The 3D view draws exactly these solutions.</p>
     <p><b>Four quantum numbers.</b> n is the shell, l the shape (s, p, d, f), m the orientation, and spin s = ±½. The Pauli exclusion principle allows only one electron per set of four, which is why a subshell holds 2(2l + 1) electrons and a shell holds 2n². That rule builds the whole periodic table.</p>
@@ -451,7 +472,8 @@ sup{font-size:max(11px,0.72em)}
 {
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 /* ---- mobile / low-power profile ---- */
-const MOB=(()=>{try{const coarse=matchMedia('(pointer:coarse)').matches,small=Math.min(screen.width,screen.height)<900,lowMem=(navigator.deviceMemory||8)<=4,save=!!(navigator.connection&&navigator.connection.saveData);return (coarse&&small)||lowMem||save||/[?&]mobile=1/.test(location.search);}catch(e){return false;}})();
+let GFX='auto';try{GFX=localStorage.getItem('gfx')||'auto';}catch(e){}
+const MOB=GFX==='light'?true:GFX==='full'?false:(()=>{try{const coarse=matchMedia('(pointer:coarse)').matches,small=Math.min(screen.width,screen.height)<900,lowMem=(navigator.deviceMemory||8)<=4,save=!!(navigator.connection&&navigator.connection.saveData);return (coarse&&small)||lowMem||save||/[?&]mobile=1/.test(location.search);}catch(e){return false;}})();
 {const mn=document.getElementById('manual');if(mn){let st=null;try{st=localStorage.getItem('manualOpen');}catch(e){}mn.open=st!=null?st==='1':!matchMedia('(max-width:700px)').matches;mn.addEventListener('toggle',()=>{try{localStorage.setItem('manualOpen',mn.open?'1':'0');}catch(e){}});}}
 if(MOB){document.documentElement.classList.add('mob');const p=document.getElementById('pts');if(p){p.value=15000;document.getElementById('ptsV').textContent=(15000).toLocaleString();}}
 const LET='spdfgh';
@@ -586,6 +608,7 @@ function slaterOuter(Z){const gs={};config(Z).list.forEach(s=>{const t=s.l<=1?'s
 const DATA={};['cov','ie','en','ea','mp','den'].forEach(k=>{DATA[k]=RAW[k].concat([null,null]);});
 const EA_META=[2,4,7,18,54];EA_META.forEach(z=>{DATA.ea[z-1]=null;});
 DATA.zeff=SYM.map((_,i)=>+slaterOuter(i+1).z.toFixed(2));
+DATA.iepy=SYM.map((_,i)=>i<36?[12.127, 26.493, 5.235, 9.511, 8.325, 10.991, 13.74, 16.597, 19.575, 22.678, 5.163, 8.055, 5.85, 7.834, 9.828, 11.873, 13.987, 16.177, 4.383, 6.431, 7.014, 7.465, 7.855, 7.005, 8.533, 8.841, 9.135, 9.419, 8.183, 9.959, 5.913, 7.659, 9.347, 11.03, 12.73, 14.458][i]:null);
 DATA.iem=SYM.map((_,i)=>{const o=slaterOuter(i+1),ns=NSTAR[o.n];return +(13.6*o.z*o.z/(ns*ns)).toFixed(2);});
 DATA.shell=SYM.map((_,i)=>{const R=slaterR(i+1);if(!C_OUT){C_OUT=slaterR(6)[2];C_UNIT=4/C_OUT;}return +(Math.max(...Object.values(R).slice(-1))/C_OUT).toFixed(2);});
 DATA.val=SYM.map((_,i)=>{const c=shellCounts(i+1),mx=Math.max(...Object.keys(c).map(Number));return c[mx];});
@@ -598,6 +621,7 @@ const PI={
  den:{nm:'Density',u:'g/cm³',d:2,what:'Rises down the table and peaks at osmium and iridium. Values past fermium are theoretical estimates.',why:'Mass climbs steadily with atomic number, while the f-block contraction keeps the following d-block atoms small, so the heaviest packing comes in period 6.',src:'CRC Handbook, via mendeleev'},
  zeff:{nm:'Effective nuclear charge on the outer electron',u:'',d:2,what:'Climbs steadily across each period, then drops back at the start of the next one.',why:'This is the engine behind most of the other trends. An electron in the same shell only screens 0.35 of a proton, so each step across a period adds about 0.65 of net pull. A new shell is screened by the entire inner core, so the pull resets. Computed with Slater’s rules on this page.',src:'Slater’s rules, computed on this page'},
  shell:{nm:'Outer shell size',u:'× carbon',d:2,what:'Follows the same pattern as atomic size: small at the right of each row, large at the alkali metals.',why:'Size is roughly n*² ÷ Z_eff. A higher shell number pushes the electron out, and a stronger effective nuclear charge pulls it in. Computed with Slater’s rules on this page, with carbon = 1.',src:'Slater’s rules, computed on this page'},
+ iepy:{nm:'Ionization energy computed with density-functional theory',u:'eV',d:2,what:'Computed for hydrogen to krypton by this project’s Python solver: the energy of the ion minus the energy of the atom, each solved with every electron included. Average error against experiment is 0.8 eV, about five times better than reading it off the top orbital.',why:'The solver treats each electron as moving in the average field of all the others (the local-density approximation), on a fine radial grid checked against the NIST reference tables. It is weakest for open-shell atoms such as oxygen and fluorine, because this version does not yet track electron spin.',src:'python/atomic_modeling/radial.py in this project (all-electron LDA, validated against NIST)'},
  iem:{nm:'Ionization energy predicted by the model',u:'eV',d:2,what:'A rough prediction from Slater’s rules: 13.6 eV × Z_eff² ÷ n*². Compare it with the measured ionization energy to see what the simple shell model gets right and wrong.',why:'It captures the big sawtooth: high at the noble gases and low at the alkali metals, but its absolute values can be far off, especially for light elements (carbon: about 36 eV predicted against 11.3 eV measured). It misses the small dips inside a period and overshoots in places, because the real atom has electron pairing, subshell effects and relativity that the simple screening rules leave out.',src:'Slater’s rules, computed on this page'},
  val:{nm:'Electrons in the outer shell',u:'',d:0,what:'Counts up from 1 to 8 across each main-group row, then resets to 1.',why:'Elements in the same column have the same number of outer electrons, which is why they react alike. Transition metals mostly keep 2 outer electrons while they fill an inner d subshell, which is why they are so similar to each other.',src:'Electron configurations on this page'}};
 
@@ -1032,6 +1056,74 @@ function renderSM(){const dk=isDark()?2:1;$('#smGrid').innerHTML=SM.map(g=>'<h3>
  $('#smRead').innerHTML='<div class="nm">'+P[1][0].toUpperCase()+P[1].slice(1)+' <span style="font-size:15px;color:var(--mut);font-weight:400">'+G[0].toLowerCase().replace(/s$/,'')+'</span></div><dl style="margin-top:8px"><dt>Mass</dt><dd>'+P[2]+'</dd><dt>Electric charge</dt><dd>'+P[3]+'</dd><dt>Spin</dt><dd>'+P[4]+'</dd><dt>Role</dt><dd>'+P[5]+'</dd></dl>';}
 $('#smGrid').addEventListener('click',e=>{const b=e.target.closest('[data-sm]');if(b){smSel=b.dataset.sm;renderSM();}});
 renderSM();new MutationObserver(renderSM).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ---- particle detector simulation ---- */
+const PX={e:{m:0.000511,q:-1,tau:Infinity,kind:'em',nm:'electron'},'μ':{m:0.10566,q:-1,tau:2.197e-6,kind:'mu',nm:'muon'},'τ':{m:1.777,q:-1,tau:2.903e-13,kind:'tau',nm:'tau'},
+ 'νe':{m:0,q:0,tau:Infinity,kind:'nu',nm:'neutrino'},'νμ':{m:0,q:0,tau:Infinity,kind:'nu',nm:'neutrino'},'ντ':{m:0,q:0,tau:Infinity,kind:'nu',nm:'neutrino'},
+ 'γ':{m:0,q:0,tau:Infinity,kind:'gam',nm:'photon'},u:{m:0.0022,kind:'jet',nm:'up quark'},d:{m:0.0047,kind:'jet',nm:'down quark'},s:{m:0.093,kind:'jet',nm:'strange quark'},c:{m:1.27,kind:'jet',nm:'charm quark'},b:{m:4.18,kind:'jet',nm:'bottom quark'},g:{m:0,kind:'jet',nm:'gluon'},
+ t:{m:173,tau:5e-25,kind:'top',nm:'top quark'},W:{m:80.4,q:1,tau:3e-25,kind:'W',nm:'W boson'},Z:{m:91.2,q:0,tau:3e-25,kind:'Z',nm:'Z boson'},H:{m:125.2,q:0,tau:1.6e-22,kind:'H',nm:'Higgs boson'},'π':{m:0.1396,q:1,tau:2.6e-8,kind:'had',nm:'pion'},'π0':{m:0.135,q:0,tau:8e-17,kind:'had0',nm:'neutral hadron'}};
+const DET={trk:1.1,ecal:[1.2,1.5],hcal:[1.5,2.2],coil:2.3,mu:[2.6,3.4],edge:3.6};
+const SIM={tracks:[],t0:0,dur:1500,story:'',vis:false,last:0};
+function simPick(list){let u=Math.random(),a=0;for(const [p,v] of list){a+=p;if(u<a)return v;}return list[list.length-1][1];}
+function simBoost(par,th,M,kids){ // two-body decay of mass M moving with momentum par along th; kids=[sym,sym]
+ const m1=PX[kids[0]].m||0,m2=PX[kids[1]].m||0,ps=Math.sqrt(Math.max(0,(M*M-(m1+m2)**2)*(M*M-(m1-m2)**2)))/(2*M),ph=Math.random()*2*Math.PI,E=Math.sqrt(par*par+M*M),g=E/M,bg=par/M;
+ return kids.map((k,i)=>{const sg=i?-1:1,m=i?m2:m1,pl=sg*ps*Math.cos(ph),pt=sg*ps*Math.sin(ph),es=Math.sqrt(ps*ps+m*m),L=g*pl+bg*es,p=Math.hypot(L,pt);return [k,p,th+Math.atan2(pt,L)];});}
+function simEmit(sym,p,th,q,out,depth){const P=PX[sym],anti=q!=null&&P.q!=null&&q!==P.q;
+ if(P.kind==='jet'){const n=Math.max(3,Math.min(12,Math.round(4+2.2*Math.log10(Math.max(p,0.2))+Math.random()*2)));let fr=[];for(let i=0;i<n;i++)fr.push(Math.random()**1.5+0.05);const sm=fr.reduce((a,b)=>a+b);
+  for(let i=0;i<n;i++){const pp=p*fr[i]/sm,kt=0.35*(Math.random()+Math.random()-1),neutral=Math.random()<0.33;out.push({sym:neutral?'π0':'π',p:Math.max(0.03,pp),th:th+Math.atan2(kt,Math.max(pp,0.05)),q:neutral?0:(Math.random()<0.5?1:-1),kind:neutral?'had0':'had'});}return 'a jet of '+n+' hadrons';}
+ if(P.kind==='top'){const k=simBoost(p,th,P.m,['b','W']);const a=simEmit('b',k[0][1],k[0][2],null,out,depth+1),b2=simEmit('W',k[1][1],k[1][2],q==null?1:q,out,depth+1);return 'a bottom-quark jet and a W boson, and the W became '+b2;}
+ if(P.kind==='W'){const ch=q==null?(Math.random()<0.5?1:-1):q;const mode=simPick([[0.108,'e'],[0.106,'μ'],[0.113,'τ'],[0.673,'jj']]);
+  if(mode==='jj'){const k=simBoost(p,th,P.m,['u','d']);simEmit('u',k[0][1],k[0][2],null,out,depth+1);simEmit('d',k[1][1],k[1][2],null,out,depth+1);return 'two jets (a quark and an antiquark)';}
+  const k=simBoost(p,th,P.m,[mode,'ν'+mode]);const sub=simEmit(mode,k[0][1],k[0][2],ch,out,depth+1);simEmit('ν'+mode,k[1][1],k[1][2],0,out,depth+1);return (mode==='e'?'an electron':mode==='μ'?'a muon':'a tau (which became '+sub+')')+' and a neutrino';}
+ if(P.kind==='Z'){const mode=simPick([[0.034,'e'],[0.034,'μ'],[0.034,'τ'],[0.2,'νμ'],[0.698,'jj']]);
+  if(mode==='jj'){const k=simBoost(p,th,P.m,['d','d']);simEmit('d',k[0][1],k[0][2],null,out,depth+1);simEmit('d',k[1][1],k[1][2],null,out,depth+1);return 'two jets';}
+  const k=simBoost(p,th,P.m,[mode,mode]);if(mode==='νμ'){simEmit(mode,k[0][1],k[0][2],0,out,depth+1);simEmit(mode,k[1][1],k[1][2],0,out,depth+1);return 'two neutrinos, so the detector sees nothing at all';}
+  simEmit(mode,k[0][1],k[0][2],-1,out,depth+1);simEmit(mode,k[1][1],k[1][2],1,out,depth+1);return 'a pair of '+(mode==='e'?'electrons':mode==='μ'?'muons':'taus')+' with opposite charges';}
+ if(P.kind==='H'){const mode=simPick([[0.582,'bb'],[0.214,'WW'],[0.082,'gg'],[0.063,'ττ'],[0.029,'cc'],[0.026,'ZZ'],[0.004,'γγ']]);
+  const pr={bb:['b','b'],gg:['g','g'],cc:['c','c'],'γγ':['γ','γ'],'ττ':['τ','τ']}[mode];
+  if(pr){const k=simBoost(p,th,P.m,pr);simEmit(pr[0],k[0][1],k[0][2],-1,out,depth+1);simEmit(pr[1],k[1][1],k[1][2],1,out,depth+1);return {bb:'two bottom-quark jets (its most common decay, 58%)',gg:'two gluon jets',cc:'two charm-quark jets','γγ':'two photons: rare (0.2%), but this is how it was discovered','ττ':'two taus'}[mode];}
+  const V=mode==='WW'?'W':'Z',mv=PX[V].m*0.75,ps=Math.sqrt(Math.max(0,P.m*P.m/4-mv*mv)),ph=Math.random()*2*Math.PI,g=Math.hypot(p,P.m)/P.m,bg=p/P.m;
+  [1,-1].forEach(sg=>{const pl=sg*ps*Math.cos(ph),pt=sg*ps*Math.sin(ph),L=g*pl+bg*Math.hypot(ps,mv);simEmit(V,Math.hypot(L,pt),th+Math.atan2(pt,L),V==='W'?sg:0,out,depth+1);});return 'two '+V+' bosons, which decayed in turn';}
+ if(P.kind==='tau'){const mode=simPick([[0.178,'e'],[0.174,'μ'],[0.648,'π']]);const x=0.25+0.6*Math.random();
+  if(mode==='π'){out.push({sym:'π',p:p*x,th:th+0.05*(Math.random()-0.5),q:q,kind:'had'});}else simEmit(mode,p*x,th+0.05*(Math.random()-0.5),q,out,depth+1);out.push({sym:'ντ',p:p*(1-x),th:th,q:0,kind:'nu'});return (mode==='e'?'an electron':mode==='μ'?'a muon':'a pion')+' and neutrinos';}
+ out.push({sym,p,th,q:P.q===0?0:(q==null?P.q:q),kind:P.kind});return '';}
+function simTrack(t,B){const pts=[[0,0]];let x=0,y=0,th=t.th,L=0,end='escape';const ds=0.012,k=t.q?-t.q*0.3*B/Math.max(t.p,1e-4):0;
+ for(let i=0;i<6000;i++){const r=Math.hypot(x,y);if(r<DET.coil)th+=k*ds;x+=Math.cos(th)*ds;y+=Math.sin(th)*ds;L+=ds;pts.push([x,y]);const r2=Math.hypot(x,y);
+  if((t.kind==='em'||t.kind==='gam'||t.kind==='had0'&&false)&&r2>=DET.ecal[0]+0.12){end='ecal';break;}
+  if((t.kind==='had'||t.kind==='had0')&&r2>=DET.hcal[0]+0.25){end='hcal';break;}
+  if(r2>=DET.edge){end='escape';break;}if(L>40){end='curl';break;}}
+ return {pts,L,end};}
+function simFire(){const sym=smSel,P=PX[sym];if(!P)return;const p=10**(+$('#smP').value),B=+$('#smB').value,anti=$('#smAnti').checked,th0=(Math.random()-0.5)*1.2-(Math.random()<0.5?0:Math.PI),out=[];
+ const q0=P.q==null?null:(anti?-P.q:P.q);const what=simEmit(sym,p,th0,q0,out,0);
+ SIM.tracks=out.map(t=>Object.assign(t,simTrack(t,B)));SIM.t0=performance.now();SIM.last=SIM.t0;
+ const E=Math.hypot(p,P.m),beta=p/E,gam=P.m>0?E/P.m:Infinity,R=P.q?p/(0.3*Math.abs(P.q)*Math.max(B,1e-9)):Infinity,dl=P.tau===Infinity||P.tau==null?Infinity:(P.m>0?p/P.m:1)*2.998e8*P.tau;
+ const f3=v=>v>=100?Math.round(v).toLocaleString():v.toPrecision(3),dist=d=>d===Infinity?'never decays':d>=1000?f3(d/1000)+' km':d>=1?f3(d)+' m':d>=1e-3?f3(d*1e3)+' mm':d>=1e-6?f3(d*1e6)+' µm':d>=1e-9?f3(d*1e9)+' nm':sci(d,'m');
+ const K=P.kind,nm=(anti&&P.q?'anti-':'')+P.nm;let story;
+ if(K==='em')story='The '+nm+' curves in the magnet, then stops in the first thick layer (the electromagnetic calorimeter) in a small shower.';
+ else if(K==='mu')story='The '+nm+' curves in the magnet and then goes straight through every layer. Muons are the only charged particles that reach the outer chambers.';
+ else if(K==='nu')story='The neutrino flies out without touching anything. Detectors never see it; they only notice that some momentum is missing.';
+ else if(K==='gam')story='The photon has no charge, so it leaves no track and does not bend. It shows up only when it hits the calorimeter.';
+ else if(K==='jet')story=(/^[aeiou]/.test(nm)?'An ':'A ')+nm+' can never be seen alone. The strong force turns it into '+what+', which stop in the outer calorimeter.';
+ else story='The '+nm+' is far too short-lived to see: it travels about '+dist(dl)+' and decays. This time it became '+what+'.';
+ $('#smOut').innerHTML='<div class="sub">'+nm[0].toUpperCase()+nm.slice(1)+' at '+f3(p)+' GeV/c</div><p style="margin:6px 0">'+story+'</p><dl>'+(K==='jet'?'':'<dt>Speed</dt><dd>'+(P.m>0?(beta>0.99999?'99.999+% of the':(100*beta).toFixed(beta>0.999?3:beta>0.99?2:1)+'% of the'):'exactly the')+' speed of light</dd>'+(P.m>0?'<dt>Time stretch (γ)</dt><dd>'+f3(gam)+'×</dd>':''))+(P.q?'<dt>Curve radius in the magnet</dt><dd>'+(B>0?dist(R):'no magnet, straight line')+'</dd>':'')+'<dt>Distance before decaying</dt><dd>'+(K==='jet'?'never exists alone':dist(dl))+'</dd></dl>';}
+function simDraw(now){const cv=$('#smCv'),W=cv.clientWidth,H=cv.clientHeight;if(!W)return;const dpr=Math.min(window.devicePixelRatio||1,MOB?1.5:2);if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);}
+ const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);const dk=isDark(),sc=W/(2*DET.edge),cx=W/2,cy=H/2,mut=getComputedStyle($('#probeMut')).color,X=v=>cx+v*sc,Y=v=>cy-v*sc;
+ const TAU=Math.PI*2,ring=(r0,r1,fill)=>{x.beginPath();x.arc(cx,cy,r1*sc,0,TAU);x.moveTo(cx+r0*sc,cy);x.arc(cx,cy,r0*sc,0,TAU,true);x.fillStyle=fill;x.fill('evenodd');};
+ ring(DET.ecal[0],DET.ecal[1],dk?'rgba(57,135,229,0.20)':'rgba(42,120,214,0.14)');ring(DET.hcal[0],DET.hcal[1],dk?'rgba(217,89,38,0.20)':'rgba(235,104,52,0.13)');ring(DET.mu[0],DET.mu[1],dk?'rgba(25,158,112,0.20)':'rgba(27,175,122,0.14)');
+ x.strokeStyle=mut;x.globalAlpha=0.5;x.lineWidth=1;x.beginPath();x.arc(cx,cy,DET.trk*sc,0,7);x.stroke();x.setLineDash([3,3]);x.beginPath();x.arc(cx,cy,DET.coil*sc,0,7);x.stroke();x.setLineDash([]);x.globalAlpha=1;
+ x.fillStyle=mut;x.font=(W<420?10:12)+'px "Instrument Sans",sans-serif';x.textAlign='center';[['tracker',0.55],['stops electrons and photons',1.35],['stops hadrons',1.85],['magnet coil',2.42],['muon chambers',3.0]].forEach(([t,r])=>x.fillText(t,cx,Y(r)+4));
+ const el=Math.min(1,(now-SIM.t0)/SIM.dur),Lmax=Math.max(...SIM.tracks.map(t=>t.L),1),cP=dk?'#3987e5':'#2a78d6',cN=dk?'#d95926':'#eb6834',cZ=dk?'#199e70':'#1baf7a',inv=$('#smInv').checked;
+ SIM.tracks.forEach(t=>{if(t.kind==='nu'&&!inv)return;const n=Math.max(2,Math.floor(t.pts.length*Math.min(1,el*Lmax/Math.min(t.L,DET.edge*1.3)*0.9+0.02)));x.beginPath();for(let i=0;i<n&&i<t.pts.length;i++){const q=t.pts[i];i?x.lineTo(X(q[0]),Y(q[1])):x.moveTo(X(q[0]),Y(q[1]));}
+  x.strokeStyle=t.q>0?cP:t.q<0?cN:cZ;x.lineWidth=t.kind==='nu'?1:t.kind==='mu'?2.4:1.8;x.globalAlpha=t.kind==='nu'?0.45:1;x.setLineDash(t.q===0?(t.kind==='nu'?[1,5]:[5,4]):[]);x.stroke();x.setLineDash([]);x.globalAlpha=1;
+  if(n>=t.pts.length&&(t.end==='ecal'||t.end==='hcal')){const q=t.pts[t.pts.length-1],a=Math.atan2(q[1],q[0]);x.strokeStyle=t.q>0?cP:t.q<0?cN:cZ;x.lineWidth=1.2;for(let k=-3;k<=3;k++){const a2=a+k*0.11,l=(t.end==='ecal'?0.2:0.42)*(1-Math.abs(k)/5);x.beginPath();x.moveTo(X(q[0]),Y(q[1]));x.lineTo(X(q[0]+Math.cos(a2)*l),Y(q[1]+Math.sin(a2)*l));x.stroke();}}});
+ x.fillStyle=getComputedStyle($('#probeInk')).color;x.beginPath();x.arc(cx,cy,3,0,7);x.fill();}
+(()=>{const key=()=>{const dk=isDark();$('#smKey').innerHTML='<span><i style="background:'+(dk?'#3987e5':'#2a78d6')+'"></i>positive charge</span><span><i style="background:'+(dk?'#d95926':'#eb6834')+'"></i>negative charge</span><span><i style="background:'+(dk?'#199e70':'#1baf7a')+'"></i>no charge (dashed, no bending)</span>';};key();new MutationObserver(key).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+ const lab=()=>{const p=10**(+$('#smP').value);$('#smPo').textContent=(p>=1?p.toPrecision(3)+' GeV/c':(p*1000).toPrecision(3)+' MeV/c');$('#smBo').textContent=(+$('#smB').value).toFixed(1)+' tesla';};lab();
+ ['smP','smB'].forEach(id=>$('#'+id).addEventListener('input',()=>{lab();simFire();}));$('#smAnti').addEventListener('change',simFire);$('#smFire').addEventListener('click',simFire);$('#smGrid').addEventListener('click',e=>{if(e.target.closest('[data-sm]'))simFire();});
+ // runs only while on screen (with a 250 px buffer), and replays every few seconds
+ const still=matchMedia('(prefers-reduced-motion: reduce)').matches;new IntersectionObserver(es=>{SIM.vis=es[0].isIntersecting;if(SIM.vis&&!SIM.tracks.length)simFire();},{rootMargin:'250px 0px'}).observe($('#smSim'));
+ (function loop(){if(SIM.vis){const now=performance.now();if(now-SIM.t0<SIM.dur+400||SIM.dirty!==isDark()){simDraw(still?SIM.t0+SIM.dur:now);SIM.dirty=isDark();}}requestAnimationFrame(loop);})();
+ window.addEventListener('resize',()=>{SIM.t0=performance.now()-SIM.dur;SIM.dirty=null;});})();
 let nucT='p';const QG=new THREE.Group();scene.add(QG);QG.visible=false;let quarks=[],gl=[];
 function buildQuarks(){clear(QG);quarks=[];gl=[];const fl=nucT==='p'?['u','u','d']:['u','d','d'],cols=[0xe24b4a,0x3b9d4a,0x378add];
  const shell=new THREE.Mesh(new THREE.SphereGeometry(3,48,32),new THREE.MeshPhongMaterial({color:nucT==='p'?0xde5f37:0x9aa3ab,transparent:true,opacity:0.12,depthWrite:false}));QG.add(shell);
@@ -1227,10 +1319,10 @@ const GL_LAP=`float lapc(float i,float j,float k,int ch){vec2 c=atv(i,j,k);
  vec2 l=(16.0*s1-s2-90.0*c)/(12.0*uH*uH);return ch==0?l.x:l.y;}
 void vox(out float i,out float j,out float k){vec2 px=floor(gl_FragCoord.xy);float tx=floor(px.x/uG),ty=floor(px.y/uG);i=px.x-tx*uG;j=px.y-ty*uG;k=ty*uT+tx;}
 vec3 posOf(float i,float j,float k){return (vec3(i,j,k)+0.5-0.5*uG)*uH;}`;
-const gUni=()=>({uPsi:{value:null},uG:{value:64},uT:{value:8},uWx:{value:512},uWy:{value:512},uH:{value:1},uDt:{value:0.1},uD:{value:0.5},uPt:{value:0},uA:{value:1},uB:{value:0},uVr:{value:Array.from({length:64},()=>new THREE.Vector4())},uRmax:{value:10},uPass:{value:0},uAbs:{value:0},uMu:{value:0.8}});
+const gUni=()=>({uPsi:{value:null},uG:{value:64},uT:{value:8},uWx:{value:512},uWy:{value:512},uH:{value:1},uDt:{value:0.1},uD:{value:0.5},uPt:{value:0},uA:{value:1},uB:{value:0},uVr:{value:Array.from({length:64},()=>new THREE.Vector4())},uRmax:{value:10},uPass:{value:0},uAbs:{value:0},uMu:{value:0.8},uEs:{value:0}});
 function gInit(){const d=gDims();if(gRT)return;const o={type:THREE.FloatType,format:THREE.RGBAFormat,minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter,depthBuffer:false,stencilBuffer:false};gRT=[new THREE.WebGLRenderTarget(d.Wx,d.Wy,o),new THREE.WebGLRenderTarget(d.Wx,d.Wy,o)];
  if(!gMat){gMat=new THREE.ShaderMaterial({uniforms:gUni(),vertexShader:'void main(){gl_Position=vec4(position.xy,0.0,1.0);}',
-  fragmentShader:GL_ATLAS+GL_POT+GL_LAP+`uniform float uDt,uD,uMu;void main(){float i,j,k;vox(i,j,k);float tx2=mod(k,uT),ty2=floor(k/uT);vec4 raw=texture2D(uPsi,vec2((tx2*uG+i+0.5)/uWx,(ty2*uG+j+0.5)/uWy));float c=raw.r;float v=pot(posOf(i,j,k));float nw=c+uDt*(uD*lapc(i,j,k,0)-v*c)+uMu*(c-raw.b);gl_FragColor=vec4(nw,0.0,c,1.0);}`});
+  fragmentShader:GL_ATLAS+GL_POT+GL_LAP+`uniform float uDt,uD,uMu,uEs;void main(){float i,j,k;vox(i,j,k);float tx2=mod(k,uT),ty2=floor(k/uT);vec4 raw=texture2D(uPsi,vec2((tx2*uG+i+0.5)/uWx,(ty2*uG+j+0.5)/uWy));float c=raw.r;float v=pot(posOf(i,j,k));float nw=c+uDt*(uD*lapc(i,j,k,0)-(v-uEs)*c)+uMu*(c-raw.b);gl_FragColor=vec4(nw,0.0,c,1.0);}`});
   gTd=new THREE.ShaderMaterial({uniforms:gMat.uniforms,vertexShader:'void main(){gl_Position=vec4(position.xy,0.0,1.0);}',
   fragmentShader:GL_ATLAS+GL_POT+GL_LAP+`uniform float uDt,uD,uPass,uAbs;void main(){float i,j,k;vox(i,j,k);vec2 c=atv(i,j,k);vec3 p=posOf(i,j,k);float v=pot(p);
    vec3 e=min(vec3(i,j,k),uG-1.0-vec3(i,j,k));float m=min(e.x,min(e.y,e.z));float damp=uAbs>0.5?1.0-0.02*pow(max(0.0,1.0-m/8.0),2.0):1.0;
@@ -1242,7 +1334,7 @@ function gInit(){const d=gDims();if(gRT)return;const o={type:THREE.FloatType,for
 function gParams(){const P=GPOT[gPotK],a=+$('#gA').value,b=P.B?+$('#gB').value:0,L=P.L(a,b),h=2*L/GS.G,pt={h:0,h2:1,ws:2,ho:3,scf:4}[gPotK];
  const vmin=gPotK==='h'||gPotK==='scf'?a/(0.2*h):gPotK==='h2'?2/(0.2*h):gPotK==='ws'?50:0.5*a*a*L*L*3;const dt=1.5/(16*P.D/(h*h)+vmin);
  const dtR=0.9*2/(16*P.D/(h*h)+vmin);return {P,a,b,L,h,pt,dt,dtR};}
-function gSetU(pr){const u=gMat.uniforms;u.uMu.value=$('#gMom').checked?0.8:0;u.uH.value=pr.h;u.uDt.value=pr.dt;u.uD.value=pr.P.D;u.uPt.value=pr.pt;u.uA.value=pr.a;u.uB.value=pr.b;}
+function gSetU(pr){const u=gMat.uniforms;u.uMu.value=$('#gMom').checked?0.8:0;u.uEs.value=u.uMu.value>0&&GS.lastE!=null?GS.lastE:0;u.uH.value=pr.h;u.uDt.value=pr.dt;u.uD.value=pr.P.D;u.uPt.value=pr.pt;u.uA.value=pr.a;u.uB.value=pr.b;}
 function gUpload(re,im){const d=gDims();if(!gTex||gTex.image.width!==d.Wx){if(gTex)gTex.dispose();gTex=new THREE.DataTexture(new Float32Array(d.Wx*d.Wy*4),d.Wx,d.Wy,THREE.RGBAFormat,THREE.FloatType);}const t=gTex.image.data;t.fill(0);for(let q=0;q<d.N;q++){const o=(GI.Yy[q]*d.Wx+GI.X[q])*4;t[o]=re[q];if(im)t[o+1]=im[q];else t[o+2]=re[q];t[o+3]=1;}gTex.needsUpdate=true;
  gQuad.material=gCopy;gCopy.uniforms.uSrc.value=gTex;renderer.setRenderTarget(gRT[0]);renderer.render(gScene,gCam);renderer.setRenderTarget(null);gQuad.material=gMat;}
 function gRead(both){const d=gDims(),re=new Float32Array(d.N),im=both?new Float32Array(d.N):null,G=d.G,T=d.T,rows=gBuf.length/(4*d.Wx);
@@ -1257,7 +1349,21 @@ function gEnergy(psi,pr){const G=GS.G,h=pr.h,D=pr.P.D,c0=0.5*G;let num=0,den=0;c
   num+=c*(-D*lap+potCPU(pr,(i+0.5-c0)*h,(j+0.5-c0)*h,(k+0.5-c0)*h)*c);den+=c*c;}return num/den;}
 function gOrtho(psi,list){(list||GS.states).forEach(st=>{let d=0;for(let q=0;q<psi.length;q++)d+=psi[q]*st.psi[q];for(let q=0;q<psi.length;q++)psi[q]-=d*st.psi[q];});let nn=0;for(let q=0;q<psi.length;q++)nn+=psi[q]*psi[q];nn=Math.sqrt(nn)||1;for(let q=0;q<psi.length;q++)psi[q]/=nn;return psi;}
 function gSeed(idx){const G=GS.G,n=G*G*G,a=new Float32Array(n),c0=G/2-0.5,w=300*(G/64)**2;let sd=12345+idx*7919;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647-0.5;};for(let k=0;k<G;k++)for(let j=0;j<G;j++)for(let i=0;i<G;i++){const x=i-c0,y=j-c0,z=k-c0;a[(k*G+j)*G+i]=Math.exp(-(x*x+y*y+z*z)/w)*(1+rnd());}return a;}
-function gStart(){if(!gpuOK()){$('#gStat').textContent='This browser’s graphics card can’t render to floating-point textures (WebGL 2 with EXT_color_buffer_float is needed), so the solver can’t run here.';return;}
+function gCpu(){return GS.G===32;}
+function gEigCPU(){const pr=GS.pr,G=GS.G,N=G*G*G,h=pr.h,D=pr.P.D,dt=pr.dt,mu=$('#gMom').checked?0.8:0,c0=0.5*G,t0=performance.now(),list=GS.task==='scf'?GS.scf.cur:GS.states;
+ if(!GS.cV||GS.cVkey!==gKey()+'|'+(GS.scf?GS.scf.cycle:0)){GS.cV=new Float32Array(N);for(let k=0;k<G;k++)for(let j=0;j<G;j++)for(let i=0;i<G;i++)GS.cV[(k*G+j)*G+i]=potCPU(pr,(i+0.5-c0)*h,(j+0.5-c0)*h,(k+0.5-c0)*h);GS.cVkey=gKey()+'|'+(GS.scf?GS.scf.cycle:0);}
+ const V=GS.cV,k12=D*dt/(12*h*h),G2=G*G,Es=mu>0&&GS.lastE!=null?GS.lastE:0;let a=GS.cpsi,b=GS.cprev,n=new Float32Array(N),steps=0;
+ while(steps<8||performance.now()-t0<(MOB?10:14)){for(let k=0;k<G;k++)for(let j=0;j<G;j++){const row=(k*G+j)*G;for(let i=0;i<G;i++){const q=row+i,c=a[q];
+    const s1=(i>0?a[q-1]:0)+(i<G-1?a[q+1]:0)+(j>0?a[q-G]:0)+(j<G-1?a[q+G]:0)+(k>0?a[q-G2]:0)+(k<G-1?a[q+G2]:0),s2=(i>1?a[q-2]:0)+(i<G-2?a[q+2]:0)+(j>1?a[q-2*G]:0)+(j<G-2?a[q+2*G]:0)+(k>1?a[q-2*G2]:0)+(k<G-2?a[q+2*G2]:0);
+    n[q]=c+k12*(16*s1-s2-90*c)-dt*(V[q]-Es)*c+mu*(c-b[q]);}}const t=b;b=a;a=n;n=t;steps++;if(steps>=200)break;}
+ GS.it+=steps;GS.itTot=(GS.itTot||0)+steps;
+ list.forEach(st=>{let d=0,d2=0;for(let q=0;q<N;q++){d+=a[q]*st.psi[q];d2+=b[q]*st.psi[q];}for(let q=0;q<N;q++){a[q]-=d*st.psi[q];b[q]-=d2*st.psi[q];}});
+ let nn=0;for(let q=0;q<N;q++)nn+=a[q]*a[q];nn=1/(Math.sqrt(nn)||1);for(let q=0;q<N;q++){a[q]*=nn;b[q]*=nn;}GS.cpsi=a;GS.cprev=b;
+ const E=gEnergy(a,pr),tol=GS.task==='scf'?2e-5:2e-6,conv=GS.lastE!==null&&Math.abs(E-GS.lastE)<Math.max(1e-6,Math.abs(E)*tol)*Math.max(1,steps/40);GS.stable=conv?GS.stable+1:0;GS.lastE=E;
+ const done=GS.stable>=(GS.task==='scf'?2:3)||GS.it>=40000,now=performance.now();if(done||now-(GS.lastVolT||0)>500){try{gVol(a);}catch(e){}GS.lastVolT=now;}
+ return {psi:done?Float32Array.from(a):null,E,done};}
+function gStart(){if(!gCpu()&&!gpuOK()){gSetGrid(32);$$('[data-gg]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.gg==='32')));}
+ if(gCpu()){GS.chain=null;GS.up=null;GS.itTot=0;GS.states=[];GS.view=-1;GS.tdse=null;GS.run=true;GS.cV=null;GS.task=gPotK==='scf'?'scf':'eig';if(GS.task==='scf')scfInit();gBegin();return;}
  if(!GS.chain){GS.itTot=0;GS.up=null;if(GS.G>64&&$('#gUp').checked){const st=GS.G===256?[64,128,256]:[64,128];GS.chain={st,idx:0,its:[],t0:performance.now()};gSetGrid(64);}}
  gInit();GS.states=[];GS.view=-1;GS.tdse=null;GS.run=true;GS.task=gPotK==='scf'?'scf':'eig';if(GS.task==='scf'){scfInit();if(GS.up&&GS.up.vtab){GS.scf.Vtab=Float32Array.from(GS.up.vtab);scfSendV();}}gBegin();}
 function gUpsample(a){const g=Math.round(Math.cbrt(a.length)),G=2*g,o=new Float32Array(G*G*G),cl=v=>v<0?0:v>g-1?g-1:v;for(let k=0;k<G;k++){const z=cl(k/2-0.25),z0=Math.floor(z),z1=Math.min(g-1,z0+1),fz=z-z0;for(let j=0;j<G;j++){const y=cl(j/2-0.25),y0=Math.floor(y),y1=Math.min(g-1,y0+1),fy=y-y0;for(let i=0;i<G;i++){const x=cl(i/2-0.25),x0=Math.floor(x),x1=Math.min(g-1,x0+1),fx=x-x0,A=(zz,yy,xx)=>a[(zz*g+yy)*g+xx];
@@ -1265,10 +1371,10 @@ function gUpsample(a){const g=Math.round(Math.cbrt(a.length)),G=2*g,o=new Float3
 function gChainNext(){const C=GS.chain;if(!C)return false;C.its.push(GS.itTot);
  if(C.idx<C.st.length-1){const g0=C.st[C.idx],g1=C.st[C.idx+1];GS.up={G:g0,states:GS.states.map(x=>x.psi),vtab:GS.task==='scf'?Float32Array.from(GS.scf.Vtab):null};C.idx++;gSetGrid(g1);GS.itTot=0;$('#gStat').textContent=g0+'³ solve done; enlarging it to '+g1+'³ and refining…';setTimeout(gStart,30);return true;}
  const msg=' Upscaled '+C.st.map(g=>g+'³').join(' → ')+': '+C.its.map((n,k)=>n.toLocaleString()+' GPU steps on '+C.st[k]+'³').join(', ')+' ('+((performance.now()-C.t0)/1000).toFixed(0)+' s in all).';GS.chain=null;GS.up=null;$('#gStat').textContent+=msg;return true;}
-function gBegin(seed){const pr=gParams();GS.pr=pr;GS.it=0;GS.lastE=null;GS.stable=0;gSetU(pr);const list=GS.task==='scf'?GS.scf.cur:GS.states;GS.warmUsed=false;
+function gBegin(seed){const pr=gParams();GS.pr=pr;GS.it=0;GS.lastE=null;GS.stable=0;if(!gCpu())gSetU(pr);const list=GS.task==='scf'?GS.scf.cur:GS.states;GS.warmUsed=false;
  if(!seed&&GS.up&&GS.up.G*2===GS.G&&GS.up.states[list.length]){seed=gUpsample(GS.up.states[list.length]);GS.warmUsed=true;}
  if(!seed&&GS.task==='eig'&&$('#gWarm').checked&&GS.warm&&GS.warm.G===GS.G&&GS.warm.pot===gPotK&&GS.warm.states[list.length]){seed=GS.warm.states[list.length];GS.warmUsed=true;}
- const s0=gOrtho(seed?Float32Array.from(seed):gSeed(list.length),list);gUpload(s0);gRender();}
+ const s0=gOrtho(seed&&seed.length===GS.G**3?Float32Array.from(seed):gSeed(list.length),list);if(gCpu()){GS.cpsi=s0;GS.cprev=Float32Array.from(s0);}else gUpload(s0);gRender();}
 function gStop(){GS.run=false;}
 const ECACHE={};const gKey=()=>gPotK+'|'+$('#gA').value+'|'+($('#gB').value||'');
 function gCacheE(i,E){const k=gKey();(ECACHE[k]=ECACHE[k]||{})[GS.G+':'+i]=E;}
@@ -1311,7 +1417,7 @@ function gEigGPU(){const pr=GS.pr,u=gMat.uniforms,batch=MOB?(GS.G===128?20:15):G
  return {psi,E,done};}
 function gStep(){if(!GS.run||mode!=='gpu')return;
  if(GS.task==='tdse'){tdStep();return;}
- const r=$('#gOnGpu').checked?gEigGPU():gEig();
+ const r=gCpu()?gEigCPU():$('#gOnGpu').checked?gEigGPU():gEig();
  if(GS.task==='eig'){$('#gStat').textContent='Finding state '+(GS.states.length+1)+' of '+$('#gK').value+' · '+GS.it.toLocaleString()+' GPU steps · energy now '+fE(r.E*GS.pr.P.unit);
   if(r.done){GS.states.push({psi:r.psi,E:r.E,steps:GS.it,mom:$('#gMom').checked,warm:!!GS.warmUsed});gCacheE(GS.states.length-1,r.E);GS.view=GS.states.length-1;gRender();if(GS.states.length>=+$('#gK').value){GS.run=false;$('#gStat').textContent='Done: '+GS.states.length+' states found.';gChainNext();}else gBegin();}return;}
  const S=GS.scf;$('#gStat').textContent='Self-consistency cycle '+(S.cycle+1)+' · orbital '+ORBN[S.cur.length]+' · '+GS.it.toLocaleString()+' GPU steps · ε = '+fE(r.E*27.211386);
@@ -1336,7 +1442,7 @@ function scfUpdate(){const S=GS.scf,pr=GS.pr,G=GS.G,h=pr.h,c0=0.5*G,NB=256,mass=
  if(dE<3e-4||S.cycle>=12){GS.run=false;const ie=RAW.ie[S.Z-1];GS.hist=GS.hist.filter(x=>x[0]!==S.Z).concat([[S.Z,-homo*27.211386,ie]]).sort((a,b)=>a[0]-b[0]);$('#gStat').textContent='Converged after '+S.cycle+' cycles.';gRender();gChainNext();return;}
  S.cur=[];gRender();gBegin(S.prev[0].psi);}
 /* ---- real-time evolution ---- */
-function tdStart(kind){if(!gpuOK())return;gInit();const pr=gParams(),G=GS.G,c0=0.5*G,N=G*G*G,re=new Float32Array(N),im=new Float32Array(N);
+function tdStart(kind){if(gCpu()||!gpuOK()){$('#gStat').textContent='Real-time evolution needs the GPU grids (64³ or larger).';return;}gInit();const pr=gParams(),G=GS.G,c0=0.5*G,N=G*G*G,re=new Float32Array(N),im=new Float32Array(N);
  if(kind==='sup'&&GS.states.length>=2){const a=GS.states[0].psi,b=GS.states[1].psi,s=Math.SQRT1_2;for(let q=0;q<N;q++)re[q]=s*(a[q]+b[q]);GS.tdInfo='equal mix of states 1 and 2; it should slosh back and forth with period '+fT(2*Math.PI/Math.abs(GS.states[1].E-GS.states[0].E)*pr.P.tu);}
  else{const sig=pr.L*0.12,z0=-pr.L*0.55,k=+$('#gKp').value/(pr.h*4);for(let kk=0;kk<G;kk++)for(let j=0;j<G;j++)for(let i=0;i<G;i++){const x=(i+0.5-c0)*pr.h,y=(j+0.5-c0)*pr.h,z=(kk+0.5-c0)*pr.h,env=Math.exp(-((x*x+y*y+(z-z0)**2)/(4*sig*sig))),q=(kk*G+j)*G+i;re[q]=env*Math.cos(k*z);im[q]=env*Math.sin(k*z);}
   let nn=0;for(let q=0;q<N;q++)nn+=re[q]*re[q]+im[q]*im[q];nn=Math.sqrt(nn);for(let q=0;q<N;q++){re[q]/=nn;im[q]/=nn;}GS.tdInfo='wave packet fired at the centre; the walls absorb what escapes';}
@@ -1359,7 +1465,7 @@ function ensureTdMesh(){const d=gDims();tdU.uG.value=d.G;tdU.uT.value=d.T;tdU.uW
  tdMesh.visible=mode==='gpu';if(gVolMesh)gVolMesh.visible=false;}
 $('#gTdSup').addEventListener('click',()=>tdStart('sup'));$('#gTdPk').addEventListener('click',()=>tdStart('pk'));$('#gKp').addEventListener('input',e=>{$('#gKpo').textContent=e.target.value;});
 const EX={h:(a,i)=>{const lv=[1,2,2,2,2,3,3,3,3,3,3,3,3,3,3];return -0.5*a*a/(lv[i]**2);},ho:(a,i)=>{const lv=[0,1,1,1,2,2,2,2,2,2];return a*(lv[i]+1.5);}};
-function gRender(){const pr=gParams(),P=pr.P,un=gPotK==='ws'?' fm':' bohr';let h='<div class="nm" style="font-size:20px">'+P.nm[0].toUpperCase()+P.nm.slice(1)+(gPotK==='scf'?': '+NAMES[pr.a-1]:'')+'</div><div class="sub">'+GS.G+'³ grid · spacing '+pr.h.toFixed(3)+un+' · box ±'+pr.L.toFixed(1)+un+'</div>';
+function gRender(){const pr=gParams(),P=pr.P,un=gPotK==='ws'?' fm':' bohr';let h='<div class="nm" style="font-size:20px">'+P.nm[0].toUpperCase()+P.nm.slice(1)+(gPotK==='scf'?': '+NAMES[pr.a-1]:'')+'</div><div class="sub">'+GS.G+'³ grid'+(GS.G===32?' on the CPU (coarse, but runs anywhere)':'')+' · spacing '+pr.h.toFixed(3)+un+' · box ±'+pr.L.toFixed(1)+un+'</div>';
  $('#gTdBox').hidden=gPotK==='scf';$('#gTdSup').hidden=GS.states.length<2;
  if(GS.task==='tdse'&&GS.tdInfo){h+='<p class="note" style="color:var(--ink)">Real-time run: '+GS.tdInfo+'.</p>'+tdChart();}
  if(gPotK==='scf'){const S=GS.scf&&GS.scf.Z===pr.a?GS.scf:null;
@@ -1527,10 +1633,12 @@ const mo=new MutationObserver(buildFrame);mo.observe(document.documentElement,{a
 const mq=window.matchMedia('(prefers-color-scheme: dark)');if(mq.addEventListener)mq.addEventListener('change',buildFrame);
 radialTable();buildFrame();buildShape();buildCloud();readout();setMode('cloud');
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(buildFrame);
-let visible3d=true,lastT=performance.now(),ftAvg=16,dprCur=Math.min(window.devicePixelRatio||1,MOB?1.5:2),dprMax=dprCur;new IntersectionObserver(es=>{visible3d=es[0].isIntersecting;}).observe(fig);
+let visible3d=true,lastT=performance.now(),ftAvg=16,dprCur=Math.min(window.devicePixelRatio||1,MOB?1.5:2),dprMax=dprCur;new IntersectionObserver(es=>{visible3d=es[0].isIntersecting;const p=!visible3d&&((GS.run&&mode==='gpu')||(Q.run&&mode==='qmc'));const el=mode==='qmc'?$('#qStat'):$('#gStat');if(el&&p&&!/off screen/.test(el.textContent))el.textContent+=' · paused while off screen';},{rootMargin:'300px 0px'}).observe(fig);
 function adaptRes(){const now=performance.now(),ft=now-lastT;lastT=now;ftAvg=0.9*ftAvg+0.1*Math.min(ft,200);let want=dprCur;if(ftAvg>24&&dprCur>0.75)want=Math.max(0.75,dprCur-0.25);else if(ftAvg<14&&dprCur<dprMax)want=Math.min(dprMax,dprCur+0.25);if(want!==dprCur){dprCur=want;renderer.setPixelRatio(dprCur);renderer.setSize(fig.clientWidth,fig.clientHeight,false);cloudU.uPx.value=fig.clientHeight*0.5*dprCur;}}
 let mobSkip=false;
-function tick(){const tt=performance.now()/1000;if(MOB&&!ptr.size&&!(GS.run&&mode==='gpu')&&!(Q.run&&mode==='qmc')){mobSkip=!mobSkip;if(mobSkip){requestAnimationFrame(tick);return;}}if(!visible3d&&!(GS.run&&mode==='gpu')&&!(Q.run&&mode==='qmc')){requestAnimationFrame(tick);return;}if(Q.run&&mode==='qmc')qStep();adaptRes();if(GS.run&&mode==='gpu')gStep();animQuarks(tt);animNuc(tt);if(auto&&!ptr.size)th+=0.0025;place();renderer.render(scene,cam);requestAnimationFrame(tick);}
+function tick(){const tt=performance.now()/1000;if(MOB&&!ptr.size&&!(GS.run&&mode==='gpu')&&!(Q.run&&mode==='qmc')){mobSkip=!mobSkip;if(mobSkip){requestAnimationFrame(tick);return;}}if(!visible3d){requestAnimationFrame(tick);return;}if(Q.run&&mode==='qmc')qStep();adaptRes();if(GS.run&&mode==='gpu')gStep();animQuarks(tt);animNuc(tt);if(auto&&!ptr.size)th+=0.0025;place();renderer.render(scene,cam);requestAnimationFrame(tick);}
+$$('[data-gfx]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.gfx===GFX));b.addEventListener('click',()=>{try{localStorage.setItem('gfx',b.dataset.gfx);}catch(e){}location.reload();});});
+$('#gfxNote').textContent=(GFX==='auto'?'Auto picked ':'Using ')+(MOB?'Light':'Full')+(gpuOK()?'':' · this device can’t run the GPU solver, so it uses the built-in CPU solver')+'.';
 cv.addEventListener('webglcontextlost',e=>{e.preventDefault();GS.run=false;Q.run=false;const n=document.createElement('div');n.id='ctxLost';n.className='ctxlost';n.innerHTML='<p>The browser reset the graphics (this happens on phones when the app is in the background or memory runs low).</p><button>Reload the 3D view</button>';n.querySelector('button').onclick=()=>location.reload();fig.appendChild(n);},false);
 tick();
 }
