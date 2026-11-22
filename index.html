@@ -15,192 +15,253 @@
 :root{color-scheme:light dark;--bg:light-dark(#f4f3ef,#111316);--ink:light-dark(#1c1e21,#e9e7e2);--mut:light-dark(#5b5e64,#a3a6ac);--line:light-dark(#d8d6cf,#2b2f35);--card:light-dark(#ffffff,#181b1f);--acc:light-dark(#0b6f68,#4cc4ba);--onacc:light-dark(#ffffff,#0c1a19);--pos:#12958b;--neg:#de5f37}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 'Instrument Sans',system-ui,sans-serif;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font:var(--f4)/1.55 'Instrument Sans',system-ui,sans-serif;overflow-x:clip}
 .band{padding:clamp(24px,4vw,48px) max(5vw,16px) 18px;max-width:1240px;margin:0 auto}
-h1{font-size:clamp(30px,4.4vw,46px);line-height:1.05;font-weight:600;margin:0 0 10px;text-wrap:balance}
+h1{font-size:clamp(26px,3.6vw,38px);line-height:1.05;font-weight:600;margin:0 0 10px;text-wrap:balance}
 .lede{color:var(--mut);max-width:64ch;margin:0}
-.wrap{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:24px;padding:0 max(5vw,16px) 32px;max-width:1240px;margin:0 auto}
+.wrap{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:24px;padding:0 max(4vw,12px) 32px;max-width:1240px;margin:0 auto}
 @media(max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)}}
 .stagecol{display:flex;flex-direction:column;gap:14px}
-.fig{position:relative;height:clamp(360px,62vh,640px);border-radius:14px;background:var(--card);border:1px solid var(--line);overflow:hidden}
+@media(min-width:861px){.stagecol{position:sticky;top:calc(var(--top) + 46px);align-self:start}}
+.fig{position:relative;height:clamp(360px,calc(100svh - 215px),720px);border-radius:14px;background:var(--card);border:1px solid var(--line);overflow:hidden}
 .fig canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
 .views{position:absolute;left:10px;bottom:10px;display:flex;flex-wrap:wrap;gap:6px}
-.hint{position:absolute;right:12px;top:10px;font-size:13px;color:var(--mut);pointer-events:none}
+.hint{position:absolute;right:12px;top:10px;font-size:var(--f2);color:var(--mut);pointer-events:none}
 .rad{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .rad .fig2{position:relative;height:150px}
 .rad svg{position:absolute;inset:0;width:100%;height:100%}
-.rad p{margin:0 0 4px;font-size:14px;color:var(--mut)}
-button{font:inherit;font-size:15px;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.rad p{margin:0 0 4px;font-size:var(--f3);color:var(--mut)}
+button{font:inherit;font-size:var(--f3);min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
 button:hover{border-color:var(--mut)}
 button[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
 button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-.views button{min-height:38px;font-size:14px;background:color-mix(in srgb,var(--card) 88%,transparent)}
+.views button{min-height:38px;font-size:var(--f3);background:color-mix(in srgb,var(--card) 88%,transparent)}
 aside{display:flex;flex-direction:column;gap:18px}
-h2{font-size:16px;font-weight:600;margin:0 0 8px}
+h2{font-size:var(--f4);font-weight:600;margin:0 0 8px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .qn{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
-.step .k{font-size:13px;color:var(--mut)}
-.step .v{font-size:24px;font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums}
+.step .k{font-size:var(--f2);color:var(--mut)}
+.step .v{font-size:var(--f6);font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums}
 .step .b{display:flex;gap:6px;justify-content:center;margin-top:4px}
-.step button{min-height:40px;width:44px;padding:0;font-size:20px}
-.step #kFit{width:auto;font-size:15px;padding:0 12px;min-height:44px}
+.step button{min-height:40px;width:44px;padding:0;font-size:var(--f5)}
+.step #kFit{width:auto;font-size:var(--f3);padding:0 12px;min-height:44px}
 .read{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
-.read .nm{font-size:26px;font-weight:600;line-height:1.1}
-.read .sub{color:var(--mut);font-size:14px;margin:2px 0 10px}
-.read dl{margin:0;display:grid;grid-template-columns:7.2em minmax(0,1fr);gap:6px 10px;font-size:15px}
+.read .nm{font-size:var(--f6);font-weight:600;line-height:1.1}
+.read .sub{color:var(--mut);font-size:var(--f3);margin:2px 0 10px}
+.read dl{margin:0;display:grid;grid-template-columns:7.2em minmax(0,1fr);gap:6px 10px;font-size:var(--f3)}
 .read dt{color:var(--mut)}.read dd{margin:0}
-.key{display:flex;gap:16px;font-size:14px;color:var(--mut);margin-top:10px}
+.key{display:flex;gap:16px;font-size:var(--f3);color:var(--mut);margin-top:10px}
 .key i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
-label.chk{display:flex;align-items:center;gap:10px;min-height:40px;font-size:15px;cursor:pointer}
+label.chk{display:flex;align-items:center;gap:10px;min-height:40px;font-size:var(--f3);cursor:pointer}
 label.chk input{width:20px;height:20px;accent-color:var(--acc)}
-.rng{display:flex;align-items:center;gap:10px;font-size:15px}
+.rng{display:flex;align-items:center;gap:10px;font-size:var(--f3)}
 .rng input{flex:1;accent-color:var(--acc)}
 .rng span{min-width:4.5em;text-align:right;font-variant-numeric:tabular-nums}
 .quiz{background:var(--card);border:1px solid var(--acc);border-radius:14px;padding:14px 16px}
 .quiz p{margin:0 0 10px}
-.score{font-size:14px;color:var(--mut)}
+.score{font-size:var(--f3);color:var(--mut)}
 .shells{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
-.shells li .sub2{display:block;font-size:13px;color:var(--mut)}
-.shells li .st{font-size:13px;padding:1px 8px;border-radius:999px;margin-left:6px}
+.shells li .sub2{display:block;font-size:var(--f2);color:var(--mut)}
+.shells li .st{font-size:var(--f2);padding:1px 8px;border-radius:999px;margin-left:6px}
 .st.full{background:var(--acc);color:var(--onacc)}.st.part{background:#de5f3733;color:var(--ink)}.st.none{border:1px dashed var(--mut);color:var(--mut)}
-.shells li{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;border-bottom:1px solid var(--line);padding:6px 0;font-size:15px}
-.note{font-size:14px;color:var(--mut);margin:8px 0 0}
-.foot{max-width:1240px;margin:0 auto;padding:0 max(5vw,16px) 40px;color:var(--mut);font-size:14px}
+.shells li{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;border-bottom:1px solid var(--line);padding:6px 0;font-size:var(--f3)}
+.note{font-size:var(--f3);color:var(--mut);margin:8px 0 0}
+.foot{max-width:1240px;margin:0 auto;padding:0 max(5vw,16px) 40px;color:var(--mut);font-size:var(--f3)}
 .foot p{max-width:78ch;margin:0 0 8px}
-.ptband{max-width:1240px;margin:0 auto;padding:8px max(5vw,16px) 32px}
-.ptband>h2{font-size:clamp(24px,3vw,32px);line-height:1.1;margin:0 0 6px}
+.ptband{max-width:1240px;margin:0 auto;padding:0 max(4vw,12px) 32px}
+.ptband>h2{font-size:var(--f6);line-height:1.1;margin:0 0 6px}
 .ptlay{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;margin-top:12px}
 .elcard{max-width:760px}
 .scroll{overflow-x:auto;padding-bottom:4px}
 .ptgrid{display:grid;grid-template-columns:28px repeat(18,minmax(42px,1fr));grid-template-rows:auto repeat(8,auto) 16px repeat(2,auto);gap:4px;min-width:860px}
 .el{min-height:44px;aspect-ratio:1;padding:4px 5px;border-radius:7px;border:1px solid transparent;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;color:var(--ink);transition:opacity .15s}
-.el .zn{font-size:12px;font-weight:500;line-height:1;color:var(--mut)}
+.el .zn{font-size:var(--f1);font-weight:500;line-height:1;color:var(--mut)}
 .el .sy{font-size:clamp(15px,1.45vw,20px);font-weight:600;line-height:1;align-self:center;margin-bottom:auto;margin-top:auto}
-.gh{font-size:13px;color:var(--mut);text-align:center;align-self:end;padding-bottom:2px}
-.ph{font-size:13px;color:var(--mut);align-self:center;text-align:center}
-.fl{font-size:13px;color:var(--mut);align-self:center;grid-column:1/4;padding-left:2px}
+.gh{font-size:var(--f2);color:var(--mut);text-align:center;align-self:end;padding-bottom:2px}
+.ph{font-size:var(--f2);color:var(--mut);align-self:center;text-align:center}
+.fl{font-size:var(--f2);color:var(--mut);align-self:center;grid-column:1/4;padding-left:2px}
 .ptsum{grid-row:2/5;grid-column:5/14;align-self:stretch;margin:0 6px 6px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:10px 14px;display:flex;gap:14px;align-items:center;min-height:0}
 .ptsum .big{width:76px;height:76px;flex:none;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ptsum .big b{font-size:32px;line-height:1}.ptsum .big span{font-size:13px;color:var(--mut)}
-.ptsum .t{font-size:18px;font-weight:600;line-height:1.2}.ptsum .d{font-size:14px;color:var(--mut)}.ptsum .c{font-size:15px;margin-top:2px}
+.ptsum .big b{font-size:var(--f6);line-height:1}.ptsum .big span{font-size:var(--f2);color:var(--mut)}
+.ptsum .t{font-size:var(--f5);font-weight:600;line-height:1.2}.ptsum .d{font-size:var(--f3);color:var(--mut)}.ptsum .c{font-size:var(--f3);margin-top:2px}
 .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
-.tools input[type=search]{font:inherit;font-size:16px;min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:min(260px,100%)}
+.tools input[type=search]{font:inherit;font-size:var(--f4);min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:min(260px,100%)}
 .el.dim{opacity:.22}
-.swipe{display:none;font-size:13px;color:var(--mut);margin:6px 0 0}@media(max-width:900px){.swipe{display:block}}
+.swipe{display:none;font-size:var(--f2);color:var(--mut);margin:6px 0 0}@media(max-width:900px){.swipe{display:block}}
 .el:hover{border-color:var(--mut)}.el[aria-pressed=true]{outline:2px solid var(--ink);outline-offset:1px;background:inherit;color:var(--ink)}
 .bs{background:light-dark(#d6efe9,#143b36)}.bp{background:light-dark(#fbe0d4,#47271c)}.bd{background:light-dark(#dfe4f7,#242d47)}.bf{background:light-dark(#f5e8c9,#3e3117)}
 .el.ghost{background:transparent;border:1.5px dashed var(--mut);color:var(--mut)}
-.p8{grid-row:9;grid-column:4/15;align-self:center;font-size:13px;color:var(--mut);padding-left:8px}
-.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:14px;color:var(--mut);margin-top:10px}
+.p8{grid-row:9;grid-column:4/15;align-self:center;font-size:var(--f2);color:var(--mut);padding-left:8px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:var(--f3);color:var(--mut);margin-top:10px}
 .legend i{display:inline-block;width:14px;height:14px;border-radius:4px;margin-right:6px;vertical-align:-2px}
 .elcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
 .elcard .sym{font-size:44px;font-weight:600;line-height:1}
-.elcard .sub{color:var(--mut);font-size:14px;margin:4px 0 12px}
-.elcard .cfg{font-size:17px;margin:0 0 12px}
-.elcard .chips button{min-height:40px;font-size:15px}
-.elcard .chips button span{color:var(--mut);margin-left:4px;font-size:13px}
+.elcard .sub{color:var(--mut);font-size:var(--f3);margin:4px 0 12px}
+.elcard .cfg{font-size:var(--f4);margin:0 0 12px}
+.elcard .chips button{min-height:40px;font-size:var(--f3)}
+.elcard .chips button span{color:var(--mut);margin-left:4px;font-size:var(--f2)}
 .elcard .chips button[aria-pressed=true] span{color:inherit}
-select{font:inherit;font-size:16px;min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
-.scale{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut)}
+select{font:inherit;font-size:var(--f4);min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.scale{display:flex;align-items:center;gap:8px;font-size:var(--f2);color:var(--mut)}
 .legendbar{margin-top:10px;max-width:520px}
 .legendbar .lb{height:14px;border-radius:7px}
-.legendbar .lt{position:relative;height:20px;font-size:13px;color:var(--mut)}
+.legendbar .lt{position:relative;height:20px;font-size:var(--f2);color:var(--mut)}
 .legendbar .lt span{position:absolute;top:3px;transform:translateX(-50%);white-space:nowrap}
 .legendbar .lt span:first-child{transform:none}.legendbar .lt span:last-child{transform:translateX(-100%)}
-.legendbar .lc{font-size:13px;color:var(--mut);margin-top:2px}
+.legendbar .lc{font-size:var(--f2);color:var(--mut);margin-top:2px}
 .el .zn.val{font-variant-numeric:tabular-nums}
 .el.nodata{background:transparent!important;border:1px dashed var(--line);color:var(--mut)!important}
 .el.nodata .zn{color:var(--mut)!important}
 .trend{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
 .trhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-start}
-.trhead h3{margin:0;font-size:20px;font-weight:600}.trw{margin:4px 0 0;color:var(--mut);font-size:15px;max-width:70ch}
-.cmp{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--mut)}
+.trhead h3{margin:0;font-size:var(--f5);font-weight:600}.trw{margin:4px 0 0;color:var(--mut);font-size:var(--f3);max-width:70ch}
+.cmp{display:flex;flex-direction:column;gap:4px;font-size:var(--f3);color:var(--mut)}
 .tfig{position:relative;height:280px;margin:10px 0 6px}.tfig svg{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair}
 .why{border-top:1px solid var(--line);padding-top:10px}.why p{margin:4px 0 0;max-width:80ch}
-.props{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;font-size:15px;margin:6px 0 0}
+.props{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;font-size:var(--f3);margin:6px 0 0}
 .props span:nth-child(odd){color:var(--mut)}.props span:nth-child(even){text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .props .on{color:var(--acc)!important;font-weight:600}
 .cond{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;max-width:900px}
 .sl{display:grid;grid-template-columns:8.5em minmax(0,1fr) minmax(11em,auto);gap:12px;align-items:center;margin-top:10px}
 .sl input{accent-color:var(--acc);width:100%}.sl output{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 @media(max-width:600px){.sl{grid-template-columns:minmax(0,1fr) auto}.sl input{grid-column:1/-1;grid-row:2}}
-.phkey{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:15px}
+.phkey{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:var(--f3)}
 .phkey i{display:inline-block;width:14px;height:14px;border-radius:4px;margin-right:6px;vertical-align:-2px}
 .phkey .nd{border:1px dashed var(--mut)}
 .grav{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.grav summary{cursor:pointer;font-weight:600;min-height:32px}.grav p{max-width:78ch;margin:8px 0}
 .isochips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.isochips button{min-height:38px;font-size:14px;padding:0 10px}
+.isochips button{min-height:38px;font-size:var(--f3);padding:0 10px}
 .isochips button.use{border-color:var(--acc)}
-.isochips button .st2{color:var(--mut);font-size:12px;margin-left:4px}
+.isochips button .st2{color:var(--mut);font-size:var(--f1);margin-left:4px}
 .isochips button[aria-pressed=true] .st2{color:inherit}
 .isobox{margin-top:10px;background:var(--bg);border-radius:12px;padding:12px 14px}
-.isobox .in{font-size:22px;font-weight:600}.isobox .use2{margin:8px 0 0;max-width:70ch}
-.isobox dl{margin:8px 0 0;display:grid;grid-template-columns:8.5em minmax(0,1fr);gap:4px 10px;font-size:15px}.isobox dt{color:var(--mut)}.isobox dd{margin:0}
+.isobox .in{font-size:var(--f5);font-weight:600}.isobox .use2{margin:8px 0 0;max-width:70ch}
+.isobox dl{margin:8px 0 0;display:grid;grid-template-columns:8.5em minmax(0,1fr);gap:4px 10px;font-size:var(--f3)}.isobox dt{color:var(--mut)}.isobox dd{margin:0}
 .nucfig{position:relative;height:clamp(380px,62vw,620px);background:var(--card);border:1px solid var(--line);border-radius:14px;margin-top:8px;overflow:hidden}
 .nucfig canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair}
-.nucinfo{margin:10px 0 0;font-size:15px;min-height:1.6em}
-.nuclegend{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:12px;font-size:14px;color:var(--mut)}
+.nucinfo{margin:10px 0 0;font-size:var(--f3);min-height:1.6em}
+.nuclegend{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:12px;font-size:var(--f3);color:var(--mut)}
 .nuclegend .grad{width:220px;height:12px;border-radius:6px}
-.nuclegend .tk{display:flex;justify-content:space-between;width:220px;font-size:12px}
+.nuclegend .tk{display:flex;justify-content:space-between;width:220px;font-size:var(--f1)}
 .smgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:14px;max-width:1000px}
-.smgrid h3{grid-column:1/-1;margin:8px 0 0;font-size:15px;font-weight:600;color:var(--mut)}
+.smgrid h3{grid-column:1/-1;margin:8px 0 0;font-size:var(--f3);font-weight:600;color:var(--mut)}
 .pc{text-align:left;min-height:84px;padding:10px 12px;border-radius:12px;display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);background:var(--card)}
-.pc .sym2{font-size:22px;font-weight:600;line-height:1.1}.pc .pn{font-size:14px}.pc .pm{font-size:13px;color:var(--mut)}
+.pc .sym2{font-size:var(--f5);font-weight:600;line-height:1.1}.pc .pn{font-size:var(--f3)}.pc .pm{font-size:var(--f2);color:var(--mut)}
 .pc .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
 .massbar{display:flex;height:16px;border-radius:8px;overflow:hidden;margin:8px 0 4px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px;max-width:1000px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
-.stat b{display:block;font-size:26px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}.stat span{font-size:14px;color:var(--mut)}
-.simlab{position:absolute;left:12px;top:10px;right:120px;font-size:14px;line-height:1.35;color:var(--ink);pointer-events:none}.simlab b{font-size:17px;font-weight:600;display:block}.simlab span{color:var(--mut)}
+.stat b{display:block;font-size:var(--f6);font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}.stat span{font-size:var(--f3);color:var(--mut)}
+.simlab{position:absolute;left:12px;top:10px;right:120px;font-size:var(--f3);line-height:1.35;color:var(--ink);pointer-events:none}.simlab b{font-size:var(--f4);font-weight:600;display:block}.simlab span{color:var(--mut)}
 .trgrid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:16px;margin-top:12px}@media(max-width:860px){.trgrid{grid-template-columns:minmax(0,1fr)}}
-.trh{margin:0 0 6px;font-size:15px;font-weight:600}.trsel{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:8px}
+.trh{margin:0 0 6px;font-size:var(--f3);font-weight:600}.trsel{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:8px}
 .trsteps{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
 .trsteps li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:130px}
-.trsteps li b{display:block;font-size:17px}.trsteps li span{display:block;font-size:13px;color:var(--mut)}
-.trsteps li.arrow{background:transparent;border:0;min-width:0;padding:8px 2px;display:flex;flex-direction:column;justify-content:center;font-size:13px;color:var(--mut);max-width:170px}
-.trsteps li.arrow b{font-size:14px;color:var(--ink)}
+.trsteps li b{display:block;font-size:var(--f4)}.trsteps li span{display:block;font-size:var(--f2);color:var(--mut)}
+.trsteps li.arrow{background:transparent;border:0;min-width:0;padding:8px 2px;display:flex;flex-direction:column;justify-content:center;font-size:var(--f2);color:var(--mut);max-width:170px}
+.trsteps li.arrow b{font-size:var(--f3);color:var(--ink)}
 sup{font-size:max(11px,0.72em)}
+
+/* ---- one type scale: six steps ---- */
+:root{--f1:12px;--f2:13px;--f3:14px;--f4:16px;--f5:20px;--f6:28px;--top:52px}
+/* ---- sticky top bar: tabs, what is loaded, help, settings ---- */
+.topbar{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.tbin{display:flex;align-items:center;gap:10px;max-width:1240px;margin:0 auto;padding:7px max(4vw,12px);min-height:var(--top);box-sizing:border-box;position:relative}
+.brand{font-weight:600;font-size:var(--f4);white-space:nowrap}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none;border:0;background:none;color:var(--mut);font-size:var(--f3);font-weight:600;padding:0 11px;min-height:38px;border-radius:9px;white-space:nowrap;cursor:pointer}
+.tabs button:hover{background:color-mix(in srgb,var(--ink) 7%,transparent);color:var(--ink)}
+.tabs button[aria-pressed="true"]{background:var(--acc);color:var(--onacc)}
+.ctx{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;font-size:var(--f2);font-weight:600;padding:0 12px;min-height:34px;white-space:nowrap;cursor:pointer;max-width:30vw;overflow:hidden;text-overflow:ellipsis}
+.ctx:hover{border-color:var(--acc);color:var(--acc)}.ctx small{font-weight:400;color:var(--mut)}
+.icon{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:50%;width:34px;height:34px;min-height:34px;padding:0;font-size:var(--f3);cursor:pointer;flex:none}
+.icon:hover{border-color:var(--acc);color:var(--acc)}
+.setpanel{position:absolute;right:max(4vw,12px);top:calc(100% - 4px);width:min(420px,92vw);background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.16);padding:12px 14px;display:flex;flex-direction:column;gap:10px;z-index:3}
+.setpanel .tools{margin:0}
+@media(max-width:760px){.tbin{flex-wrap:wrap;padding-bottom:0}.tabs{order:3;flex-basis:100%;width:100%;margin:0 calc(max(4vw,12px) * -1);padding:0 max(4vw,12px) 4px;box-sizing:content-box}.ctx{max-width:none;flex:1;text-align:left}.brand{font-size:var(--f3)}}
+@media(max-width:420px){.brand{display:none}}
+/* ---- missions strip ---- */
+.msbar{border-top:1px solid var(--line);background:color-mix(in srgb,var(--acc) 7%,transparent)}
+.msopen{display:flex;align-items:center;gap:10px;width:100%;max-width:1240px;margin:0 auto;padding:7px max(4vw,12px);background:none;border:0;color:var(--ink);font-size:var(--f3);text-align:left;cursor:pointer;min-height:38px;box-sizing:border-box}
+.msopen::after{content:"\25be";margin-left:auto;color:var(--mut)}.msopen[aria-expanded="true"]::after{content:"\25b4"}
+.msprog{color:var(--mut);font-size:var(--f2);white-space:nowrap}
+.msbody{max-width:1240px;margin:0 auto;padding:0 max(4vw,12px) 12px}
+button.small{min-height:34px;font-size:var(--f2)}
+/* ---- tab panels ---- */
+.tabpanel{padding-top:18px}
+.ptband>h2{margin-bottom:4px}
+.ptband>.lede{font-size:var(--f3);max-width:88ch;margin-bottom:10px}
+@media(max-width:860px){.fig{height:clamp(300px,52vh,520px)}}
+.helpdlg{width:min(1100px,94vw);max-height:86vh;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);padding:18px 20px 22px}
+.helpdlg::backdrop{background:rgba(0,0,0,.45)}
+.hdhead{display:flex;align-items:center;gap:12px;margin-bottom:6px}.hdhead h2{font-size:var(--f6);margin:0;flex:1}
+/* ---- primary actions stand out ---- */
+button.go{background:var(--acc);color:var(--onacc);border-color:var(--acc);font-weight:600}
+button.go:hover{filter:brightness(1.08)}
 [hidden]{display:none!important}
 .learn [data-mode="vol"],.learn [data-mode="gpu"],.learn [data-mode="qmc"],.learn #gfxRow,.learn [data-stc="exp"],.learn [data-stc="pred"],.learn #shCsv,.learn #shIso,.learn #radBox{display:none!important}
 .missions{max-width:1240px;margin:0 auto;padding:0 max(5vw,16px) 18px}
 .mhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .mscard{margin-top:10px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px 16px}
-.mscard h3{margin:0 0 4px;font-size:19px}.mscard p{margin:6px 0;max-width:70ch}.mscard .done{color:var(--acc);font-weight:600}
+.mscard h3{margin:0 0 4px;font-size:var(--f5)}.mscard p{margin:6px 0;max-width:70ch}.mscard .done{color:var(--acc);font-weight:600}
 .mscard ol{margin:6px 0 8px;padding-left:22px;line-height:1.5}
-.mslist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.mslist button{min-height:36px;padding:0 10px;font-size:14px}.mslist button.ok{border-color:var(--acc);color:var(--acc)}
-.tb{display:inline-block;font-size:11.5px;font-weight:600;line-height:1;padding:3px 7px;border-radius:999px;border:1px solid currentColor;vertical-align:1px;white-space:nowrap;margin-right:4px}
+.mslist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.mslist button{min-height:36px;padding:0 10px;font-size:var(--f3)}.mslist button.ok{border-color:var(--acc);color:var(--acc)}
+.tb{display:inline-block;font-size:var(--f1);font-weight:600;line-height:1;padding:3px 7px;border-radius:999px;border:1px solid currentColor;vertical-align:1px;white-space:nowrap;margin-right:4px}
 .tb-m{color:light-dark(#0b6f68,#4cc4ba)}.tb-x{color:light-dark(#2a5fb0,#7fb0f0)}.tb-c{color:light-dark(#8a5a00,#e0b050)}.tb-g{color:light-dark(#a9401f,#f0997b);border-style:dashed}
-.tbrow{font-size:13.5px;color:var(--mut);margin:4px 0 8px;line-height:1.45}
+.tbrow{font-size:var(--f2);color:var(--mut);margin:4px 0 8px;line-height:1.45}
 .specfig{position:relative;height:120px;background:#000;border-radius:12px;overflow:hidden;margin-top:10px}.specfig canvas{position:absolute;inset:0;width:100%;height:100%}
-.spectab{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}.spectab th,.spectab td{text-align:left;padding:4px 10px 4px 0;border-bottom:1px solid var(--line)}.spectab i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.spectab{width:100%;border-collapse:collapse;font-size:var(--f3);margin-top:8px}.spectab th,.spectab td{text-align:left;padding:4px 10px 4px 0;border-bottom:1px solid var(--line)}.spectab i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 .smsim{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
 .smgridsim{display:grid;grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:18px;align-items:start}@media(max-width:860px){.smgridsim{grid-template-columns:minmax(0,1fr)}}
 .smcvwrap{position:relative;aspect-ratio:1;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}.smcvwrap canvas{position:absolute;inset:0;width:100%;height:100%}
-.nuczb{position:absolute;right:8px;bottom:44px;display:flex;flex-direction:column;gap:6px}.nuczb button{width:40px;height:40px;border-radius:10px;font-size:20px;line-height:1;padding:0}
-.nuctip{position:absolute;max-width:min(320px,80%);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13.5px;line-height:1.4;box-shadow:0 4px 14px rgba(0,0,0,0.12);pointer-events:none;z-index:2}.nuctip small{color:var(--mut);font-size:12px}
-@media(max-width:600px){.nuczb{right:6px;bottom:40px;gap:4px}.nuczb button{width:36px;height:36px;font-size:18px}}
+.nuczb{position:absolute;right:8px;bottom:44px;display:flex;flex-direction:column;gap:6px}.nuczb button{width:40px;height:40px;border-radius:10px;font-size:var(--f5);line-height:1;padding:0}
+.nuctip{position:absolute;max-width:min(320px,80%);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:var(--f2);line-height:1.4;box-shadow:0 4px 14px rgba(0,0,0,0.12);pointer-events:none;z-index:2}.nuctip small{color:var(--mut);font-size:var(--f1)}
+@media(max-width:600px){.nuczb{right:6px;bottom:40px;gap:4px}.nuczb button{width:36px;height:36px;font-size:var(--f5)}}
 .manual{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:0 16px}
-.manual>summary{cursor:pointer;font-weight:600;font-size:16px;min-height:44px;display:flex;align-items:center}
+.manual>summary{cursor:pointer;font-weight:600;font-size:var(--f4);min-height:44px;display:flex;align-items:center}
 .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px 22px;padding:0 0 14px}
-.mcard h3{margin:4px 0 6px;font-size:15px}.mcard ol,.mcard ul{margin:0;padding-left:20px;font-size:14px;line-height:1.45}.mcard li{margin-bottom:4px}
-.mcard dl{margin:0;font-size:14px;line-height:1.4}.mcard dt{font-weight:600;margin-top:6px}.mcard dd{margin:0;color:var(--mut)}
+.mcard h3{margin:4px 0 6px;font-size:var(--f3)}.mcard ol,.mcard ul{margin:0;padding-left:20px;font-size:var(--f3);line-height:1.45}.mcard li{margin-bottom:4px}
+.mcard dl{margin:0;font-size:var(--f3);line-height:1.4}.mcard dt{font-weight:600;margin-top:6px}.mcard dd{margin:0;color:var(--mut)}
 .mcard a{color:inherit;text-decoration-color:var(--mut);text-underline-offset:2px}
-.ctxlost{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center;background:color-mix(in srgb,var(--card) 92%,transparent);font-size:15px}
-@media(max-width:600px){.fig{height:clamp(300px,52vh,520px)}.simlab{right:12px;font-size:12.5px}.simlab b{font-size:15px}.simlab span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.fig .hint{display:none}}
+.ctxlost{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center;background:color-mix(in srgb,var(--card) 92%,transparent);font-size:var(--f3)}
+@media(max-width:600px){.fig{height:clamp(300px,52vh,520px)}.simlab{right:12px;font-size:var(--f1)}.simlab b{font-size:var(--f3)}.simlab span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.fig .hint{display:none}}
 #probeInk{color:var(--ink)}#probeMut{color:var(--mut)}#probeAcc{color:var(--acc)}
 </style>
 </head>
 <body>
-<header class="band">
-  <h1>Orbitals inside your compass frame</h1>
-  <p class="lede">Hydrogen orbitals from the real equations, set by the quantum numbers n, l and m. They sit inside your 32 rays at 11.25°, the square and the r = 4 and r = 5.7 circles. Drag to turn, scroll or pinch to zoom. The top view is your notebook page.</p>
-  <details class="manual" id="manual" open>
-    <summary>How to use this page</summary>
-    <div class="mgrid">
+<div class="topbar">
+  <div class="tbin">
+    <span class="brand">Atomic Modeling</span>
+    <nav class="tabs" id="tabs" aria-label="Sections">
+      <button data-tab="atom" aria-pressed="true">Atom</button><button data-tab="pt" aria-pressed="false">Table</button><button data-tab="spec" aria-pressed="false">Light</button><button data-tab="nuc" aria-pressed="false">Nuclei</button><button data-tab="trans" aria-pressed="false">Transmute</button><button data-tab="sm" aria-pressed="false">Particles</button>
+    </nav>
+    <button class="ctx" id="ctxChip" title="What is loaded right now. Tap to open it in the Atom view."></button>
+    <button class="icon" id="helpBtn" aria-label="How to use this page" title="How to use this page">?</button>
+    <button class="icon" id="setBtn" aria-label="Settings" title="Units, level, hardware, share" aria-expanded="false">⚙</button>
+    <div class="setpanel" id="setPanel" hidden>
+  <div class="tools" ><span style="font-weight:600">Level</span><span class="chips" id="lvlChips"><button data-lvl="learn" aria-pressed="true">Learn</button><button data-lvl="lab" aria-pressed="false">Lab</button></span><span class="note" id="lvlNote" style="margin:0"></span></div>
+  <div class="tools" ><span style="font-weight:600">Energy units</span><span class="chips" id="eUnits"><button data-eu="eV" aria-pressed="true">electronvolts</button><button data-eu="J" aria-pressed="false">joules</button><button data-eu="cal" aria-pressed="false">calories</button><button data-eu="kJmol" aria-pressed="false">kJ per mole</button><button data-eu="kcalmol" aria-pressed="false">kcal per mole</button></span></div>
+  <div class="tools"  id="gfxRow"><span style="font-weight:600">Hardware</span><span class="chips" id="gfxChips"><button data-gfx="auto" aria-pressed="true">Auto</button><button data-gfx="light" aria-pressed="false">Light (any device)</button><button data-gfx="full" aria-pressed="false">Full (strong graphics card)</button></span><span class="note" id="gfxNote" style="margin:0"></span></div>
+  <div class="tools" ><span style="font-weight:600">Share and export</span><span class="chips"><button id="shLink">Copy link to this view</button><button id="shPng">Save picture</button><button id="shCsv">Elements (CSV)</button><button id="shIso">Isotopes (CSV)</button></span><span class="note" id="shNote" style="margin:0" aria-live="polite"></span></div>
+    </div>
+  </div>
+  <div class="msbar" id="msBar">
+    <button class="msopen" id="msOpen" aria-expanded="false"><span id="msLine">Missions</span><span class="msprog" id="msProg"></span></button>
+    <div class="msbody" id="msBody" hidden>
+      <div class="mscard" id="msCard" aria-live="polite"></div>
+      <div class="mslist" id="msList"></div>
+      <button id="msReset" class="small">Start over</button>
+    </div>
+  </div>
+</div>
+<dialog id="helpDlg" class="helpdlg">
+  <form method="dialog" class="hdhead"><h2>How to use this page</h2><button class="icon" aria-label="Close">✕</button></form>
+  <p class="lede" style="margin:0 0 12px">Hydrogen orbitals from the real equations, set by the quantum numbers n, l and m. They sit inside your 32 rays at 11.25°, the square and the r = 4 and r = 5.7 circles. Drag to turn, scroll or pinch to zoom. The top view is your notebook page.</p>
+  <div class="mgrid">
       <div class="mcard"><h3>Quick start</h3><ol>
-        <li><b>Pick an element</b> in the <a href="#pt">periodic table</a>. The 3D view, its label and the readout switch to it.</li>
-        <li><b>Choose a view</b> under <i>Show</i>, next to the 3D view.</li>
+        <li><b>Pick an element</b> in the <a href="#pt">Table</a> tab. Every tab follows it, and the chip at the top right always shows what is loaded.</li>
+        <li><b>Choose a view</b> under <i>Show</i>, next to the 3D view in the <a href="#atom">Atom</a> tab.</li>
         <li><b>Set the orbital</b> with n, l and m, or swap the electron for a muon or another particle.</li>
         <li><b>Drag</b> to rotate, <b>pinch or scroll</b> to zoom. <i>Top</i> matches your notebook page.</li>
       </ol></div>
@@ -212,35 +273,28 @@ sup{font-size:max(11px,0.72em)}
         <dt>Monte Carlo electrons</dt><dd>The most accurate mode: all electrons of He, Li or Be at once. Press Run and let the error bar shrink.</dd>
         <dt>Inside a nucleon</dt><dd>Quarks and gluons in a proton or neutron.</dd>
       </dl></div>
-      <div class="mcard"><h3>Further down</h3><dl>
-        <dt><a href="#pt">Periodic table</a></dt><dd>Colour by any property, see trends, and change temperature, pressure and gravity.</dd>
-        <dt><a href="#spec">Spectrum</a></dt><dd>The colours an element gives off: measured lines, and exact lines for one-electron ions.</dd>
-        <dt><a href="#nuc">Chart of nuclides</a></dt><dd>Every known isotope, research elements and predicted new ones.</dd>
-        <dt><a href="#stab">Stable isotopes</a></dt><dd>The 253 that never decay, plus a tunable experiment that predicts stability.</dd>
-        <dt><a href="#trans">Transmutation lab</a></dt><dd>Cheapest nuclear routes between isotopes (lead → gold, americium → moscovium), on an absolute or Gold = 1 scale.</dd>
-        <dt><a href="#sm">Fundamental particles</a></dt><dd>Quarks, leptons and bosons, a detector simulation that fires any of them, and the quantum mechanics behind the page.</dd>
+      <div class="mcard"><h3>The other tabs</h3><dl>
+        <dt><a href="#pt">Table</a></dt><dd>Colour by any property, see trends, and change temperature, pressure and gravity.</dd>
+        <dt><a href="#spec">Light</a></dt><dd>The colours an element gives off: measured lines, and exact lines for one-electron ions.</dd>
+        <dt><a href="#nuc">Nuclei</a></dt><dd>Every known isotope, research elements and predicted new ones, plus the 253 that never decay and a tunable experiment that predicts stability.</dd>
+        <dt><a href="#trans">Transmute</a></dt><dd>Cheapest nuclear routes between isotopes (lead → gold, americium → moscovium), on an absolute or Gold = 1 scale.</dd>
+        <dt><a href="#sm">Particles</a></dt><dd>Quarks, leptons and bosons, a detector simulation that fires any of them, and the quantum mechanics behind the page.</dd>
       </dl></div>
       <div class="mcard"><h3>Good to know</h3><ul>
-        <li><b>Energy units</b> (below) change every energy on the page.</li>
+        <li><b>The ⚙ button</b> (top right) holds energy units, Learn or Lab, hardware and sharing.</li>
         <li><b>Every number has a label:</b> <span class="tb tb-m">Measured</span> from experiment, <span class="tb tb-x">Exact</span> solved from the equations, <span class="tb tb-c">Computed</span> calculated with a known error, <span class="tb tb-g">Rough guess</span> a simple model.</li>
-        <li><b>Learn or Lab:</b> Learn shows the essentials and guided missions; Lab adds the solvers, Monte Carlo and downloads.</li>
-        <li><b>Share and export</b> (below the hardware switch): copy a link to the exact view, save a picture, or download the data.</li>
-        <li><b>Heavy modes</b> (GPU grids, Monte Carlo) run on your graphics card. 256³ needs a desktop GPU. The <b>Hardware</b> switch below picks Light or Full for you, and the solver falls back to the main processor on devices without a suitable graphics card.</li>
-        <li><b>Simulations pause</b> when you scroll away from them and pick up again when you come back.</li>
+        <li><b>Learn or Lab</b> (under ⚙): Learn shows the essentials and guided missions; Lab adds the solvers, Monte Carlo and downloads.</li>
+        <li><b>Share and export</b> (under ⚙): copy a link to the exact view — it remembers the tab, element, isotope and orbital — save a picture, or download the data.</li>
+        <li><b>Heavy modes</b> (GPU grids, Monte Carlo) run on your graphics card. 256³ needs a desktop GPU. The <b>Hardware</b> switch under ⚙ picks Light or Full for you, and the solver falls back to the main processor on devices without a suitable graphics card.</li>
+        <li><b>Simulations pause</b> when you leave their tab and pick up again when you return.</li>
         <li><b>Pause</b> a long run any time; results so far stay on screen.</li>
       </ul></div>
     </div>
-  </details>
-  <div class="tools" style="margin-top:12px"><span style="font-weight:600">Level</span><span class="chips" id="lvlChips"><button data-lvl="learn" aria-pressed="true">Learn</button><button data-lvl="lab" aria-pressed="false">Lab</button></span><span class="note" id="lvlNote" style="margin:0"></span></div>
-  <div class="tools" style="margin-top:8px"><span style="font-weight:600">Energy units</span><span class="chips" id="eUnits"><button data-eu="eV" aria-pressed="true">electronvolts</button><button data-eu="J" aria-pressed="false">joules</button><button data-eu="cal" aria-pressed="false">calories</button><button data-eu="kJmol" aria-pressed="false">kJ per mole</button><button data-eu="kcalmol" aria-pressed="false">kcal per mole</button></span></div>
-  <div class="tools" style="margin-top:8px" id="gfxRow"><span style="font-weight:600">Hardware</span><span class="chips" id="gfxChips"><button data-gfx="auto" aria-pressed="true">Auto</button><button data-gfx="light" aria-pressed="false">Light (any device)</button><button data-gfx="full" aria-pressed="false">Full (strong graphics card)</button></span><span class="note" id="gfxNote" style="margin:0"></span></div>
-  <div class="tools" style="margin-top:8px"><span style="font-weight:600">Share and export</span><span class="chips"><button id="shLink">Copy link to this view</button><button id="shPng">Save picture</button><button id="shCsv">Elements (CSV)</button><button id="shIso">Isotopes (CSV)</button></span><span class="note" id="shNote" style="margin:0" aria-live="polite"></span></div>
-</header>
-<section class="missions" id="missions" aria-label="Missions">
-  <div class="mhead"><h2 style="margin:0">Missions</h2><span id="msProg" class="note" style="margin:0"></span><button id="msReset" style="margin-left:auto;min-height:36px">Start over</button></div>
-  <div class="mscard" id="msCard" aria-live="polite"></div>
-  <div class="mslist" id="msList"></div>
-</section>
+  
+</dialog>
+<main>
+<div class="tabpanel" data-panel="atom">
+
 <div class="wrap">
   <div class="stagecol">
     <div class="fig" id="fig">
@@ -301,7 +355,7 @@ sup{font-size:max(11px,0.72em)}
       <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><span>Atom</span><span class="chips"><button data-qz="2" aria-pressed="false">Helium</button><button data-qz="3" aria-pressed="true">Lithium</button><button data-qz="4" aria-pressed="false">Beryllium</button></span></div>
       <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><span>Method</span><span class="chips"><button data-qm="mf" aria-pressed="false">No dodging</button><button data-qm="vmc" aria-pressed="false">Dodging (VMC)</button><button data-qm="dmc" aria-pressed="true">Full Monte Carlo (DMC)</button></span></div>
       <label class="chk" style="min-height:36px"><input type="checkbox" id="qIon" checked>Also simulate the ion, to get the ionization energy</label>
-      <div class="chips" style="margin-top:10px"><button id="qGo">Run</button><button id="qStop">Pause</button><button id="qReset">Start over</button></div>
+      <div class="chips" style="margin-top:10px"><button id="qGo" class="go">Run</button><button id="qStop">Pause</button><button id="qReset">Start over</button></div>
       <p class="note" id="qStat" style="margin:8px 0 0">Press Run.</p>
       <div class="read" id="qRes" style="margin-top:10px"></div>
       <p class="note" id="qWhat"></p>
@@ -316,7 +370,7 @@ sup{font-size:max(11px,0.72em)}
       <div class="sl" id="gKRow" style="grid-template-columns:7em minmax(0,1fr)"><label for="gK">States to find</label><select id="gK"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
       <label class="chk" style="min-height:36px" id="gLatRow" hidden><input type="checkbox" id="gLat" checked>Self-repulsion fix (Latter tail): an electron no longer repels its own charge</label><label class="chk" style="min-height:36px"><input type="checkbox" id="gMom" checked>Momentum acceleration (the “heavy-ball” trick from training neural networks)</label>
       <label class="chk" style="min-height:36px"><input type="checkbox" id="gWarm" checked>Warm start from the last solution when you change a setting</label><label class="chk" style="min-height:36px"><input type="checkbox" id="gOnGpu" checked>Keep the whole solve on the GPU: the potential is cached there, the picture is drawn straight from GPU memory, the workload is paced to a steady level, and each finished state is copied back without stalling</label><label class="chk" style="min-height:36px"><input type="checkbox" id="gUp" checked>Upscale (the FSR trick): on the 128³ grid, solve on 64³ first and enlarge that answer as the starting guess</label>
-      <div class="chips" style="margin-top:10px"><button id="gGo">Solve</button><button id="gStop">Stop</button></div>
+      <div class="chips" style="margin-top:10px"><button id="gGo" class="go">Solve</button><button id="gStop">Stop</button></div>
       <div id="gTdBox" style="margin-top:12px"><h3 class="trh">Evolve in real time</h3><p class="note" style="margin:0 0 6px">Solves the time-dependent Schrödinger equation on the GPU and draws straight from graphics memory.</p>
         <div class="sl"><label for="gKp">Packet speed</label><input type="range" id="gKp" min="0" max="3" step="0.1" value="1"><output id="gKpo">1</output></div>
         <div class="chips"><button id="gTdPk">Fire a wave packet</button><button id="gTdSup" hidden>Mix states 1 and 2</button></div></div>
@@ -362,6 +416,8 @@ sup{font-size:max(11px,0.72em)}
     </div>
   </aside>
 </div>
+</div>
+<div class="tabpanel" data-panel="pt" hidden>
 <section class="ptband" id="pt">
   <h2>Periodic table</h2>
   <p class="lede">Hover over an element to preview it, or tap it to load its highest-energy orbital into the 3D view. The full breakdown appears under the table, where you can load any of its subshells. Colours show the block (the type of subshell the element fills last) until you pick a property to colour and chart by.</p>
@@ -401,13 +457,15 @@ sup{font-size:max(11px,0.72em)}
     <div class="trend" id="trend" hidden>
       <div class="trhead"><div><h3 id="trName"></h3><p id="trWhat" class="trw"></p></div>
         <div class="cmp"><label for="cmp">Compare with</label><select id="cmp"><option value="">Nothing</option><option value="zeff">Effective nuclear charge</option><option value="shell">Outer shell size</option><option value="cov">Atomic size</option><option value="ie">Ionization energy</option><option value="iepy">Ionization energy (computed, DFT)</option><option value="iem">Ionization energy (model)</option><option value="en">Electronegativity</option></select></div></div>
-      <p class="trw" id="trAxis" style="font-size:13px"></p>
+      <p class="trw" id="trAxis" style="font-size:var(--f2)"></p>
       <div class="tfig"><svg id="trSvg" role="img" aria-label="Property plotted against atomic number"></svg></div>
       <div class="why"><b>Why it happens</b><p id="trWhy"></p><p id="trCorr" class="trw"></p></div>
     </div>
     <div class="elcard" id="elc"><p style="margin:0;color:var(--mut)">Pick an element to see its electron configuration.</p></div>
   </div>
 </section>
+</div>
+<div class="tabpanel" data-panel="spec" hidden>
 <section class="ptband" id="spec">
   <h2>Spectrum: the light an element gives off</h2>
   <p class="lede">Heat an element or run electricity through its gas and it glows in its own exact colours, like a fingerprint. Each line is light from an electron dropping between two energy levels. Pick an element in the periodic table to see its lines.</p>
@@ -415,6 +473,8 @@ sup{font-size:max(11px,0.72em)}
   <div class="specfig"><canvas id="specCv" aria-label="Emission spectrum from violet at 380 nanometres to red at 780 nanometres"></canvas></div>
   <div class="read" id="specOut" style="margin-top:10px;max-width:900px" aria-live="polite"></div>
 </section>
+</div>
+<div class="tabpanel" data-panel="nuc" hidden>
 <section class="ptband" id="nuc">
   <h2>Chart of nuclides</h2>
   <p class="lede"><span class="tb tb-m">Measured</span>Every known isotope (half-lives from NUBASE2020), plotted by its neutrons (across) and protons (up). Black squares are stable, and the colour shows how long the rest last. Outlined squares are predicted isotopes nobody has made yet, and the shaded oval is the predicted island of stability near 184 neutrons. Stable nuclei hug a curved “valley of stability” that bends away from the dashed N = Z line, because heavy nuclei need extra neutrons to hold their protons together. The thin lines mark the magic numbers (2, 8, 20, 28, 50, 82, 126), where nuclei are extra stable. Hover to inspect, and tap to select.</p>
@@ -432,7 +492,7 @@ sup{font-size:max(11px,0.72em)}
     <label class="chk" style="min-height:44px"><input type="checkbox" id="stPrim">Include 35 long-lived natural radioactive isotopes</label></div>
   <div class="nuclegend" id="stLegend"></div>
   <div class="cond" id="expPanel" hidden>
-    <h3 style="margin:0 0 4px;font-size:18px">Stability experiment</h3>
+    <h3 style="margin:0 0 4px;font-size:var(--f5)">Stability experiment</h3>
     <p class="tbrow"><span class="tb tb-g">Rough guess</span>A tunable model, scored against the measured list of stable isotopes so you can see what it gets wrong.</p>
     <p class="note" style="margin:0 0 6px">A liquid-drop mass model with magic-number shell bonuses, fitted to 2,359 measured masses (average error 2.35 MeV). An isotope counts as stable when it can’t beta-decay, its predicted alpha half-life beats your threshold, and it’s below your fission limit. Change the knobs and watch the score.</p>
     <div class="sl"><label for="xSh">Shell effect</label><input type="range" id="xSh" min="0" max="3" step="0.05" value="1"><output id="oSh"></output></div>
@@ -447,6 +507,8 @@ sup{font-size:max(11px,0.72em)}
   <p class="nucinfo" id="stInfo">Hover over the map to see an isotope.</p>
   <div class="scroll"><div class="nucfig" id="stFig" style="height:clamp(720px,90vh,980px);min-width:640px"><canvas id="stCv" aria-label="Map of stable isotopes: extra neutrons across, protons up"></canvas></div></div>
 </section>
+</div>
+<div class="tabpanel" data-panel="trans" hidden>
 <section class="ptband" id="trans">
   <h2>Transmutation lab</h2>
   <p class="lede">The alchemists’ dream, done with nuclear physics. Pick a starting isotope and a target, choose which nuclear steps are allowed, and the lab finds a route through real, known isotopes. Each step’s energy comes from measured masses: positive means the step releases energy, negative means you must supply it (with a neutron beam, a particle accelerator or a gamma ray).</p>
@@ -463,13 +525,15 @@ sup{font-size:max(11px,0.72em)}
   <ol class="trsteps" id="trSteps"></ol>
   <p class="tbrow" id="trTrust"></p><p class="note" id="trNote"></p>
 </section>
+</div>
+<div class="tabpanel" data-panel="sm" hidden>
 <section class="ptband" id="sm">
   <h2>Fundamental particles</h2>
   <p class="lede">Everything on this page is built from a few of these 17 particles. Atoms use only three of them directly: up quarks, down quarks and electrons, held together by gluons and photons. Tap a particle to see what it does.</p>
   <div class="smgrid" id="smGrid"></div>
   <div class="read" id="smRead" style="margin-top:14px;max-width:820px"></div>
   <div class="smsim" id="smSim">
-    <h3 style="margin:0 0 4px;font-size:18px">Particle detector simulation</h3>
+    <h3 style="margin:0 0 4px;font-size:var(--f5)">Particle detector simulation</h3>
     <p class="tbrow"><span class="tb tb-m">Measured</span>masses, lifetimes and decay odds. <span class="tb tb-x">Exact</span>bending in the magnet and relativity. <span class="tb tb-g">Rough guess</span>the detector is a cartoon and jets are simplified.</p>
     <p class="note" style="margin:0 0 8px;max-width:820px">Fire the selected particle from the centre of a detector like the ones at CERN. A magnet bends charged particles (positive one way, negative the other; slower ones curl tighter). Each layer stops different particles, which is how physicists tell them apart. Pick a particle above, then change its momentum and the magnet.</p>
     <div class="smgridsim">
@@ -479,8 +543,8 @@ sup{font-size:max(11px,0.72em)}
         <div class="sl"><label for="smB">Magnet</label><input type="range" id="smB" min="0" max="4" step="0.1" value="2"><output id="smBo"></output></div>
         <label class="chk" style="min-height:36px"><input type="checkbox" id="smAnti">Fire the antiparticle (opposite charge)</label>
         <label class="chk" style="min-height:36px"><input type="checkbox" id="smInv" checked>Draw invisible particles (neutrinos) as faint dots</label>
-        <div class="chips" style="margin-top:8px"><button id="smFire">Fire again</button></div>
-        <div class="phkey" id="smKey" style="font-size:14px"></div>
+        <div class="chips" style="margin-top:8px"><button id="smFire" class="go">Fire again</button></div>
+        <div class="phkey" id="smKey" style="font-size:var(--f3)"></div>
         <div class="read" id="smOut" style="margin-top:10px" aria-live="polite"></div>
       </div>
     </div>
@@ -494,6 +558,8 @@ sup{font-size:max(11px,0.72em)}
     <p><b>Where this simple picture stops.</b> In heavy atoms, inner electrons move at a large fraction of light speed, so relativity (the Dirac equation) shifts their energies; it is why gold is yellow and mercury is liquid. Quantum electrodynamics adds tiny corrections such as the Lamb shift. These are not included here.</p>
   </details>
 </section>
+</div>
+</main>
 <div class="foot">
   <p>The math is the exact hydrogen solution, ψ = R<sub>nl</sub>(r) · Y<sub>lm</sub>(θ, φ), using real spherical harmonics and Laguerre polynomials. Each dot is one simulated position measurement. Teal and coral mark the wave's sign, not charge. The cloud is scaled so 99.5% of the probability fits inside your r = 5.7 circle, and the panel shows what your r = 4 corresponds to in Bohr radii (a₀ ≈ 0.053 nm).</p>
   <p>Rendering runs on the GPU: orbital shapes, dot clouds and the volume view are computed per vertex, per point and per pixel in shaders, and the nucleus jiggle runs in a vertex shader. Changing n, l or m only updates a few numbers sent to the graphics card.</p>
@@ -512,7 +578,6 @@ function dl(name,text,type){try{const a=document.createElement('a');a.href=URL.c
 /* ---- mobile / low-power profile ---- */
 let GFX='auto';try{GFX=localStorage.getItem('gfx')||'auto';}catch(e){}
 const MOB=GFX==='light'?true:GFX==='full'?false:(()=>{try{const coarse=matchMedia('(pointer:coarse)').matches,small=Math.min(screen.width,screen.height)<900,lowMem=(navigator.deviceMemory||8)<=4,save=!!(navigator.connection&&navigator.connection.saveData);return (coarse&&small)||lowMem||save||/[?&]mobile=1/.test(location.search);}catch(e){return false;}})();
-{const mn=document.getElementById('manual');if(mn){let st=null;try{st=localStorage.getItem('manualOpen');}catch(e){}mn.open=st!=null?st==='1':!matchMedia('(max-width:700px)').matches;mn.addEventListener('toggle',()=>{try{localStorage.setItem('manualOpen',mn.open?'1':'0');}catch(e){}});}}
 if(MOB){document.documentElement.classList.add('mob');const p=document.getElementById('pts');if(p){p.value=15000;document.getElementById('ptsV').textContent=(15000).toLocaleString();}}
 const LET='spdfgh';
 let EU='eV';try{EU=localStorage.getItem('eunit')||'eV';}catch(e){}
@@ -791,8 +856,8 @@ let selIso=null,showAllIso=false;
 function isoList(Z){const all=ISOZ[Z]||[];if(showAllIso)return all;const keep=all.filter(r=>r[2]!=null||USE[Z+'-'+r[1]]);if(keep.length)return keep;return all.slice().sort((a,b)=>(b[3]??99)-(a[3]??99)).slice(0,3).sort((a,b)=>a[1]-b[1]);}
 function isoInit(Z){selIso=null;const all=ISOZ[Z]||[];let pick=null;if(all.length){const ab=all.filter(r=>r[2]!=null).sort((a,b)=>b[2]-a[2]);pick=ab[0]||all.slice().sort((a,b)=>(b[3]??99)-(a[3]??99))[0];}
  selIso=pick?{z:Z,a:pick[1]}:null;renderIso();}
-function predBox(p){const k=p[0]+'-'+p[1];return '<div class="in">'+NAMEZ(p[0])+'-'+p[1]+' <span style="font-size:14px;color:var(--mut);font-weight:400">predicted, not yet observed</span></div><dl><dt>Nucleus</dt><dd>'+p[0]+' protons + '+(p[1]-p[0])+' neutrons</dd><dt>Predicted half-life</dt><dd>about '+fmtHL(p[2])+', by alpha decay</dd><dt>Decay energy</dt><dd>about '+p[3].toFixed(1)+' MeV'+(p[0]>118?', extrapolated from elements 112–118':', from estimated masses')+'</dd>'+(TARGET[k]?'<dt>Search</dt><dd>'+TARGET[k]+'</dd>':'')+'</dl><p class="use2">Estimated with the Viola–Seaborg formula, which links an alpha emitter’s half-life to its decay energy. Tested on 83 measured superheavy isotopes, it shows almost no bias and is typically within a factor of about 6. Some of these nuclei may split apart (fission) instead, which this model ignores.</p>';}
-function renderIso(){try{drawSpec();}catch(e){}const box=$('#isoSec');if(!box||!sel)return;const all=ISOZ[sel]||[],pl=PRED.filter(p=>p[0]===sel);
+function predBox(p){const k=p[0]+'-'+p[1];return '<div class="in">'+NAMEZ(p[0])+'-'+p[1]+' <span style="font-size:var(--f3);color:var(--mut);font-weight:400">predicted, not yet observed</span></div><dl><dt>Nucleus</dt><dd>'+p[0]+' protons + '+(p[1]-p[0])+' neutrons</dd><dt>Predicted half-life</dt><dd>about '+fmtHL(p[2])+', by alpha decay</dd><dt>Decay energy</dt><dd>about '+p[3].toFixed(1)+' MeV'+(p[0]>118?', extrapolated from elements 112–118':', from estimated masses')+'</dd>'+(TARGET[k]?'<dt>Search</dt><dd>'+TARGET[k]+'</dd>':'')+'</dl><p class="use2">Estimated with the Viola–Seaborg formula, which links an alpha emitter’s half-life to its decay energy. Tested on 83 measured superheavy isotopes, it shows almost no bias and is typically within a factor of about 6. Some of these nuclei may split apart (fission) instead, which this model ignores.</p>';}
+function renderIso(){try{if(TAB==='spec')drawSpec();ctxUpdate();}catch(e){}const box=$('#isoSec');if(!box||!sel)return;const all=ISOZ[sel]||[],pl=PRED.filter(p=>p[0]===sel);
  if(!all.length&&!pl.length){box.innerHTML='<p class="note">No isotope data for this element.</p>';buildNucleus();drawNuc();return;}
  if(!all.length&&(!selIso||!selIso.pred)){const t=pl.find(p=>p[4])||pl[0];selIso={z:sel,a:t[1],pred:t};}
  let chips='';
@@ -825,7 +890,7 @@ function nucPreset(k){const W=$('#nucFig').clientWidth,nar=W<560;
  const C={whole:null,island:nar?{n0:154,n1:190,z0:100,z1:127}:{n0:138,n1:194,z0:98,z1:128},og:{c:[176,118],w:nar?22:34,h:nar?18:22},fl:{c:[184,114],w:nar?22:34,h:nar?18:22},next:{c:[176,120],w:nar?22:34,h:nar?16:20}}[k];
  NVW=C&&C.c?{n0:C.c[0]-C.w/2,n1:C.c[0]+C.w/2,z0:C.c[1]-C.h/2,z1:C.c[1]+C.h/2}:C?Object.assign({},C):null;
  $$('[data-nz]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.nz===k)));$('#nucZoomNote').hidden=!NVW;nucCv.style.touchAction=NVW?'none':'pan-y';drawNuc();}
-function drawNuc(){const fig=$('#nucFig');if(!fig||!nucCv)return;const W=fig.clientWidth,H=fig.clientHeight,dpr=Math.min(window.devicePixelRatio||1,2);nucCv.width=W*dpr;nucCv.height=H*dpr;const x=nucCv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
+function drawNuc(){const fig=$('#nucFig');if(!fig||!nucCv||fig.clientWidth<80||fig.clientHeight<80)return;const W=fig.clientWidth,H=fig.clientHeight,dpr=Math.min(window.devicePixelRatio||1,2);nucCv.width=W*dpr;nucCv.height=H*dpr;const x=nucCv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
  const nar=W<560,Zm=!!NVW,VV=NVW||{n0:0,n1:196,z0:0,z1:134},n0=VV.n0,n1=VV.n1,z0=VV.z0,z1=VV.z1,pl=Zm?(nar?62:74):40,pb=Zm?38:34,pt=Zm?30:14,pr=Zm?18:14,cw=(W-pl-pr)/(n1-n0+1),ch=(H-pt-pb)/(z1-z0+1),X=n=>pl+(n-n0)*cw,Y=z=>H-pb-(z-z0+1)*ch;NG={pl,pb,pt,pr,cw,ch,W,H,n0,z0};
  const css=getComputedStyle($('#probeMut')).color,ink=getComputedStyle($('#probeInk')).color,dk=isDark(),cor=dk?'#f0997b':'#a9401f',corL=dk?'#f0997b':'#c4532c',fs=Zm&&W<520?11:12;x.font=fs+'px "Instrument Sans",sans-serif';x.fillStyle=css;x.strokeStyle=css;
  x.save();x.beginPath();x.rect(pl,pt,W-pl-pr,H-pt-pb);x.clip();
@@ -944,7 +1009,7 @@ $('#expNew').addEventListener('click',e=>{const b=e.target.closest('[data-xz]');
 function expLine(z,a){const k=z+'-'+a,p=EXP&&EXP.P.get(k),known=EXP&&EXP.K.has(k),nm=(SYM[z-1]?NAMEZ(z):'Element '+z)+'-'+a;
  if(p&&known)return '<b>'+nm+'</b> · stable in nature, and the model agrees.';if(known)return '<b>'+nm+'</b> · stable in nature, but the model says it should decay (a miss).';
  if(p)return '<b>'+nm+'</b> · '+z+' protons, '+(a-z)+' neutrons · <b>model predicts stable</b>'+(p[2]!=null?', alpha half-life about '+p10(p[2].toFixed(1))+' years':'')+'. '+(z<=82&&z!==43&&z!==61?'In nature this one is radioactive, so it counts as a false alarm.':'Not stable in nature or not yet made: this is a prediction to test.');return '';}
-function drawStab(){const fig=$('#stFig'),cv=$('#stCv');if(!fig)return;const W=fig.clientWidth,H=fig.clientHeight,dpr=Math.min(window.devicePixelRatio||1,2);cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
+function drawStab(){const fig=$('#stFig'),cv=$('#stCv');if(!fig||fig.clientWidth<80||fig.clientHeight<60)return;const W=fig.clientWidth,H=fig.clientHeight,dpr=Math.min(window.devicePixelRatio||1,2);cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
  const pm=stc==='pred'||stc==='exp',rows=pm?126:stPrim?92:83,Emax=pm?96:56,pl=64,pr=14,pt=14,pb=38,cw=(W-pl-pr)/(Emax+1),ch=(H-pt-pb)/rows,X=e=>pl+e*cw,Y=z=>H-pb-z*ch;SG={pl,pr,pt,pb,cw,ch,W,H,rows};
  const mut=getComputedStyle($('#probeMut')).color,ink=getComputedStyle($('#probeInk')).color,dk=isDark()?'dark':'light';x.font='12px "Instrument Sans",sans-serif';
  for(let z=1;z<=rows;z++){if(z%2===0){x.fillStyle=isDark()?'rgba(255,255,255,0.025)':'rgba(0,0,0,0.025)';x.fillRect(pl,Y(z),W-pl-pr,ch);}}
@@ -1092,7 +1157,7 @@ const SM=[
 let smSel='u';
 function renderSM(){const dk=isDark()?2:1;$('#smGrid').innerHTML=SM.map(g=>'<h3><span class="sw" style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:'+g[dk]+'"></span>'+g[0]+'</h3>'+g[3].map(p=>'<button class="pc" data-sm="'+p[0]+'" aria-pressed="'+(smSel===p[0])+'" style="'+(smSel===p[0]?'outline:2px solid var(--ink);outline-offset:1px;':'')+'border-left:4px solid '+g[dk]+';border-radius:0 12px 12px 0"><span class="sym2">'+p[0]+'</span><span class="pn">'+p[1]+'</span><span class="pm">'+p[2]+' · charge '+p[3]+'</span></button>').join('')).join('');
  let P=null,G=null;SM.forEach(g=>g[3].forEach(p=>{if(p[0]===smSel){P=p;G=g;}}));
- $('#smRead').innerHTML='<div class="nm">'+P[1][0].toUpperCase()+P[1].slice(1)+' <span style="font-size:15px;color:var(--mut);font-weight:400">'+G[0].toLowerCase().replace(/s$/,'')+'</span></div><dl style="margin-top:8px"><dt>Mass</dt><dd>'+P[2]+'</dd><dt>Electric charge</dt><dd>'+P[3]+'</dd><dt>Spin</dt><dd>'+P[4]+'</dd><dt>Role</dt><dd>'+P[5]+'</dd></dl>';}
+ $('#smRead').innerHTML='<div class="nm">'+P[1][0].toUpperCase()+P[1].slice(1)+' <span style="font-size:var(--f3);color:var(--mut);font-weight:400">'+G[0].toLowerCase().replace(/s$/,'')+'</span></div><dl style="margin-top:8px"><dt>Mass</dt><dd>'+P[2]+'</dd><dt>Electric charge</dt><dd>'+P[3]+'</dd><dt>Spin</dt><dd>'+P[4]+'</dd><dt>Role</dt><dd>'+P[5]+'</dd></dl>';}
 $('#smGrid').addEventListener('click',e=>{const b=e.target.closest('[data-sm]');if(b){smSel=b.dataset.sm;renderSM();}});
 renderSM();new MutationObserver(renderSM).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
@@ -1294,7 +1359,7 @@ function fillMass(zSel,aSel,keep){const z=+$(zSel).value,list=z>118?PRED.filter(
 const zOpts=SYM.slice(0,120).map((s2,i)=>'<option value="'+(i+1)+'">'+(i+1)+' '+NAMEZ(i+1)+' ('+s2+')</option>').join('');$('#trSZ').innerHTML=zOpts;$('#trTZ').innerHTML=zOpts;
 const PRESETS=[['Lead → gold (Saturn → Sun)',82,208,79,197],['Lead → gold at the LHC, 2025',82,208,79,203,['gn','gp']],['Mercury → gold (Harvard, 1940)',80,198,79,198],['Bismuth → gold (Berkeley, 1980)',83,209,79,197],['Tin → silver (Jupiter → Moon)',50,120,47,107],['Copper → silver (Venus → Moon)',29,63,47,107],['Iron → gold (Mars → Sun)',26,56,79,197],
  ['Americium → moscovium (Dubna, 2003)',95,243,115,288,['fu','gn'],0],['Californium → oganesson (Dubna, 2002–06)',98,249,118,294,['fu','gn'],0],['Berkelium → tennessine (2010)',97,249,117,294,['fu','gn'],0],['Curium → livermorium (2000)',96,248,116,292,['fu','gn'],0],['Plutonium → flerovium (1999)',94,244,114,289,['fu','gn'],0],['Bismuth → nihonium (RIKEN, 2004)',83,209,113,278,['fu','gn'],6],['Curium → element 119 (RIKEN search)',96,248,119,296,['fu','gn'],2],['Californium → element 120 (Berkeley plan)',98,249,120,296,['fu','gn'],1]];
-$('#trPre').innerHTML='<span style="flex-basis:100%;font-size:14px;color:var(--mut)">Alchemy</span>'+PRESETS.slice(0,7).map((p,i)=>'<button data-trp="'+i+'">'+p[0]+'</button>').join('')+'<span style="flex-basis:100%;font-size:14px;color:var(--mut);margin-top:6px">Making new elements</span>'+PRESETS.slice(7).map((p,i)=>'<button data-trp="'+(i+7)+'">'+p[0]+'</button>').join('');
+$('#trPre').innerHTML='<span style="flex-basis:100%;font-size:var(--f3);color:var(--mut)">Alchemy</span>'+PRESETS.slice(0,7).map((p,i)=>'<button data-trp="'+i+'">'+p[0]+'</button>').join('')+'<span style="flex-basis:100%;font-size:var(--f3);color:var(--mut);margin-top:6px">Making new elements</span>'+PRESETS.slice(7).map((p,i)=>'<button data-trp="'+(i+7)+'">'+p[0]+'</button>').join('');
 function setTR(sz,sa,tz,ta){$('#trSZ').value=sz;fillMass('#trSZ','#trSA',sa);$('#trTZ').value=tz;fillMass('#trTZ','#trTA',ta);runTR();}
 $('#trPre').addEventListener('click',e=>{const b=e.target.closest('[data-trp]');if(!b)return;const p=PRESETS[+b.dataset.trp];if(p[6]!=null){BEAM=p[6];$('#trBeam').value=p[6];}$$('[data-mv]').forEach(c=>{const m=MOVES.find(v=>v[0]===c.dataset.mv);c.checked=p[5]?p[5].includes(m[0]):m[4];});$$('[data-trp]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));setTR(p[1],p[2],p[3],p[4]);});
 $('#trSZ').addEventListener('change',()=>{fillMass('#trSZ','#trSA');runTR();});$('#trTZ').addEventListener('change',()=>{fillMass('#trTZ','#trTA');runTR();});$('#trSA').addEventListener('change',runTR);$('#trTA').addEventListener('change',runTR);
@@ -1526,7 +1591,7 @@ $('#gTdSup').addEventListener('click',()=>tdStart('sup'));$('#gTdPk').addEventLi
 const EX={h:(a,i)=>{const lv=[1,2,2,2,2,3,3,3,3,3,3,3,3,3,3];return -0.5*a*a/(lv[i]**2);},ho:(a,i)=>{const lv=[0,1,1,1,2,2,2,2,2,2];return a*(lv[i]+1.5);}};
 function gMem(){const d=gDims(),tex=d.Wx*d.Wy*16/1048576,st=GS.states.length+(GS.scf&&GS.scf.cur?GS.scf.cur.length:0)+(GS.up?GS.up.states.length/8:0);
  const gpu=gCpu()?0:tex*(2+1+1+(gRed?gRed.packs.length:0))+Math.min(d.N,128**3)*4/1048576,ram=st*d.N*4/1048576+(gCpu()?3*d.N*4/1048576:0)+(gBuf?gBuf.length*4/1048576:0);return {gpu,ram};}
-function gRender(){const pr=gParams(),P=pr.P,un=gPotK==='ws'?' fm':' bohr';let h='<div class="nm" style="font-size:20px">'+P.nm[0].toUpperCase()+P.nm.slice(1)+(gPotK==='scf'?': '+NAMES[pr.a-1]:'')+'</div><div class="sub">Memory in use: about '+Math.round(gMem().gpu)+' MB on the graphics card, '+Math.round(gMem().ram)+' MB of RAM</div><div class="sub">'+GS.G+'³ grid'+(GS.G===32?' on the CPU (coarse, but runs anywhere)':'')+' · spacing '+pr.h.toFixed(3)+un+' · box ±'+pr.L.toFixed(1)+un+'</div>';
+function gRender(){const pr=gParams(),P=pr.P,un=gPotK==='ws'?' fm':' bohr';let h='<div class="nm" style="font-size:var(--f5)">'+P.nm[0].toUpperCase()+P.nm.slice(1)+(gPotK==='scf'?': '+NAMES[pr.a-1]:'')+'</div><div class="sub">Memory in use: about '+Math.round(gMem().gpu)+' MB on the graphics card, '+Math.round(gMem().ram)+' MB of RAM</div><div class="sub">'+GS.G+'³ grid'+(GS.G===32?' on the CPU (coarse, but runs anywhere)':'')+' · spacing '+pr.h.toFixed(3)+un+' · box ±'+pr.L.toFixed(1)+un+'</div>';
  $('#gTdBox').hidden=gPotK==='scf';$('#gTdSup').hidden=GS.states.length<2;
  if(GS.task==='tdse'&&GS.tdInfo){h+='<p class="note" style="color:var(--ink)">Real-time run: '+GS.tdInfo+'.</p>'+tdChart();}
  if(gPotK==='scf'){const S=GS.scf&&GS.scf.Z===pr.a?GS.scf:null;
@@ -1537,7 +1602,7 @@ function gRender(){const pr=gParams(),P=pr.P,un=gPotK==='ws'?' fm':' bohr';let h
  else{if(!GS.states.length)h+='<p class="note">Press Solve. On a typical laptop graphics card each state takes a few seconds'+(GS.G===256?' (much longer on the 256³ grid: about 64× the work of 64³, so it needs a desktop graphics card with several GB of memory)':GS.G===128?' (several times longer on the 128³ grid)':'')+'.</p>';
   else h+='<dl>'+GS.states.map((st,i)=>{const ex=EX[gPotK]?EX[gPotK](pr.a,i):(gPotK==='h2'&&Math.abs(pr.a-2)<0.05&&i===0?-1.1026:null);const err=ex!=null?' · exact '+fE(ex*P.unit)+' ('+(100*(st.E-ex)/Math.abs(ex)).toFixed(1)+'% off)':'';
    const rc=gRich(i),rcs=rc!=null?'<br><b>Predicted for a perfect grid</b> (extrapolating '+gRichPair(i)[0]+'³ → '+gRichPair(i)[1]+'³): '+fE(rc*P.unit)+(ex!=null?' ('+(100*(rc-ex)/Math.abs(ex)).toFixed(1)+'% off)':''):'';
-   return '<dt><button data-gv="'+i+'" aria-pressed="'+(GS.view===i)+'" style="min-height:36px;padding:0 10px">State '+(i+1)+'</button></dt><dd>'+fE(st.E*P.unit)+err+'<br><span style="color:var(--mut);font-size:13px">'+(st.steps||0).toLocaleString()+' GPU steps'+(st.mom?', momentum on':', momentum off')+(st.warm?', warm start':'')+'</span>'+rcs+'</dd>';}).join('')+'</dl><p class="note">Solve once on 64³ and once on 128³ with the same settings, and the page extrapolates both to predict the answer on an infinitely fine grid (Richardson extrapolation). Try toggling momentum to compare step counts.</p>';
+   return '<dt><button data-gv="'+i+'" aria-pressed="'+(GS.view===i)+'" style="min-height:36px;padding:0 10px">State '+(i+1)+'</button></dt><dd>'+fE(st.E*P.unit)+err+'<br><span style="color:var(--mut);font-size:var(--f2)">'+(st.steps||0).toLocaleString()+' GPU steps'+(st.mom?', momentum on':', momentum off')+(st.warm?', warm start':'')+'</span>'+rcs+'</dd>';}).join('')+'</dl><p class="note">Solve once on 64³ and once on 128³ with the same settings, and the page extrapolates both to predict the answer on an infinitely fine grid (Richardson extrapolation). Try toggling momentum to compare step counts.</p>';
   h+='<p class="note">'+({h:'Exact energies are −13.6 eV × Z² ⁄ n², with n = 2 four-fold degenerate. The ground state is hardest because its wavefunction has a sharp point at the nucleus: a finer grid (128³) or a smaller box cuts its error, but too small a box squeezes the larger n = 2 states.',h2:'Electronic energy only (add +1/R for the repulsion between the protons). At 2.0 bohr the exact ground state is −1.1026 hartree (−30.0 eV). State 1 is the bonding orbital, with the electron piled up between the protons; state 2 is antibonding, with a node in the middle.',ws:'No spin–orbit force here, so this shows only what deformation does: at β = 0 the p and d levels are degenerate; stretch the nucleus and they split apart. That splitting is why the simple shell model failed for deformed nuclei like uranium.',ho:'Exact energies are (N + 3⁄2)ħω, with levels holding 1, 3, 6, … states.'})[gPotK]+'</p>';}
  $('#gRes').innerHTML='<div class="tbrow">'+tb('c')+'Solved numerically on a grid. Where an exact answer exists, the error is shown next to it.</div>'+h+(GS.states.length&&GS.view>=0?'<div class="chips" style="margin-top:8px"><button id="gCube">Download this state (.cube for VESTA or 3Dmol)</button></div>':'');const cb=$('#gCube');if(cb)cb.onclick=gCube;simLabel();}
 function tdChart(){if(!GS.zt||GS.zt.length<2)return '';const W=300,H=90,t0=GS.zt[0][0],t1=GS.zt[GS.zt.length-1][0],zs=GS.zt.map(p=>p[1]),mn=Math.min(...zs),mx=Math.max(...zs),sp=mx-mn||1;
@@ -1558,7 +1623,7 @@ function gVol(psi){let G=GS.G;if(G===256){const g=128,o=new Float32Array(g*g*g);
  gVolMesh.material.uniforms.uTex.value=gTex3;gVolMesh.visible=mode==='gpu';if(tdMesh)tdMesh.visible=false;}
 gSetPot('h');
 
-function rebuild(){radialTable();buildShape();buildCloud();drawRadial();readout();simLabel();if(typeof drawSpec==='function')drawSpec();}
+function rebuild(){radialTable();buildShape();buildCloud();drawRadial();readout();simLabel();if(typeof drawSpec==='function'&&TAB==='spec')drawSpec();if(typeof ctxUpdate==='function')ctxUpdate();}
 
 /* ---- Quantum Monte Carlo: Slater–Jastrow trial wavefunction, VMC and fixed-node DMC (hartree units) ---- */
 const QMCA={
@@ -1644,7 +1709,7 @@ $('#qGo').addEventListener('click',()=>{if(!Q.A)qReset();Q.run=true;qRender();})
 $('#qStop').addEventListener('click',()=>{Q.run=false;qRender();});
 $('#qReset').addEventListener('click',()=>{const r=Q.run;qReset();Q.run=r;});
 
-function setMode(md){mode=md;NG2.visible=md==='nuc';if(typeof gVolMesh!=='undefined'&&gVolMesh)gVolMesh.visible=md==='gpu'&&GS.task!=='tdse';if(typeof tdMesh!=='undefined'&&tdMesh)tdMesh.visible=md==='gpu'&&GS.task==='tdse';if(md==='gpu'){dist=19;$('#volRow').hidden=false;}if(md==='nuc'){buildNuc();dist=16;}if(md==='shell')setTimeout(buildShells,0);else if(dist>45)dist=19;QG.visible=md==='quark';if(md==='quark'){buildQuarks();dist=15;}['rays','square','circles'].forEach(k=>{const cb=document.querySelector('[data-layer="'+k+'"]');Lg[k].visible=md!=='quark'&&cb.checked;});Lg.nucleus.visible=md!=='quark'&&md!=='nuc'&&md!=='gpu'&&md!=='qmc'&&document.querySelector('[data-layer="nucleus"]').checked;$$('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===md)));
+function setMode(md){mode=md;if(typeof ctxUpdate==='function')setTimeout(ctxUpdate,0);NG2.visible=md==='nuc';if(typeof gVolMesh!=='undefined'&&gVolMesh)gVolMesh.visible=md==='gpu'&&GS.task!=='tdse';if(typeof tdMesh!=='undefined'&&tdMesh)tdMesh.visible=md==='gpu'&&GS.task==='tdse';if(md==='gpu'){dist=19;$('#volRow').hidden=false;}if(md==='nuc'){buildNuc();dist=16;}if(md==='shell')setTimeout(buildShells,0);else if(dist>45)dist=19;QG.visible=md==='quark';if(md==='quark'){buildQuarks();dist=15;}['rays','square','circles'].forEach(k=>{const cb=document.querySelector('[data-layer="'+k+'"]');Lg[k].visible=md!=='quark'&&cb.checked;});Lg.nucleus.visible=md!=='quark'&&md!=='nuc'&&md!=='gpu'&&md!=='qmc'&&document.querySelector('[data-layer="nucleus"]').checked;$$('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===md)));
  if(mesh)mesh.visible=md==='shape';if(cloud)cloud.visible=md==='cloud';if(volMesh)volMesh.visible=md==='vol';$('#volRow').hidden=md!=='vol'&&md!=='gpu';Lg.shells.visible=md==='shell';
  const oq=md==='shell'||md==='quark'||md==='nuc'||md==='gpu'||md==='qmc';$('#qmcPanel').hidden=md!=='qmc';if(Q.pts)Q.pts.visible=md==='qmc';if(md==='qmc'){dist=19;if(!Q.A)qReset();}$('#gpuPanel').hidden=md!=='gpu';$('#nucPanel').hidden=md!=='nuc';$('#shellPanel').hidden=md!=='shell';$('#quarkPanel').hidden=md!=='quark';$('#qnPanel').hidden=oq;$('#quiz').hidden=oq;$('#ptsRow').hidden=md!=='cloud';$('#radBox').hidden=oq;$('#read').hidden=oq;simLabel();}
 $$('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
@@ -1718,7 +1783,7 @@ function drawSpec(){const cv=$('#specCv');if(!cv)return;const Z=sel&&sel<=118?se
  rows.forEach(([k,y0,y1])=>{(k==='ref'?ref.map(w=>({nm:w})):hl.filter(q=>q.nm>=380&&q.nm<=780)).forEach(q=>{const c=nmRGB(q.nm),px=X(q.nm);const g=x.createLinearGradient(px-5,0,px+5,0);g.addColorStop(0,'rgba('+c+',0)');g.addColorStop(0.5,'rgba('+c+',0.55)');g.addColorStop(1,'rgba('+c+',0)');x.fillStyle=g;x.fillRect(px-5,y0,10,y1-y0);x.fillStyle='rgb('+c+')';x.fillRect(px-1,y0,2,y1-y0);if(k==='h'&&q.hi===n&&q.lo<n){x.strokeStyle='#fff';x.lineWidth=1;x.strokeRect(px-4,y0+2,8,y1-y0-4);}});
   x.fillStyle='rgba(255,255,255,0.75)';x.font='11px "Instrument Sans",sans-serif';x.textAlign='left';if(spMode==='both')x.fillText(k==='ref'?'measured':'one-electron ion, exact',6,y0+13);});
  x.fillStyle='rgba(255,255,255,0.6)';x.font='11px "Instrument Sans",sans-serif';x.textAlign='center';for(let w=400;w<=760;w+=(W<520?80:40))x.fillText(w+' nm',X(w),H-5);
- const sw=w=>'<i style="background:rgb('+nmRGB(w)+')"></i>',ion=Z===1?'hydrogen atom':NAMEZ(Z).toLowerCase()+' with all but one electron removed';let h='<div class="nm" style="font-size:20px">'+NAMEZ(Z)+'</div>';
+ const sw=w=>'<i style="background:rgb('+nmRGB(w)+')"></i>',ion=Z===1?'hydrogen atom':NAMEZ(Z).toLowerCase()+' with all but one electron removed';let h='<div class="nm" style="font-size:var(--f5)">'+NAMEZ(Z)+'</div>';
  if(spMode!=='h'){h+='<div class="tbrow">'+tb('m')+'Strongest visible lines of the neutral atom, wavelengths in air (NIST Atomic Spectra Database). A short reference list, not the full spectrum.</div>';
   h+=ref.length?(SPK[sym]?'<p style="margin:4px 0 6px">'+SPK[sym]+'</p>':'')+'<p style="margin:0;line-height:1.9">'+ref.map(w=>'<span style="white-space:nowrap;margin-right:12px">'+sw(w)+w.toFixed(1)+' nm</span>').join(' ')+'</p>':'<p class="note">No reference lines are stored for '+NAMEZ(Z).toLowerCase()+' yet. Try H, He, Li, Na, K, Ca, Cu, Sr, Ne, Ar or Hg, or switch to the one-electron ion.</p>';}
  if(spMode!=='ref'){const vis=hl.filter(q=>q.nm>=380&&q.nm<=780),cur=hl.filter(q=>q.hi===n&&q.lo<n);h+='<div class="tbrow" style="margin-top:10px">'+tb('x')+'Lines of a '+ion+', from the Rydberg formula with the mass-'+A+' nucleus. Exact apart from tiny relativistic shifts.</div>';
@@ -1736,18 +1801,54 @@ $('#shCsv').addEventListener('click',()=>{const keys=Object.keys(PI).filter(k=>D
 $('#shIso').addEventListener('click',()=>{const rows=['Z,symbol,A,N,natural_abundance_percent,half_life_seconds,decay_mode,binding_energy_per_nucleon_MeV,spin_parity'];ISO.forEach(r=>{const d=NUCD?NUCD[r[0]+'-'+r[1]]:null;rows.push([r[0],SYM[r[0]-1],r[1],r[1]-r[0],r[2]==null?'':r[2],r[3]==null?'stable':(10**r[3]).toPrecision(4),r[4]||'',d?d[0]:'',d&&d[3]?d[3]:''].join(','));});$('#shNote').textContent=dl('isotopes.csv','# half-lives: NUBASE2020; binding energies and spins: AME2020 / NUBASE2020\n'+rows.join('\n')+'\n','text/csv')?'Saved isotopes.csv':'This browser blocked the download.';});
 $('#shPng').addEventListener('click',()=>{try{renderer.render(scene,cam);const a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='atomic-modeling.png';document.body.appendChild(a);a.click();a.remove();$('#shNote').textContent='Saved atomic-modeling.png';}catch(e){$('#shNote').textContent='This browser blocked the download.';}});
 /* ---- share links: the address remembers the view ---- */
-function viewState(){const o={z:sel||1,mode,n,l,m,by:$('#cby').value,eu:EU};if(selIso&&selIso.z===sel&&!selIso.pred)o.a=selIso.a;if(part&&part!=='e')o.p=part;return Object.keys(o).map(k=>k+'='+encodeURIComponent(o[k])).join('&');}
+function viewState(){const o={tab:TAB,z:sel||1,mode,n,l,m,by:$('#cby').value,eu:EU};if(selIso&&selIso.z===sel&&!selIso.pred)o.a=selIso.a;if(part&&part!=='e')o.p=part;return Object.keys(o).map(k=>k+'='+encodeURIComponent(o[k])).join('&');}
 function applyState(str){const o={};str.replace(/^#/,'').split('&').forEach(kv=>{const i=kv.indexOf('=');if(i>0)o[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1));});if(!Object.keys(o).length)return;
  try{const Z=+o.z;if(Z>=1&&Z<=120)showEl(Z);if(o.a&&ISO.some(r=>r[0]===Z&&r[1]===+o.a)){selIso={z:Z,a:+o.a,pred:null};renderIso();}
   const N=+o.n,Lq=+o.l,M=+o.m;if(N>=1&&N<=7&&Lq>=0&&Lq<N&&Math.abs(M)<=Lq){n=N;l=Lq;m=M;rebuild();}
   if(o.by){const c=$('#cby');if([...c.options].some(x=>x.value===o.by)){c.value=o.by;c.dispatchEvent(new Event('change'));}}
   if(o.eu){const b=document.querySelector('[data-eu="'+o.eu+'"]');if(b)b.click();}
   if(o.p){const b=document.querySelector('[data-part="'+o.p+'"]');if(b)b.click();}
-  if(o.mode){const b=document.querySelector('[data-mode="'+o.mode+'"]');if(b)b.click();}}catch(e){console.error('could not restore the shared view',e);}}
+  if(o.mode){const b=document.querySelector('[data-mode="'+o.mode+'"]');if(b)b.click();}
+  if(o.tab)setTab(o.tab,{instant:true});}catch(e){console.error('could not restore the shared view',e);}}
 $('#shLink').addEventListener('click',()=>{let base='https://tbirdpower3000.github.io/Atomic-Modeling/';try{if(window.top===window.self&&/^https?:/.test(location.protocol))base=location.origin+location.pathname;}catch(e){}const url=base+'#'+viewState();
  const done=ok=>{$('#shNote').innerHTML=ok?'Link copied. Anyone who opens it sees this element, view and orbital.':'Copy this link: <input readonly value="'+url+'" style="width:min(100%,420px)" onfocus="this.select()">';};
  try{navigator.clipboard.writeText(url).then(()=>done(true),()=>done(false));}catch(e){done(false);}try{if(window.top===window.self)history.replaceState(null,'','#'+viewState());}catch(e){}});
 
+
+/* ---- tabs: one instrument, six sections ---- */
+const TABS=['atom','pt','spec','nuc','trans','sm'];
+let TAB='atom';
+function tabRedraw(t){
+ try{
+  if(t==='atom'){if(typeof rebuild==='function'&&mode!=='gpu'&&mode!=='qmc')rebuild();}
+  if(t==='pt'){paint();if(!$('#trend').hidden&&PI[cby]&&DATA[cby])drawTrend();}
+  if(t==='spec')drawSpec();
+  if(t==='nuc'){drawNuc();if(typeof drawStab==='function')drawStab();}
+  if(t==='trans'&&NUCD)runTR();
+  if(t==='sm'){SIM.dirty=null;if(!SIM.tracks.length)simFire();}
+ }catch(e){console.error(e);}
+}
+function setTab(t,opt){if(!TABS.includes(t))t='atom';TAB=t;
+ $$('.tabpanel').forEach(p=>p.hidden=p.dataset.panel!==t);
+ $$('[data-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===t)));
+ if(!opt||!opt.keepScroll)window.scrollTo({top:0,behavior:opt&&opt.instant?'auto':'smooth'});
+ window.dispatchEvent(new Event('resize'));
+ requestAnimationFrame(()=>requestAnimationFrame(()=>tabRedraw(t)));
+ ctxUpdate();}
+$$('[data-tab]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+/* what is loaded right now, always on screen */
+function ctxUpdate(){const c=$('#ctxChip');if(!c)return;const Z=sel&&sel<=118?sel:1,a=selIso&&selIso.z===Z?selIso.a:null;
+ c.innerHTML='<b>'+SYM[Z-1]+(a?'-'+a:'')+'</b> <small>'+(mode==='nuc'?'nucleus':mode==='shell'?'shells':mode==='qmc'?'Monte Carlo':mode==='gpu'?'solver':orbName(n,l,m))+'</small>';
+ c.title=NAMEZ(Z)+(a?'-'+a:'')+' · open in the Atom view';}
+$('#ctxChip').addEventListener('click',()=>setTab('atom'));
+/* help and settings */
+$('#helpBtn').addEventListener('click',()=>{const d=$('#helpDlg');d.showModal?d.showModal():d.setAttribute('open','');});
+$('#helpDlg').addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;e.preventDefault();const t=a.getAttribute('href').slice(1);$('#helpDlg').close&&$('#helpDlg').close();setTab(t);});
+const setPanel=$('#setPanel'),setBtn=$('#setBtn');
+function setOpen(v){setPanel.hidden=!v;setBtn.setAttribute('aria-expanded',String(v));}
+setBtn.addEventListener('click',e=>{e.stopPropagation();setOpen(setPanel.hidden);});
+document.addEventListener('click',e=>{if(!setPanel.hidden&&!setPanel.contains(e.target)&&e.target!==setBtn)setOpen(false);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false);});
 /* ---- Learn / Lab level ---- */
 let ULV='learn';try{ULV=localStorage.getItem('lvl')||'learn';}catch(e){}
 function setLvl(v,save){ULV=v;document.documentElement.classList.toggle('learn',v==='learn');$$('[data-lvl]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lvl===v)));
@@ -1757,44 +1858,48 @@ function setLvl(v,save){ULV=v;document.documentElement.classList.toggle('learn',
 $$('[data-lvl]').forEach(b=>b.addEventListener('click',()=>setLvl(b.dataset.lvl,true)));
 /* ---- guided missions ---- */
 const MSF={island:false,spec:false};
-const go=id=>{const e=document.querySelector(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'});};
+const GOTAB={'#fig':'atom','#pt':'pt','#spec':'spec','#nuc':'nuc','#stab':'nuc','#trans':'trans','#sm':'sm'};
+const go=id=>{const t=GOTAB[id];if(t)setTab(t);const e=document.querySelector(id);if(e&&t&&t!=='atom')setTimeout(()=>e.scrollIntoView({behavior:'smooth',block:'start'}),60);};
 const MS=[
- {id:'atom',t:'Meet an atom',goal:'Find carbon, the element all living things are built from.',steps:['Scroll to the periodic table.','Tap the square marked C (number 6).'],go:()=>go('#pt'),ok:()=>sel===6,
+ {id:'atom',t:'Meet an atom',goal:'Find carbon, the element all living things are built from.',steps:['Open the Table tab.','Tap the square marked C (number 6).'],go:()=>go('#pt'),ok:()=>sel===6,
   won:'Carbon has 6 protons in its nucleus and 6 electrons around it. The number on each square is its proton count, and that number alone decides which element it is.'},
- {id:'cloud',t:'Where is the electron?',goal:'Make a dumbbell-shaped electron cloud.',steps:['Next to the 3D view, choose “Dot cloud”.','Set the shape number l to 1 (a p orbital).','Drag the picture to turn it around.'],go:()=>go('#fig'),ok:()=>l===1&&(mode==='cloud'||mode==='shape'),
+ {id:'cloud',t:'Where is the electron?',goal:'Make a dumbbell-shaped electron cloud.',steps:['In the Atom tab, choose “Dot cloud” under Show.','Set the shape number l to 1 (a p orbital).','Drag the picture to turn it around.'],go:()=>go('#fig'),ok:()=>l===1&&(mode==='cloud'||mode==='shape'),
   won:'An electron is not a tiny ball on a track. Each dot is one place it could turn up, and more dots mean more likely. The two colours are the two halves of its wave, not two electrons.'},
- {id:'shells',t:'Count the shells',goal:'See why sodium is so reactive.',steps:['Pick sodium (Na, number 11) in the periodic table.','Choose the “Shells” view.','Count the electrons in each ring.'],go:()=>go('#pt'),ok:()=>sel===11&&mode==='shell',
+ {id:'shells',t:'Count the shells',goal:'See why sodium is so reactive.',steps:['In the Table tab, pick sodium (Na, number 11).','Back in the Atom tab, choose the “Shells” view.','Count the electrons in each ring.'],go:()=>go('#pt'),ok:()=>sel===11&&mode==='shell',
   won:'Sodium’s electrons sit 2, 8, 1. That one lonely outer electron is easy to give away, which is why sodium reacts so fiercely and why it pairs up with chlorine to make salt.'},
- {id:'light',t:'Fingerprints of light',goal:'Find a metal that makes fireworks green.',steps:['Scroll to “Spectrum”.','Try elements in the periodic table and watch the lines.','Look for one whose lines are mostly green: try barium (Ba) or copper (Cu).'],go:()=>go('#spec'),ok:()=>MSF.spec&&(sel===56||sel===29),
+ {id:'light',t:'Fingerprints of light',goal:'Find a metal that makes fireworks green.',steps:['Open the Light tab.','Pick elements in the Table tab and come back to watch the lines.','Look for one whose lines are mostly green: try barium (Ba) or copper (Cu).'],go:()=>go('#spec'),ok:()=>MSF.spec&&(sel===56||sel===29),
   won:'Every element glows in its own exact colours. That is how firework makers choose their metals, and how astronomers know what stars are made of without ever visiting one.'},
- {id:'iso',t:'Heavy hydrogen',goal:'Find the hydrogen that weighs twice as much.',steps:['Pick hydrogen (H, number 1).','In its card, find the isotope list.','Choose hydrogen-2 (deuterium).'],go:()=>go('#pt'),ok:()=>!!selIso&&selIso.z===1&&selIso.a===2,
+ {id:'iso',t:'Heavy hydrogen',goal:'Find the hydrogen that weighs twice as much.',steps:['In the Table tab, pick hydrogen (H, number 1).','Scroll to its card below the table and find the isotope list.','Choose hydrogen-2 (deuterium).'],go:()=>go('#pt'),ok:()=>!!selIso&&selIso.z===1&&selIso.a===2,
   won:'Isotopes are the same element with extra neutrons. Deuterium has one proton and one neutron, so it weighs twice as much as ordinary hydrogen but behaves almost the same chemically.'},
- {id:'gold',t:'The alchemist’s dream',goal:'Turn mercury into gold.',steps:['Scroll to the Transmutation lab.','Set the start to mercury (Hg) and the target to gold (Au).','Read the route it finds.'],go:()=>go('#trans'),ok:()=>!!ROUTE&&ROUTE[0][0]===80&&ROUTE[ROUTE.length-1][0]===79,
+ {id:'gold',t:'The alchemist’s dream',goal:'Turn mercury into gold.',steps:['Open the Transmute tab.','Set the start to mercury (Hg) and the target to gold (Au).','Read the route it finds.'],go:()=>go('#trans'),ok:()=>!!ROUTE&&ROUTE[0][0]===80&&ROUTE[ROUTE.length-1][0]===79,
   won:'It really can be done: knock one proton out of a mercury nucleus and it becomes gold. But each atom needs millions of times more energy than a chemical reaction, so the gold costs far more than it is worth.'},
- {id:'island',t:'Find the island',goal:'Visit a place on the map that nobody has reached.',steps:['Scroll to the Chart of nuclides.','Tap “Island of stability”.','Tap inside the shaded oval.'],go:()=>go('#nuc'),ok:()=>MSF.island,
+ {id:'island',t:'Find the island',goal:'Visit a place on the map that nobody has reached.',steps:['Open the Nuclei tab.','Tap “Island of stability”.','Tap inside the shaded oval.'],go:()=>go('#nuc'),ok:()=>MSF.island,
   won:'The heaviest atoms ever made fall apart in less than a second. Scientists predict that a little further on, around 184 neutrons, some could last much longer. Nobody has got there yet: we are about 7 neutrons short.'},
- {id:'muon',t:'Catch a muon',goal:'Fire a muon through a particle detector.',steps:['Scroll to Fundamental particles.','Tap the muon (μ).','Watch its track in the detector, then try an electron and compare.'],go:()=>go('#sm'),ok:()=>smSel==='μ'&&SIM.tracks.length>0&&SIM.vis,
+ {id:'muon',t:'Catch a muon',goal:'Fire a muon through a particle detector.',steps:['Open the Particles tab.','Tap the muon (μ).','Watch its track in the detector, then try an electron and compare.'],go:()=>go('#sm'),ok:()=>smSel==='μ'&&SIM.tracks.length>0&&SIM.vis,
   won:'A muon is a heavy cousin of the electron. It punches through every layer of the detector, while an electron stops in the first thick one. That difference is how detectors tell them apart.'},
- {id:'grid',lab:true,t:'Solve the atom yourself',goal:'Make the computer find hydrogen’s ground state.',steps:['Switch to Lab.','Choose the “Solve on GPU” view and press Solve.','Compare its answer with the exact −13.6 eV.'],go:()=>go('#fig'),ok:()=>gPotK==='h'&&GS.states.length>0,
+ {id:'grid',lab:true,t:'Solve the atom yourself',goal:'Make the computer find hydrogen’s ground state.',steps:['Switch to Lab under ⚙.','In the Atom tab, choose “Solve on GPU” and press Solve.','Compare its answer with the exact −13.6 eV.'],go:()=>go('#fig'),ok:()=>gPotK==='h'&&GS.states.length>0,
   won:'The solver knew nothing about orbitals: it only followed the Schrödinger equation on a grid, and the 1s cloud appeared on its own. The small error comes from the grid being too coarse near the nucleus.'},
- {id:'mc',lab:true,t:'Beat the textbook',goal:'Get helium’s energy right to three decimal places.',steps:['Switch to Lab and open “Monte Carlo electrons”.','Choose Helium and Full Monte Carlo, then press Run.','Wait until the result is within 0.005 hartree of the exact value.'],go:()=>go('#fig'),ok:()=>{if(Q.Z!==2||!Q.A)return false;const st=qmcStats(Q.A.es,Q.m==='dmc'?100:50);return !!st&&Math.abs(st[0]-QMCA[2].ref)<0.005&&st[1]<0.005;},
+ {id:'mc',lab:true,t:'Beat the textbook',goal:'Get helium’s energy right to three decimal places.',steps:['Switch to Lab under ⚙, then open “Monte Carlo electrons” in the Atom tab.','Choose Helium and Full Monte Carlo, then press Run.','Wait until the result is within 0.005 hartree of the exact value.'],go:()=>go('#fig'),ok:()=>{if(Q.Z!==2||!Q.A)return false;const st=qmcStats(Q.A.es,Q.m==='dmc'?100:50);return !!st&&Math.abs(st[0]-QMCA[2].ref)<0.005&&st[1]<0.005;},
   won:'The simple textbook picture, where each electron ignores the other, is off by about 1 eV. By tracking both electrons at once and letting them dodge each other, you recovered nearly all of it.'}];
 let msDone=[],msCur=null;try{msDone=JSON.parse(localStorage.getItem('missions')||'[]');}catch(e){}
 function msNext(){return MS.find(x=>!msDone.includes(x.id)&&(!x.lab||ULV==='lab'))||MS.find(x=>!msDone.includes(x.id))||null;}
 function msRender(){const el=$('#msCard');if(!el)return;if(!msCur||(msDone.includes(msCur.id)&&!msCur.just))msCur=msNext();const M=msCur,avail=MS.filter(x=>!x.lab||ULV==='lab');
  $('#msProg').textContent=msDone.length+' of '+MS.length+' done';
+ $('#msLine').textContent=M?((M.just||msDone.includes(M.id))?'✓ '+M.t:'Mission: '+M.t):'All missions complete';
  $('#msList').innerHTML=MS.map((x,i)=>'<button data-ms="'+x.id+'" class="'+(msDone.includes(x.id)?'ok':'')+'" aria-pressed="'+(M&&M.id===x.id)+'">'+(msDone.includes(x.id)?'✓ ':'')+(i+1)+'. '+x.t+(x.lab?' (Lab)':'')+'</button>').join('');
  if(!M){el.innerHTML='<h3>All missions complete</h3><p>You have explored electrons, light, isotopes, nuclei and particles. Everything is open to you now: switch to Lab and experiment.</p>';return;}
  if(M.just||msDone.includes(M.id)){el.innerHTML='<h3>'+M.t+'</h3><p class="done">✓ Mission complete</p><p>'+M.won+'</p><div class="chips"><button id="msGoNext">'+(msNext()?'Next mission':'Finish')+'</button></div>';$('#msGoNext').onclick=()=>{M.just=false;msCur=msNext();msRender();};return;}
  el.innerHTML='<h3>'+M.t+'</h3><p>'+M.goal+'</p><ol>'+M.steps.map(x=>'<li>'+x+'</li>').join('')+'</ol><div class="chips"><button id="msGo">Take me there</button>'+(M.lab&&ULV!=='lab'?'<button id="msLab">Switch to Lab</button>':'')+'</div>';
  $('#msGo').onclick=()=>M.go();const lb=$('#msLab');if(lb)lb.onclick=()=>setLvl('lab',true);}
+$('#msOpen').addEventListener('click',()=>{const b=$('#msBody');b.hidden=!b.hidden;$('#msOpen').setAttribute('aria-expanded',String(!b.hidden));});
 $('#msList').addEventListener('click',e=>{const b=e.target.closest('[data-ms]');if(!b)return;if(msCur)msCur.just=false;msCur=MS.find(x=>x.id===b.dataset.ms);msRender();});
 $('#msReset').addEventListener('click',()=>{msDone=[];MS.forEach(x=>x.just=false);MSF.island=false;msCur=null;try{localStorage.removeItem('missions');}catch(e){}msRender();});
 new IntersectionObserver(es=>{if(es[0].isIntersecting)MSF.spec=true;}).observe($('#specCv'));
-setInterval(()=>{const M=msCur;if(!M||msDone.includes(M.id)||document.hidden)return;let ok=false;try{ok=M.ok();}catch(e){}if(ok){msDone.push(M.id);M.just=true;try{localStorage.setItem('missions',JSON.stringify(msDone));}catch(e){}msRender();}},500);
+setInterval(()=>{const M=msCur;if(!M||msDone.includes(M.id)||document.hidden)return;let ok=false;try{ok=M.ok();}catch(e){}if(ok){msDone.push(M.id);M.just=true;try{localStorage.setItem('missions',JSON.stringify(msDone));}catch(e){}const b=$('#msBody');if(b.hidden){b.hidden=false;$('#msOpen').setAttribute('aria-expanded','true');}msRender();}},500);
 cv.addEventListener('webglcontextlost',e=>{e.preventDefault();GS.run=false;Q.run=false;const n=document.createElement('div');n.id='ctxLost';n.className='ctxlost';n.innerHTML='<p>The browser reset the graphics (this happens on phones when the app is in the background or memory runs low).</p><button>Reload the 3D view</button>';n.querySelector('button').onclick=()=>location.reload();fig.appendChild(n);},false);
 try{if(location.hash.length>1){if(/mode=(vol|gpu|qmc)/.test(location.hash))ULV='lab';applyState(location.hash);}}catch(e){}
 setLvl(ULV,false);
+try{setTab(TAB,{instant:true,keepScroll:true});ctxUpdate();}catch(e){console.error(e);}
 tick();
 }
 </script>

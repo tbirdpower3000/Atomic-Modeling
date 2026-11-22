@@ -7,7 +7,6 @@ function dl(name,text,type){try{const a=document.createElement('a');a.href=URL.c
 /* ---- mobile / low-power profile ---- */
 let GFX='auto';try{GFX=localStorage.getItem('gfx')||'auto';}catch(e){}
 const MOB=GFX==='light'?true:GFX==='full'?false:(()=>{try{const coarse=matchMedia('(pointer:coarse)').matches,small=Math.min(screen.width,screen.height)<900,lowMem=(navigator.deviceMemory||8)<=4,save=!!(navigator.connection&&navigator.connection.saveData);return (coarse&&small)||lowMem||save||/[?&]mobile=1/.test(location.search);}catch(e){return false;}})();
-{const mn=document.getElementById('manual');if(mn){let st=null;try{st=localStorage.getItem('manualOpen');}catch(e){}mn.open=st!=null?st==='1':!matchMedia('(max-width:700px)').matches;mn.addEventListener('toggle',()=>{try{localStorage.setItem('manualOpen',mn.open?'1':'0');}catch(e){}});}}
 if(MOB){document.documentElement.classList.add('mob');const p=document.getElementById('pts');if(p){p.value=15000;document.getElementById('ptsV').textContent=(15000).toLocaleString();}}
 const LET='spdfgh';
 let EU='eV';try{EU=localStorage.getItem('eunit')||'eV';}catch(e){}

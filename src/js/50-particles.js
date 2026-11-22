@@ -6,7 +6,7 @@ const SM=[
 let smSel='u';
 function renderSM(){const dk=isDark()?2:1;$('#smGrid').innerHTML=SM.map(g=>'<h3><span class="sw" style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:'+g[dk]+'"></span>'+g[0]+'</h3>'+g[3].map(p=>'<button class="pc" data-sm="'+p[0]+'" aria-pressed="'+(smSel===p[0])+'" style="'+(smSel===p[0]?'outline:2px solid var(--ink);outline-offset:1px;':'')+'border-left:4px solid '+g[dk]+';border-radius:0 12px 12px 0"><span class="sym2">'+p[0]+'</span><span class="pn">'+p[1]+'</span><span class="pm">'+p[2]+' · charge '+p[3]+'</span></button>').join('')).join('');
  let P=null,G=null;SM.forEach(g=>g[3].forEach(p=>{if(p[0]===smSel){P=p;G=g;}}));
- $('#smRead').innerHTML='<div class="nm">'+P[1][0].toUpperCase()+P[1].slice(1)+' <span style="font-size:15px;color:var(--mut);font-weight:400">'+G[0].toLowerCase().replace(/s$/,'')+'</span></div><dl style="margin-top:8px"><dt>Mass</dt><dd>'+P[2]+'</dd><dt>Electric charge</dt><dd>'+P[3]+'</dd><dt>Spin</dt><dd>'+P[4]+'</dd><dt>Role</dt><dd>'+P[5]+'</dd></dl>';}
+ $('#smRead').innerHTML='<div class="nm">'+P[1][0].toUpperCase()+P[1].slice(1)+' <span style="font-size:var(--f3);color:var(--mut);font-weight:400">'+G[0].toLowerCase().replace(/s$/,'')+'</span></div><dl style="margin-top:8px"><dt>Mass</dt><dd>'+P[2]+'</dd><dt>Electric charge</dt><dd>'+P[3]+'</dd><dt>Spin</dt><dd>'+P[4]+'</dd><dt>Role</dt><dd>'+P[5]+'</dd></dl>';}
 $('#smGrid').addEventListener('click',e=>{const b=e.target.closest('[data-sm]');if(b){smSel=b.dataset.sm;renderSM();}});
 renderSM();new MutationObserver(renderSM).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
