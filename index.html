@@ -1417,22 +1417,26 @@ function gReadPoll(A){if(A.sync)return gRead();const gl=renderer.getContext(),st
  const d=gDims(),buf=new Float32Array(d.Wx*d.Wy*4);gl.bindBuffer(gl.PIXEL_PACK_BUFFER,A.pbo);gl.getBufferSubData(gl.PIXEL_PACK_BUFFER,0,buf);gl.bindBuffer(gl.PIXEL_PACK_BUFFER,null);gl.deleteSync(A.fence);gl.deleteBuffer(A.pbo);
  const re=new Float32Array(d.N);for(let q=0;q<d.N;q++)re[q]=buf[(GI.Yy[q]*d.Wx+GI.X[q])*4];GS.xfer={ms:performance.now()-A.t0,frames:A.frames,mb:d.Wx*d.Wy*16/1048576};return re;}
 function gLive(dmax){ensureTdMesh();tdU.uPsi.value=gRT[0].texture;if(dmax>0)tdU.uDmax.value=dmax;tdMesh.visible=mode==='gpu';if(gVolMesh)gVolMesh.visible=false;}
-function gEigGPU(){const pr=GS.pr,u=gMat.uniforms,t0=performance.now();gRedInit();gQuad.material=gMat;gSetU(pr);
- const base=GS.G===256?120:GS.G===128?60:40;if(!GS.batch||GS.batchG!==GS.G){GS.batch=MOB?12:GS.G===256?8:GS.G===128?20:40;GS.batchG=GS.G;}const batch=GS.batch;
- for(let s2=0;s2<batch;s2++){u.uPsi.value=gRT[0].texture;renderer.setRenderTarget(gRT[1]);renderer.render(gScene,gCam);gRT.reverse();}renderer.setRenderTarget(null);GS.it+=batch;GS.itTot=(GS.itTot||0)+batch;
- const list=GS.task==='scf'?GS.scf.cur:GS.states;
- for(const pk of gPacks(list)){const dt=gProdReduce(1,pk);gAxpy(pk,dt,1);}
- const en=gProdReduce(0),E=en[0]/en[1];GS.nb=(GS.nb||0)+1;const mx=GS.nb%6===1?gReduce(true)[1]/en[1]:0;gAxpy(gRed.zero,[0,0,0,0],1/Math.sqrt(en[1]));gQuad.material=gMat;gLive(mx);
- // steady load: size the next batch so one frame of solver work takes about 11 ms
- const tn=performance.now(),ms=tn-t0,fd=GS.lastCall?Math.min(2000,t0-GS.lastCall):16;GS.lastCall=t0;GS.other=GS.other!=null?0.7*GS.other+0.3*Math.max(0,fd-(GS.prevMs||ms)):0;GS.prevMs=ms;const want=Math.min(1200,Math.max(MOB?7:11,2*GS.other));GS.batchMs=GS.batchMs?0.7*GS.batchMs+0.3*ms:ms;GS.batch=Math.max(4,Math.min(600,Math.round(batch*Math.max(0.5,Math.min(2,want/Math.max(ms,0.5))))));
- const tol=(GS.task==='scf'?2e-5:2e-6)*batch/base,conv=GS.lastE!==null&&Math.abs(E-GS.lastE)<Math.max(1e-6*batch/base,Math.abs(E)*tol);GS.acc=(conv?(GS.acc||0)+batch:0);GS.lastE=E;
- const done=GS.acc>=base*(GS.task==='scf'?2:3)||GS.it>=40000;return {psi:null,E,done};}
+function gEigGPU(){const pr=GS.pr,u=gMat.uniforms,t0=performance.now();gRedInit();
+ const base=GS.G===256?120:GS.G===128?60:40;if(!GS.batch||GS.batchG!==GS.G){GS.batch=MOB?12:GS.G===256?8:GS.G===128?20:40;GS.batchG=GS.G;}
+ // time budget for this frame: ~11 ms, stretched when drawing the page itself is slow, never while the tab is hidden
+ const fd=GS.lastCall?t0-GS.lastCall:16;GS.lastCall=t0;GS.other=document.hidden?0:(GS.other!=null?0.7*GS.other+0.3*Math.min(150,Math.max(0,fd-(GS.prevMs||0))):0);const want=Math.max(MOB?7:11,2*GS.other);
+ const list=GS.task==='scf'?GS.scf.cur:GS.states,packs=gPacks(list),tolB=GS.task==='scf'?2e-5:2e-6,need=base*(GS.task==='scf'?2:3);let E=GS.lastE,done=false,tot=0,mx=0,en=null;
+ // several short bursts per frame, each followed by orthogonalization and normalization on the GPU, until the budget is used
+ do{const sub=Math.max(4,Math.min(base,GS.batch)),ts=performance.now();gQuad.material=gMat;gSetU(pr);
+  for(let s2=0;s2<sub;s2++){u.uPsi.value=gRT[0].texture;renderer.setRenderTarget(gRT[1]);renderer.render(gScene,gCam);gRT.reverse();}renderer.setRenderTarget(null);GS.it+=sub;GS.itTot=(GS.itTot||0)+sub;tot+=sub;
+  for(const pk of packs){const dt=gProdReduce(1,pk);gAxpy(pk,dt,1);}
+  en=gProdReduce(0);E=en[0]/en[1];GS.nb=(GS.nb||0)+1;if(GS.nb%6===1)mx=gReduce(true)[1]/en[1];gAxpy(gRed.zero,[0,0,0,0],1/Math.sqrt(en[1]));
+  const conv=GS.lastE!==null&&Math.abs(E-GS.lastE)<Math.max(1e-6,Math.abs(E)*tolB)*sub/base;GS.acc=conv?(GS.acc||0)+sub:0;GS.lastE=E;done=GS.acc>=need||GS.it>=40000;
+  const ms=performance.now()-ts;GS.batch=Math.max(4,Math.min(base,Math.round(sub*Math.max(0.5,Math.min(2,want/Math.max(ms,0.3))))));
+ }while(!done&&performance.now()-t0<want);
+ gQuad.material=gMat;gLive(mx);GS.prevMs=performance.now()-t0;GS.spf=tot;return {psi:null,E,done};}
 function gStep(){if(!GS.run||mode!=='gpu')return;
  if(GS.task==='tdse'){tdStep();return;}
  let r;const lst=GS.task==='scf'?GS.scf.cur:GS.states;
  if(GS.await){const raw=gReadPoll(GS.await);if(!raw){$('#gStat').textContent='Copying the finished state from the graphics card…';return;}const psi=gOrtho(raw,lst);r={psi,E:GS.await.E,done:true};GS.await=null;gVol(psi);}
  else{r=gCpu()?gEigCPU():$('#gOnGpu').checked?gEigGPU():gEig();if(r.done&&!r.psi){GS.await=gReadAsync(r.E);GS.acc=0;return;}}
- if(GS.task==='eig'){$('#gStat').textContent='Finding state '+(GS.states.length+1)+' of '+$('#gK').value+' · '+GS.it.toLocaleString()+' GPU steps · energy now '+fE(r.E*GS.pr.P.unit)+(!gCpu()&&$('#gOnGpu').checked&&GS.batch?' · '+GS.batch+' steps per frame':'')+(GS.xfer?' · last GPU → CPU copy: '+GS.xfer.mb.toFixed(0)+' MB in '+GS.xfer.ms.toFixed(0)+' ms, no stall':'');
+ if(GS.task==='eig'){$('#gStat').textContent='Finding state '+(GS.states.length+1)+' of '+$('#gK').value+' · '+GS.it.toLocaleString()+' GPU steps · energy now '+fE(r.E*GS.pr.P.unit)+(!gCpu()&&$('#gOnGpu').checked&&GS.spf?' · '+GS.spf+' steps per frame':'')+(GS.xfer?' · last GPU → CPU copy: '+GS.xfer.mb.toFixed(0)+' MB in '+GS.xfer.ms.toFixed(0)+' ms, no stall':'');
   if(r.done){GS.states.push({psi:r.psi,E:r.E,steps:GS.it,mom:$('#gMom').checked,warm:!!GS.warmUsed});gCacheE(GS.states.length-1,r.E);GS.view=GS.states.length-1;gRender();if(GS.states.length>=+$('#gK').value){GS.run=false;$('#gStat').textContent='Done: '+GS.states.length+' states found.';gChainNext();}else gBegin();}return;}
  const S=GS.scf;$('#gStat').textContent='Self-consistency cycle '+(S.cycle+1)+' · orbital '+ORBN[S.cur.length]+' · '+GS.it.toLocaleString()+' GPU steps · ε = '+fE(r.E*27.211386);
  if(r.done){S.cur.push({psi:r.psi,E:r.E});if(S.cur.length<S.K){gBegin(S.prev[S.cur.length]&&S.prev[S.cur.length].psi);return;}scfUpdate();}}
