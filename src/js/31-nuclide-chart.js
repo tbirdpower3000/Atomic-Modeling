@@ -6,7 +6,7 @@ function nucPreset(k){const W=$('#nucFig').clientWidth,nar=W<560;
  const C={whole:null,island:nar?{n0:154,n1:190,z0:100,z1:127}:{n0:138,n1:194,z0:98,z1:128},og:{c:[176,118],w:nar?22:34,h:nar?18:22},fl:{c:[184,114],w:nar?22:34,h:nar?18:22},next:{c:[176,120],w:nar?22:34,h:nar?16:20}}[k];
  NVW=C&&C.c?{n0:C.c[0]-C.w/2,n1:C.c[0]+C.w/2,z0:C.c[1]-C.h/2,z1:C.c[1]+C.h/2}:C?Object.assign({},C):null;
  $$('[data-nz]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.nz===k)));$('#nucZoomNote').hidden=!NVW;nucCv.style.touchAction=NVW?'none':'pan-y';drawNuc();}
-function drawNuc(){const fig=$('#nucFig');if(!fig||!nucCv)return;const W=fig.clientWidth,H=fig.clientHeight,dpr=Math.min(window.devicePixelRatio||1,2);nucCv.width=W*dpr;nucCv.height=H*dpr;const x=nucCv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
+function drawNuc(){const fig=$('#nucFig');if(!fig||!nucCv||fig.clientWidth<80||fig.clientHeight<80)return;const W=fig.clientWidth,H=fig.clientHeight,dpr=Math.min(window.devicePixelRatio||1,2);nucCv.width=W*dpr;nucCv.height=H*dpr;const x=nucCv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
  const nar=W<560,Zm=!!NVW,VV=NVW||{n0:0,n1:196,z0:0,z1:134},n0=VV.n0,n1=VV.n1,z0=VV.z0,z1=VV.z1,pl=Zm?(nar?62:74):40,pb=Zm?38:34,pt=Zm?30:14,pr=Zm?18:14,cw=(W-pl-pr)/(n1-n0+1),ch=(H-pt-pb)/(z1-z0+1),X=n=>pl+(n-n0)*cw,Y=z=>H-pb-(z-z0+1)*ch;NG={pl,pb,pt,pr,cw,ch,W,H,n0,z0};
  const css=getComputedStyle($('#probeMut')).color,ink=getComputedStyle($('#probeInk')).color,dk=isDark(),cor=dk?'#f0997b':'#a9401f',corL=dk?'#f0997b':'#c4532c',fs=Zm&&W<520?11:12;x.font=fs+'px "Instrument Sans",sans-serif';x.fillStyle=css;x.strokeStyle=css;
  x.save();x.beginPath();x.rect(pl,pt,W-pl-pr,H-pt-pb);x.clip();

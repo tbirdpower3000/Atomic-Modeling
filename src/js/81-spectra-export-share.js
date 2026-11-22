@@ -15,7 +15,7 @@ function drawSpec(){const cv=$('#specCv');if(!cv)return;const Z=sel&&sel<=118?se
  rows.forEach(([k,y0,y1])=>{(k==='ref'?ref.map(w=>({nm:w})):hl.filter(q=>q.nm>=380&&q.nm<=780)).forEach(q=>{const c=nmRGB(q.nm),px=X(q.nm);const g=x.createLinearGradient(px-5,0,px+5,0);g.addColorStop(0,'rgba('+c+',0)');g.addColorStop(0.5,'rgba('+c+',0.55)');g.addColorStop(1,'rgba('+c+',0)');x.fillStyle=g;x.fillRect(px-5,y0,10,y1-y0);x.fillStyle='rgb('+c+')';x.fillRect(px-1,y0,2,y1-y0);if(k==='h'&&q.hi===n&&q.lo<n){x.strokeStyle='#fff';x.lineWidth=1;x.strokeRect(px-4,y0+2,8,y1-y0-4);}});
   x.fillStyle='rgba(255,255,255,0.75)';x.font='11px "Instrument Sans",sans-serif';x.textAlign='left';if(spMode==='both')x.fillText(k==='ref'?'measured':'one-electron ion, exact',6,y0+13);});
  x.fillStyle='rgba(255,255,255,0.6)';x.font='11px "Instrument Sans",sans-serif';x.textAlign='center';for(let w=400;w<=760;w+=(W<520?80:40))x.fillText(w+' nm',X(w),H-5);
- const sw=w=>'<i style="background:rgb('+nmRGB(w)+')"></i>',ion=Z===1?'hydrogen atom':NAMEZ(Z).toLowerCase()+' with all but one electron removed';let h='<div class="nm" style="font-size:20px">'+NAMEZ(Z)+'</div>';
+ const sw=w=>'<i style="background:rgb('+nmRGB(w)+')"></i>',ion=Z===1?'hydrogen atom':NAMEZ(Z).toLowerCase()+' with all but one electron removed';let h='<div class="nm" style="font-size:var(--f5)">'+NAMEZ(Z)+'</div>';
  if(spMode!=='h'){h+='<div class="tbrow">'+tb('m')+'Strongest visible lines of the neutral atom, wavelengths in air (NIST Atomic Spectra Database). A short reference list, not the full spectrum.</div>';
   h+=ref.length?(SPK[sym]?'<p style="margin:4px 0 6px">'+SPK[sym]+'</p>':'')+'<p style="margin:0;line-height:1.9">'+ref.map(w=>'<span style="white-space:nowrap;margin-right:12px">'+sw(w)+w.toFixed(1)+' nm</span>').join(' ')+'</p>':'<p class="note">No reference lines are stored for '+NAMEZ(Z).toLowerCase()+' yet. Try H, He, Li, Na, K, Ca, Cu, Sr, Ne, Ar or Hg, or switch to the one-electron ion.</p>';}
  if(spMode!=='ref'){const vis=hl.filter(q=>q.nm>=380&&q.nm<=780),cur=hl.filter(q=>q.hi===n&&q.lo<n);h+='<div class="tbrow" style="margin-top:10px">'+tb('x')+'Lines of a '+ion+', from the Rydberg formula with the mass-'+A+' nucleus. Exact apart from tiny relativistic shifts.</div>';
@@ -33,18 +33,54 @@ $('#shCsv').addEventListener('click',()=>{const keys=Object.keys(PI).filter(k=>D
 $('#shIso').addEventListener('click',()=>{const rows=['Z,symbol,A,N,natural_abundance_percent,half_life_seconds,decay_mode,binding_energy_per_nucleon_MeV,spin_parity'];ISO.forEach(r=>{const d=NUCD?NUCD[r[0]+'-'+r[1]]:null;rows.push([r[0],SYM[r[0]-1],r[1],r[1]-r[0],r[2]==null?'':r[2],r[3]==null?'stable':(10**r[3]).toPrecision(4),r[4]||'',d?d[0]:'',d&&d[3]?d[3]:''].join(','));});$('#shNote').textContent=dl('isotopes.csv','# half-lives: NUBASE2020; binding energies and spins: AME2020 / NUBASE2020\n'+rows.join('\n')+'\n','text/csv')?'Saved isotopes.csv':'This browser blocked the download.';});
 $('#shPng').addEventListener('click',()=>{try{renderer.render(scene,cam);const a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='atomic-modeling.png';document.body.appendChild(a);a.click();a.remove();$('#shNote').textContent='Saved atomic-modeling.png';}catch(e){$('#shNote').textContent='This browser blocked the download.';}});
 /* ---- share links: the address remembers the view ---- */
-function viewState(){const o={z:sel||1,mode,n,l,m,by:$('#cby').value,eu:EU};if(selIso&&selIso.z===sel&&!selIso.pred)o.a=selIso.a;if(part&&part!=='e')o.p=part;return Object.keys(o).map(k=>k+'='+encodeURIComponent(o[k])).join('&');}
+function viewState(){const o={tab:TAB,z:sel||1,mode,n,l,m,by:$('#cby').value,eu:EU};if(selIso&&selIso.z===sel&&!selIso.pred)o.a=selIso.a;if(part&&part!=='e')o.p=part;return Object.keys(o).map(k=>k+'='+encodeURIComponent(o[k])).join('&');}
 function applyState(str){const o={};str.replace(/^#/,'').split('&').forEach(kv=>{const i=kv.indexOf('=');if(i>0)o[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1));});if(!Object.keys(o).length)return;
  try{const Z=+o.z;if(Z>=1&&Z<=120)showEl(Z);if(o.a&&ISO.some(r=>r[0]===Z&&r[1]===+o.a)){selIso={z:Z,a:+o.a,pred:null};renderIso();}
   const N=+o.n,Lq=+o.l,M=+o.m;if(N>=1&&N<=7&&Lq>=0&&Lq<N&&Math.abs(M)<=Lq){n=N;l=Lq;m=M;rebuild();}
   if(o.by){const c=$('#cby');if([...c.options].some(x=>x.value===o.by)){c.value=o.by;c.dispatchEvent(new Event('change'));}}
   if(o.eu){const b=document.querySelector('[data-eu="'+o.eu+'"]');if(b)b.click();}
   if(o.p){const b=document.querySelector('[data-part="'+o.p+'"]');if(b)b.click();}
-  if(o.mode){const b=document.querySelector('[data-mode="'+o.mode+'"]');if(b)b.click();}}catch(e){console.error('could not restore the shared view',e);}}
+  if(o.mode){const b=document.querySelector('[data-mode="'+o.mode+'"]');if(b)b.click();}
+  if(o.tab)setTab(o.tab,{instant:true});}catch(e){console.error('could not restore the shared view',e);}}
 $('#shLink').addEventListener('click',()=>{let base='https://tbirdpower3000.github.io/Atomic-Modeling/';try{if(window.top===window.self&&/^https?:/.test(location.protocol))base=location.origin+location.pathname;}catch(e){}const url=base+'#'+viewState();
  const done=ok=>{$('#shNote').innerHTML=ok?'Link copied. Anyone who opens it sees this element, view and orbital.':'Copy this link: <input readonly value="'+url+'" style="width:min(100%,420px)" onfocus="this.select()">';};
  try{navigator.clipboard.writeText(url).then(()=>done(true),()=>done(false));}catch(e){done(false);}try{if(window.top===window.self)history.replaceState(null,'','#'+viewState());}catch(e){}});
 
+
+/* ---- tabs: one instrument, six sections ---- */
+const TABS=['atom','pt','spec','nuc','trans','sm'];
+let TAB='atom';
+function tabRedraw(t){
+ try{
+  if(t==='atom'){if(typeof rebuild==='function'&&mode!=='gpu'&&mode!=='qmc')rebuild();}
+  if(t==='pt'){paint();if(!$('#trend').hidden&&PI[cby]&&DATA[cby])drawTrend();}
+  if(t==='spec')drawSpec();
+  if(t==='nuc'){drawNuc();if(typeof drawStab==='function')drawStab();}
+  if(t==='trans'&&NUCD)runTR();
+  if(t==='sm'){SIM.dirty=null;if(!SIM.tracks.length)simFire();}
+ }catch(e){console.error(e);}
+}
+function setTab(t,opt){if(!TABS.includes(t))t='atom';TAB=t;
+ $$('.tabpanel').forEach(p=>p.hidden=p.dataset.panel!==t);
+ $$('[data-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===t)));
+ if(!opt||!opt.keepScroll)window.scrollTo({top:0,behavior:opt&&opt.instant?'auto':'smooth'});
+ window.dispatchEvent(new Event('resize'));
+ requestAnimationFrame(()=>requestAnimationFrame(()=>tabRedraw(t)));
+ ctxUpdate();}
+$$('[data-tab]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+/* what is loaded right now, always on screen */
+function ctxUpdate(){const c=$('#ctxChip');if(!c)return;const Z=sel&&sel<=118?sel:1,a=selIso&&selIso.z===Z?selIso.a:null;
+ c.innerHTML='<b>'+SYM[Z-1]+(a?'-'+a:'')+'</b> <small>'+(mode==='nuc'?'nucleus':mode==='shell'?'shells':mode==='qmc'?'Monte Carlo':mode==='gpu'?'solver':orbName(n,l,m))+'</small>';
+ c.title=NAMEZ(Z)+(a?'-'+a:'')+' · open in the Atom view';}
+$('#ctxChip').addEventListener('click',()=>setTab('atom'));
+/* help and settings */
+$('#helpBtn').addEventListener('click',()=>{const d=$('#helpDlg');d.showModal?d.showModal():d.setAttribute('open','');});
+$('#helpDlg').addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;e.preventDefault();const t=a.getAttribute('href').slice(1);$('#helpDlg').close&&$('#helpDlg').close();setTab(t);});
+const setPanel=$('#setPanel'),setBtn=$('#setBtn');
+function setOpen(v){setPanel.hidden=!v;setBtn.setAttribute('aria-expanded',String(v));}
+setBtn.addEventListener('click',e=>{e.stopPropagation();setOpen(setPanel.hidden);});
+document.addEventListener('click',e=>{if(!setPanel.hidden&&!setPanel.contains(e.target)&&e.target!==setBtn)setOpen(false);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false);});
 /* ---- Learn / Lab level ---- */
 let ULV='learn';try{ULV=localStorage.getItem('lvl')||'learn';}catch(e){}
 function setLvl(v,save){ULV=v;document.documentElement.classList.toggle('learn',v==='learn');$$('[data-lvl]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lvl===v)));
@@ -54,42 +90,46 @@ function setLvl(v,save){ULV=v;document.documentElement.classList.toggle('learn',
 $$('[data-lvl]').forEach(b=>b.addEventListener('click',()=>setLvl(b.dataset.lvl,true)));
 /* ---- guided missions ---- */
 const MSF={island:false,spec:false};
-const go=id=>{const e=document.querySelector(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'});};
+const GOTAB={'#fig':'atom','#pt':'pt','#spec':'spec','#nuc':'nuc','#stab':'nuc','#trans':'trans','#sm':'sm'};
+const go=id=>{const t=GOTAB[id];if(t)setTab(t);const e=document.querySelector(id);if(e&&t&&t!=='atom')setTimeout(()=>e.scrollIntoView({behavior:'smooth',block:'start'}),60);};
 const MS=[
- {id:'atom',t:'Meet an atom',goal:'Find carbon, the element all living things are built from.',steps:['Scroll to the periodic table.','Tap the square marked C (number 6).'],go:()=>go('#pt'),ok:()=>sel===6,
+ {id:'atom',t:'Meet an atom',goal:'Find carbon, the element all living things are built from.',steps:['Open the Table tab.','Tap the square marked C (number 6).'],go:()=>go('#pt'),ok:()=>sel===6,
   won:'Carbon has 6 protons in its nucleus and 6 electrons around it. The number on each square is its proton count, and that number alone decides which element it is.'},
- {id:'cloud',t:'Where is the electron?',goal:'Make a dumbbell-shaped electron cloud.',steps:['Next to the 3D view, choose “Dot cloud”.','Set the shape number l to 1 (a p orbital).','Drag the picture to turn it around.'],go:()=>go('#fig'),ok:()=>l===1&&(mode==='cloud'||mode==='shape'),
+ {id:'cloud',t:'Where is the electron?',goal:'Make a dumbbell-shaped electron cloud.',steps:['In the Atom tab, choose “Dot cloud” under Show.','Set the shape number l to 1 (a p orbital).','Drag the picture to turn it around.'],go:()=>go('#fig'),ok:()=>l===1&&(mode==='cloud'||mode==='shape'),
   won:'An electron is not a tiny ball on a track. Each dot is one place it could turn up, and more dots mean more likely. The two colours are the two halves of its wave, not two electrons.'},
- {id:'shells',t:'Count the shells',goal:'See why sodium is so reactive.',steps:['Pick sodium (Na, number 11) in the periodic table.','Choose the “Shells” view.','Count the electrons in each ring.'],go:()=>go('#pt'),ok:()=>sel===11&&mode==='shell',
+ {id:'shells',t:'Count the shells',goal:'See why sodium is so reactive.',steps:['In the Table tab, pick sodium (Na, number 11).','Back in the Atom tab, choose the “Shells” view.','Count the electrons in each ring.'],go:()=>go('#pt'),ok:()=>sel===11&&mode==='shell',
   won:'Sodium’s electrons sit 2, 8, 1. That one lonely outer electron is easy to give away, which is why sodium reacts so fiercely and why it pairs up with chlorine to make salt.'},
- {id:'light',t:'Fingerprints of light',goal:'Find a metal that makes fireworks green.',steps:['Scroll to “Spectrum”.','Try elements in the periodic table and watch the lines.','Look for one whose lines are mostly green: try barium (Ba) or copper (Cu).'],go:()=>go('#spec'),ok:()=>MSF.spec&&(sel===56||sel===29),
+ {id:'light',t:'Fingerprints of light',goal:'Find a metal that makes fireworks green.',steps:['Open the Light tab.','Pick elements in the Table tab and come back to watch the lines.','Look for one whose lines are mostly green: try barium (Ba) or copper (Cu).'],go:()=>go('#spec'),ok:()=>MSF.spec&&(sel===56||sel===29),
   won:'Every element glows in its own exact colours. That is how firework makers choose their metals, and how astronomers know what stars are made of without ever visiting one.'},
- {id:'iso',t:'Heavy hydrogen',goal:'Find the hydrogen that weighs twice as much.',steps:['Pick hydrogen (H, number 1).','In its card, find the isotope list.','Choose hydrogen-2 (deuterium).'],go:()=>go('#pt'),ok:()=>!!selIso&&selIso.z===1&&selIso.a===2,
+ {id:'iso',t:'Heavy hydrogen',goal:'Find the hydrogen that weighs twice as much.',steps:['In the Table tab, pick hydrogen (H, number 1).','Scroll to its card below the table and find the isotope list.','Choose hydrogen-2 (deuterium).'],go:()=>go('#pt'),ok:()=>!!selIso&&selIso.z===1&&selIso.a===2,
   won:'Isotopes are the same element with extra neutrons. Deuterium has one proton and one neutron, so it weighs twice as much as ordinary hydrogen but behaves almost the same chemically.'},
- {id:'gold',t:'The alchemist’s dream',goal:'Turn mercury into gold.',steps:['Scroll to the Transmutation lab.','Set the start to mercury (Hg) and the target to gold (Au).','Read the route it finds.'],go:()=>go('#trans'),ok:()=>!!ROUTE&&ROUTE[0][0]===80&&ROUTE[ROUTE.length-1][0]===79,
+ {id:'gold',t:'The alchemist’s dream',goal:'Turn mercury into gold.',steps:['Open the Transmute tab.','Set the start to mercury (Hg) and the target to gold (Au).','Read the route it finds.'],go:()=>go('#trans'),ok:()=>!!ROUTE&&ROUTE[0][0]===80&&ROUTE[ROUTE.length-1][0]===79,
   won:'It really can be done: knock one proton out of a mercury nucleus and it becomes gold. But each atom needs millions of times more energy than a chemical reaction, so the gold costs far more than it is worth.'},
- {id:'island',t:'Find the island',goal:'Visit a place on the map that nobody has reached.',steps:['Scroll to the Chart of nuclides.','Tap “Island of stability”.','Tap inside the shaded oval.'],go:()=>go('#nuc'),ok:()=>MSF.island,
+ {id:'island',t:'Find the island',goal:'Visit a place on the map that nobody has reached.',steps:['Open the Nuclei tab.','Tap “Island of stability”.','Tap inside the shaded oval.'],go:()=>go('#nuc'),ok:()=>MSF.island,
   won:'The heaviest atoms ever made fall apart in less than a second. Scientists predict that a little further on, around 184 neutrons, some could last much longer. Nobody has got there yet: we are about 7 neutrons short.'},
- {id:'muon',t:'Catch a muon',goal:'Fire a muon through a particle detector.',steps:['Scroll to Fundamental particles.','Tap the muon (μ).','Watch its track in the detector, then try an electron and compare.'],go:()=>go('#sm'),ok:()=>smSel==='μ'&&SIM.tracks.length>0&&SIM.vis,
+ {id:'muon',t:'Catch a muon',goal:'Fire a muon through a particle detector.',steps:['Open the Particles tab.','Tap the muon (μ).','Watch its track in the detector, then try an electron and compare.'],go:()=>go('#sm'),ok:()=>smSel==='μ'&&SIM.tracks.length>0&&SIM.vis,
   won:'A muon is a heavy cousin of the electron. It punches through every layer of the detector, while an electron stops in the first thick one. That difference is how detectors tell them apart.'},
- {id:'grid',lab:true,t:'Solve the atom yourself',goal:'Make the computer find hydrogen’s ground state.',steps:['Switch to Lab.','Choose the “Solve on GPU” view and press Solve.','Compare its answer with the exact −13.6 eV.'],go:()=>go('#fig'),ok:()=>gPotK==='h'&&GS.states.length>0,
+ {id:'grid',lab:true,t:'Solve the atom yourself',goal:'Make the computer find hydrogen’s ground state.',steps:['Switch to Lab under ⚙.','In the Atom tab, choose “Solve on GPU” and press Solve.','Compare its answer with the exact −13.6 eV.'],go:()=>go('#fig'),ok:()=>gPotK==='h'&&GS.states.length>0,
   won:'The solver knew nothing about orbitals: it only followed the Schrödinger equation on a grid, and the 1s cloud appeared on its own. The small error comes from the grid being too coarse near the nucleus.'},
- {id:'mc',lab:true,t:'Beat the textbook',goal:'Get helium’s energy right to three decimal places.',steps:['Switch to Lab and open “Monte Carlo electrons”.','Choose Helium and Full Monte Carlo, then press Run.','Wait until the result is within 0.005 hartree of the exact value.'],go:()=>go('#fig'),ok:()=>{if(Q.Z!==2||!Q.A)return false;const st=qmcStats(Q.A.es,Q.m==='dmc'?100:50);return !!st&&Math.abs(st[0]-QMCA[2].ref)<0.005&&st[1]<0.005;},
+ {id:'mc',lab:true,t:'Beat the textbook',goal:'Get helium’s energy right to three decimal places.',steps:['Switch to Lab under ⚙, then open “Monte Carlo electrons” in the Atom tab.','Choose Helium and Full Monte Carlo, then press Run.','Wait until the result is within 0.005 hartree of the exact value.'],go:()=>go('#fig'),ok:()=>{if(Q.Z!==2||!Q.A)return false;const st=qmcStats(Q.A.es,Q.m==='dmc'?100:50);return !!st&&Math.abs(st[0]-QMCA[2].ref)<0.005&&st[1]<0.005;},
   won:'The simple textbook picture, where each electron ignores the other, is off by about 1 eV. By tracking both electrons at once and letting them dodge each other, you recovered nearly all of it.'}];
 let msDone=[],msCur=null;try{msDone=JSON.parse(localStorage.getItem('missions')||'[]');}catch(e){}
 function msNext(){return MS.find(x=>!msDone.includes(x.id)&&(!x.lab||ULV==='lab'))||MS.find(x=>!msDone.includes(x.id))||null;}
 function msRender(){const el=$('#msCard');if(!el)return;if(!msCur||(msDone.includes(msCur.id)&&!msCur.just))msCur=msNext();const M=msCur,avail=MS.filter(x=>!x.lab||ULV==='lab');
  $('#msProg').textContent=msDone.length+' of '+MS.length+' done';
+ $('#msLine').textContent=M?((M.just||msDone.includes(M.id))?'✓ '+M.t:'Mission: '+M.t):'All missions complete';
  $('#msList').innerHTML=MS.map((x,i)=>'<button data-ms="'+x.id+'" class="'+(msDone.includes(x.id)?'ok':'')+'" aria-pressed="'+(M&&M.id===x.id)+'">'+(msDone.includes(x.id)?'✓ ':'')+(i+1)+'. '+x.t+(x.lab?' (Lab)':'')+'</button>').join('');
  if(!M){el.innerHTML='<h3>All missions complete</h3><p>You have explored electrons, light, isotopes, nuclei and particles. Everything is open to you now: switch to Lab and experiment.</p>';return;}
  if(M.just||msDone.includes(M.id)){el.innerHTML='<h3>'+M.t+'</h3><p class="done">✓ Mission complete</p><p>'+M.won+'</p><div class="chips"><button id="msGoNext">'+(msNext()?'Next mission':'Finish')+'</button></div>';$('#msGoNext').onclick=()=>{M.just=false;msCur=msNext();msRender();};return;}
  el.innerHTML='<h3>'+M.t+'</h3><p>'+M.goal+'</p><ol>'+M.steps.map(x=>'<li>'+x+'</li>').join('')+'</ol><div class="chips"><button id="msGo">Take me there</button>'+(M.lab&&ULV!=='lab'?'<button id="msLab">Switch to Lab</button>':'')+'</div>';
  $('#msGo').onclick=()=>M.go();const lb=$('#msLab');if(lb)lb.onclick=()=>setLvl('lab',true);}
+$('#msOpen').addEventListener('click',()=>{const b=$('#msBody');b.hidden=!b.hidden;$('#msOpen').setAttribute('aria-expanded',String(!b.hidden));});
 $('#msList').addEventListener('click',e=>{const b=e.target.closest('[data-ms]');if(!b)return;if(msCur)msCur.just=false;msCur=MS.find(x=>x.id===b.dataset.ms);msRender();});
 $('#msReset').addEventListener('click',()=>{msDone=[];MS.forEach(x=>x.just=false);MSF.island=false;msCur=null;try{localStorage.removeItem('missions');}catch(e){}msRender();});
 new IntersectionObserver(es=>{if(es[0].isIntersecting)MSF.spec=true;}).observe($('#specCv'));
-setInterval(()=>{const M=msCur;if(!M||msDone.includes(M.id)||document.hidden)return;let ok=false;try{ok=M.ok();}catch(e){}if(ok){msDone.push(M.id);M.just=true;try{localStorage.setItem('missions',JSON.stringify(msDone));}catch(e){}msRender();}},500);
+setInterval(()=>{const M=msCur;if(!M||msDone.includes(M.id)||document.hidden)return;let ok=false;try{ok=M.ok();}catch(e){}if(ok){msDone.push(M.id);M.just=true;try{localStorage.setItem('missions',JSON.stringify(msDone));}catch(e){}const b=$('#msBody');if(b.hidden){b.hidden=false;$('#msOpen').setAttribute('aria-expanded','true');}msRender();}},500);
 cv.addEventListener('webglcontextlost',e=>{e.preventDefault();GS.run=false;Q.run=false;const n=document.createElement('div');n.id='ctxLost';n.className='ctxlost';n.innerHTML='<p>The browser reset the graphics (this happens on phones when the app is in the background or memory runs low).</p><button>Reload the 3D view</button>';n.querySelector('button').onclick=()=>location.reload();fig.appendChild(n);},false);
 try{if(location.hash.length>1){if(/mode=(vol|gpu|qmc)/.test(location.hash))ULV='lab';applyState(location.hash);}}catch(e){}
 setLvl(ULV,false);
+try{setTab(TAB,{instant:true,keepScroll:true});ctxUpdate();}catch(e){console.error(e);}
 tick();
