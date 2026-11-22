@@ -1,7 +1,7 @@
 """Radial LDA solver against the NIST Atomic Reference Data for Electronic Structure Calculations.
 https://math.nist.gov/DFTdata/atomdata/tables/ptable.html  (LDA column)"""
 import pytest
-from atomic_modeling.radial import solve_atom, configuration, _grid, _solve_l
+from atomic_modeling.radial import solve_atom, solve_atom_lsd, configuration, _grid, _solve_l
 
 # (Z, total energy, {orbital: eigenvalue}) in hartree
 NIST = [
@@ -32,3 +32,20 @@ def test_configurations():
     assert configuration(24)["3d"] == 5 and configuration(24)["4s"] == 1
     assert configuration(29)["3d"] == 10 and configuration(29)["4s"] == 1
     assert sum(configuration(36).values()) == 36
+
+
+# NIST LSD column (spin-polarized): (Z, occupations or None for the neutral atom, total energy)
+NIST_LSD = [(3, None, -7.343957), (3, {"1s": 2}, -7.142818), (8, None, -74.527410), (8, {"1s": 2, "2s": 2, "2p": 3}, -74.016721)]
+
+
+@pytest.mark.parametrize("Z,occ,etot", NIST_LSD)
+def test_matches_nist_lsd(Z, occ, etot):
+    a = solve_atom_lsd(Z, dx=0.004, occupations=occ)
+    assert a.total_energy == pytest.approx(etot, abs=5e-5)
+
+
+def test_spin_fixes_oxygen_ionization_energy():
+    atom = solve_atom_lsd(8, dx=0.004)
+    ion = solve_atom_lsd(8, dx=0.004, occupations={"1s": 2, "2s": 2, "2p": 3})
+    ie = (ion.total_energy - atom.total_energy) * 27.211386
+    assert ie == pytest.approx(13.618, abs=0.4)      # measured 13.618 eV; without spin this model gives 16.6

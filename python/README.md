@@ -41,5 +41,6 @@ write_cube("h2plus.cube", g, states[0].psi)    # open in VESTA or 3Dmol
 ## Accuracy
 
 - **Radial atoms:** total energies and orbital energies agree with the NIST LDA reference tables to about 1e-4 hartree or better (see `tests/test_radial.py`).
-- **Ionization energies** are computed the honest way, as E(ion) − E(atom), not from the top orbital energy. Typical error is a few tenths of an eV; open-shell atoms such as oxygen and fluorine are worse because this version is not spin-polarized.
+- **Ionization energies** are computed as E(ion) − E(atom), not from the top orbital energy. With spin (`solve_atom_lsd`, Hund's-rule occupations) the mean error for H–Kr is 0.30 eV; without spin it is 0.77 eV and oxygen is 3 eV off.
+- **Spin-polarized totals** match the NIST LSD tables (Li −7.343957, O −74.52743 vs −74.527410 hartree).
 - **3D grid:** exact for smooth potentials (harmonic oscillator to 1e-3). A bare nucleus has a cusp no uniform grid resolves, so hydrogen is a few percent high; use the radial solver for accurate atomic numbers and the 3D solver for shapes, molecules and dynamics.

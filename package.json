@@ -1,0 +1,13 @@
+{
+  "name": "atomic-modeling",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "python3 tools/build.py",
+    "test": "python3 tools/build.py --check && node tests/qmc.test.cjs && node tests/smoke.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^23.0.0",
+    "three": "0.128.0"
+  }
+}

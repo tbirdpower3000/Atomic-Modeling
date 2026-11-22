@@ -1,7 +1,7 @@
 """Generate the data files the web app loads.  Run:  python -m atomic_modeling.export"""
 from __future__ import annotations
 import json, os, sys, time
-from .radial import solve_atom, configuration, HARTREE_EV, LETTERS
+from .radial import solve_atom, solve_atom_lsd, configuration, HARTREE_EV, LETTERS
 
 # measured first ionization energies (eV), NIST ASD, Z = 1..36
 IE_MEASURED = [13.598, 24.587, 5.392, 9.323, 8.298, 11.260, 14.534, 13.618, 17.423, 21.565, 5.139, 7.646, 5.986, 8.152,
@@ -23,7 +23,7 @@ def ion_configuration(Z: int) -> dict:
 
 
 def build(zmax: int = 36, dx: float = 0.003, out: str | None = None, verbose: bool = True) -> dict:
-    data = {"method": "all-electron LDA (Slater exchange + VWN5 correlation), spin-unpolarized, spherical, non-relativistic",
+    data = {"method": "all-electron density-functional theory (Slater exchange + VWN5 correlation), spherical, non-relativistic; keys ending _lsd are spin-polarized (Hund occupations), the others spin-unpolarized",
             "units": "hartree for energies unless a key ends in _eV", "atoms": {}}
     for Z in range(1, zmax + 1):
         t = time.time()
@@ -38,6 +38,14 @@ def build(zmax: int = 36, dx: float = 0.003, out: str | None = None, verbose: bo
         else:
             entry["E_ion"] = 0.0
             entry["ie_dscf_eV"] = round(-a.total_energy * HARTREE_EV, 3)
+        # spin-polarized (LSD): the better ionization energies
+        al = solve_atom_lsd(Z, max(dx, 0.004))
+        entry["E_lsd"] = round(al.total_energy, 6)
+        if Z > 1:
+            il = solve_atom_lsd(Z, max(dx, 0.004), occupations=ion_configuration(Z))
+            entry["ie_lsd_eV"] = round((il.total_energy - al.total_energy) * HARTREE_EV, 3)
+        else:
+            entry["ie_lsd_eV"] = round(-al.total_energy * HARTREE_EV, 3)
         # mean radius of the outermost shell, for drawing
         r, u = a.r, a.orbitals[a.homo[0]]
         import numpy as np
@@ -45,7 +53,7 @@ def build(zmax: int = 36, dx: float = 0.003, out: str | None = None, verbose: bo
         entry["r_outer"] = round(float(np.sum(u * u * r * r) * dxg), 4)
         data["atoms"][str(Z)] = entry
         if verbose:
-            print(f"Z={Z:2d} E={entry['E']:.6f} IE(dSCF)={entry['ie_dscf_eV']:.2f} eV  measured {IE_MEASURED[Z - 1]:.2f}  ({time.time() - t:.1f}s)", flush=True)
+            print(f"Z={Z:2d} E={entry['E']:.6f} IE(LDA)={entry['ie_dscf_eV']:.2f} IE(LSD)={entry['ie_lsd_eV']:.2f} eV  measured {IE_MEASURED[Z - 1]:.2f}  ({time.time() - t:.1f}s)", flush=True)
     if out:
         os.makedirs(os.path.dirname(out), exist_ok=True)
         with open(out, "w") as f:

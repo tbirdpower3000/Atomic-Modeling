@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Orbitals in your compass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*STYLES*/</style>
+</head>
+<body>
+<header class="band">
+  <h1>Orbitals inside your compass frame</h1>
+  <p class="lede">Hydrogen orbitals from the real equations, set by the quantum numbers n, l and m. They sit inside your 32 rays at 11.25°, the square and the r = 4 and r = 5.7 circles. Drag to turn, scroll or pinch to zoom. The top view is your notebook page.</p>
+  <details class="manual" id="manual" open>
+    <summary>How to use this page</summary>
+    <div class="mgrid">
+      <div class="mcard"><h3>Quick start</h3><ol>
+        <li><b>Pick an element</b> in the <a href="#pt">periodic table</a>. The 3D view, its label and the readout switch to it.</li>
+        <li><b>Choose a view</b> under <i>Show</i>, next to the 3D view.</li>
+        <li><b>Set the orbital</b> with n, l and m, or swap the electron for a muon or another particle.</li>
+        <li><b>Drag</b> to rotate, <b>pinch or scroll</b> to zoom. <i>Top</i> matches your notebook page.</li>
+      </ol></div>
+      <div class="mcard"><h3>The views</h3><dl>
+        <dt>Shape · Dot cloud · Volume</dt><dd>One electron, exact and instant. Teal and orange are the two signs of the wavefunction.</dd>
+        <dt>Shells</dt><dd>Every shell of the element, with sizes from Slater’s rules (carbon’s outer shell = your r = 4 circle).</dd>
+        <dt>Nucleus</dt><dd>Protons and neutrons, their shell-model orbitals and the nuclear shape.</dd>
+        <dt>Solve on GPU</dt><dd>Solves the Schrödinger equation numerically on a 64³–256³ grid, including atoms up to neon.</dd>
+        <dt>Monte Carlo electrons</dt><dd>The most accurate mode: all electrons of He, Li or Be at once. Press Run and let the error bar shrink.</dd>
+        <dt>Inside a nucleon</dt><dd>Quarks and gluons in a proton or neutron.</dd>
+      </dl></div>
+      <div class="mcard"><h3>Further down</h3><dl>
+        <dt><a href="#pt">Periodic table</a></dt><dd>Colour by any property, see trends, and change temperature, pressure and gravity.</dd>
+        <dt><a href="#spec">Spectrum</a></dt><dd>The colours an element gives off: measured lines, and exact lines for one-electron ions.</dd>
+        <dt><a href="#nuc">Chart of nuclides</a></dt><dd>Every known isotope, research elements and predicted new ones.</dd>
+        <dt><a href="#stab">Stable isotopes</a></dt><dd>The 253 that never decay, plus a tunable experiment that predicts stability.</dd>
+        <dt><a href="#trans">Transmutation lab</a></dt><dd>Cheapest nuclear routes between isotopes (lead → gold, americium → moscovium), on an absolute or Gold = 1 scale.</dd>
+        <dt><a href="#sm">Fundamental particles</a></dt><dd>Quarks, leptons and bosons, a detector simulation that fires any of them, and the quantum mechanics behind the page.</dd>
+      </dl></div>
+      <div class="mcard"><h3>Good to know</h3><ul>
+        <li><b>Energy units</b> (below) change every energy on the page.</li>
+        <li><b>Every number has a label:</b> <span class="tb tb-m">Measured</span> from experiment, <span class="tb tb-x">Exact</span> solved from the equations, <span class="tb tb-c">Computed</span> calculated with a known error, <span class="tb tb-g">Rough guess</span> a simple model.</li>
+        <li><b>Share and export</b> (below the hardware switch): copy a link to the exact view, save a picture, or download the data.</li>
+        <li><b>Heavy modes</b> (GPU grids, Monte Carlo) run on your graphics card. 256³ needs a desktop GPU. The <b>Hardware</b> switch below picks Light or Full for you, and the solver falls back to the main processor on devices without a suitable graphics card.</li>
+        <li><b>Simulations pause</b> when you scroll away from them and pick up again when you come back.</li>
+        <li><b>Pause</b> a long run any time; results so far stay on screen.</li>
+      </ul></div>
+    </div>
+  </details>
+  <div class="tools" style="margin-top:12px"><span style="font-weight:600">Energy units</span><span class="chips" id="eUnits"><button data-eu="eV" aria-pressed="true">electronvolts</button><button data-eu="J" aria-pressed="false">joules</button><button data-eu="cal" aria-pressed="false">calories</button><button data-eu="kJmol" aria-pressed="false">kJ per mole</button><button data-eu="kcalmol" aria-pressed="false">kcal per mole</button></span></div>
+  <div class="tools" style="margin-top:8px"><span style="font-weight:600">Hardware</span><span class="chips" id="gfxChips"><button data-gfx="auto" aria-pressed="true">Auto</button><button data-gfx="light" aria-pressed="false">Light (any device)</button><button data-gfx="full" aria-pressed="false">Full (strong graphics card)</button></span><span class="note" id="gfxNote" style="margin:0"></span></div>
+  <div class="tools" style="margin-top:8px"><span style="font-weight:600">Share and export</span><span class="chips"><button id="shLink">Copy link to this view</button><button id="shPng">Save picture</button><button id="shCsv">Elements (CSV)</button><button id="shIso">Isotopes (CSV)</button></span><span class="note" id="shNote" style="margin:0" aria-live="polite"></span></div>
+</header>
+<div class="wrap">
+  <div class="stagecol">
+    <div class="fig" id="fig">
+      <canvas id="cv" aria-label="3D view of a hydrogen orbital inside the compass frame"></canvas>
+      <div class="hint" id="hint">drag to rotate</div>
+      <div class="simlab" id="simLab" aria-live="polite"></div>
+      <div class="views">
+        <button data-view="top">Top (your page)</button>
+        <button data-view="side">Side</button>
+        <button data-view="three">3/4 view</button>
+      </div>
+    </div>
+    <div class="rad" id="radBox">
+      <p>Radial distribution: how likely the particle is at each distance. Dashed vertical lines are radial nodes.</p>
+      <div class="fig2"><svg id="radSvg" role="img" aria-label="Radial probability curve"></svg></div>
+    </div>
+  </div>
+  <aside>
+    <div>
+      <h2>Show</h2>
+      <div class="chips">
+        <button data-mode="shape" aria-pressed="false">Shape</button>
+        <button data-mode="cloud" aria-pressed="true">Dot cloud</button>
+        <button data-mode="vol" aria-pressed="false">Volume (GPU)</button>
+        <button data-mode="shell" aria-pressed="false">Shells</button>
+        <button data-mode="nuc" aria-pressed="false">Nucleus</button>
+        <button data-mode="gpu" aria-pressed="false">Solve on GPU</button>
+        <button data-mode="qmc" aria-pressed="false">Monte Carlo electrons</button><button data-mode="quark" aria-pressed="false">Inside a nucleon</button>
+      </div>
+    </div>
+    <div id="qnPanel">
+      <h2>Which particle, which well?</h2>
+      <div class="chips" style="margin-bottom:10px"><button data-pot="atom" aria-pressed="true">Electron in an atom</button><button data-pot="nuc" aria-pressed="false">Nucleon in a nucleus</button></div>
+      <div class="chips" id="jRow" hidden style="margin-bottom:10px"><button data-j="1" aria-pressed="true">j = l + ½</button><button data-j="-1" aria-pressed="false">j = l − ½</button></div>
+      <h2>Quantum numbers</h2>
+      <div class="qn">
+        <div class="step"><div class="k">n, shell</div><div class="v" id="vn">3</div><div class="b"><button data-q="n" data-d="-1" aria-label="Lower n">−</button><button data-q="n" data-d="1" aria-label="Raise n">+</button></div></div>
+        <div class="step"><div class="k">l, shape</div><div class="v" id="vl">2</div><div class="b"><button data-q="l" data-d="-1" aria-label="Lower l">−</button><button data-q="l" data-d="1" aria-label="Raise l">+</button></div></div>
+        <div class="step"><div class="k">m, turn</div><div class="v" id="vm">2</div><div class="b"><button data-q="m" data-d="-1" aria-label="Lower m">−</button><button data-q="m" data-d="1" aria-label="Raise m">+</button></div></div>
+      </div>
+      <div class="rng" id="volRow" style="margin-top:12px" hidden><label for="glow">Glow</label><input type="range" id="glow" min="0.3" max="12" step="0.1" value="3"><span id="glowV">3.0</span></div>
+      <div class="rng" id="ptsRow" style="margin-top:12px"><label for="pts">Dots</label><input type="range" id="pts" min="2000" max="200000" step="1000" value="40000"><span id="ptsV">40,000</span></div>
+      <div id="partBox"><h2 style="margin-top:14px">Orbiting particle</h2>
+      <div class="chips" id="partChips"><button data-part="e" aria-pressed="true">Electron</button><button data-part="mu" aria-pressed="false">Muon</button><button data-part="tau" aria-pressed="false">Tau</button><button data-part="pbar" aria-pressed="false">Antiproton</button></div>
+      <p class="note">Shapes stay the same; size and energy scale with the particle’s mass. Uses the nucleus of the selected element (hydrogen if none).</p></div>
+    </div>
+    <div class="read" id="read"></div>
+    <div class="quiz" id="quiz">
+      <h2>Name that orbital</h2>
+      <p id="qText">Count the nodes in the dot cloud and the radial curve, then pick the orbital.</p>
+      <div class="chips" id="qOpts"></div>
+      <div class="chips" style="margin-top:10px"><button id="qStart">Start a round</button><button id="qStop" hidden>Back to explore</button></div>
+      <p class="score" id="qScore" style="margin:10px 0 0">Score 0 of 0</p>
+    </div>
+    <div id="qmcPanel" hidden>
+      <h2>Monte Carlo electrons</h2>
+      <p class="note" style="margin:0 0 8px">Instead of a grid, this scatters hundreds of random snapshots ("walkers") of <b>all</b> the electrons at once, the way a path tracer fires random light rays. Each frame moves every walker a little, and the averages sharpen over time like a ray-traced image clearing up. Because every electron is tracked together, they can dodge each other, which the grid’s mean field cannot do.</p>
+      <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><span>Atom</span><span class="chips"><button data-qz="2" aria-pressed="false">Helium</button><button data-qz="3" aria-pressed="true">Lithium</button><button data-qz="4" aria-pressed="false">Beryllium</button></span></div>
+      <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><span>Method</span><span class="chips"><button data-qm="mf" aria-pressed="false">No dodging</button><button data-qm="vmc" aria-pressed="false">Dodging (VMC)</button><button data-qm="dmc" aria-pressed="true">Full Monte Carlo (DMC)</button></span></div>
+      <label class="chk" style="min-height:36px"><input type="checkbox" id="qIon" checked>Also simulate the ion, to get the ionization energy</label>
+      <div class="chips" style="margin-top:10px"><button id="qGo">Run</button><button id="qStop">Pause</button><button id="qReset">Start over</button></div>
+      <p class="note" id="qStat" style="margin:8px 0 0">Press Run.</p>
+      <div class="read" id="qRes" style="margin-top:10px"></div>
+      <p class="note" id="qWhat"></p>
+    </div>
+    <div id="gpuPanel" hidden>
+      <h2>GPU Schrödinger solver</h2>
+      <p class="note" style="margin:0 0 8px">Solves for the lowest-energy states numerically on a 64³ or 128³ grid. The graphics card relaxes the wavefunction toward its ground state (imaginary-time evolution); the main processor keeps each new state separate from the ones already found and measures its energy. You can watch it converge.</p>
+      <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><label for="gPot">System</label><select id="gPot"><option value="h">Hydrogen-like atom (check vs exact)</option><option value="h2">H₂⁺ molecule ion: two protons, one electron</option><option value="ws">Deformed nucleus: one neutron in a Woods–Saxon well</option><option value="ho">Harmonic oscillator (check vs exact)</option><option value="scf">Many-electron atom, helium to neon (mean field)</option></select></div>
+      <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><span>Grid</span><span class="chips"><button data-gg="32" aria-pressed="false">32³ on the CPU (any device)</button><button data-gg="64" aria-pressed="true">64³ (fast)</button><button data-gg="128" aria-pressed="false">128³ (8× finer)</button><button data-gg="256" aria-pressed="false" id="gg256">256³ (big GPUs)</button></span></div>
+      <div class="sl" id="gParA"><label for="gA">Parameter</label><input type="range" id="gA"><output id="gAo"></output></div>
+      <div class="sl" id="gParB"><label for="gB">Parameter</label><input type="range" id="gB"><output id="gBo"></output></div>
+      <div class="sl" id="gKRow" style="grid-template-columns:7em minmax(0,1fr)"><label for="gK">States to find</label><select id="gK"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
+      <label class="chk" style="min-height:36px" id="gLatRow" hidden><input type="checkbox" id="gLat" checked>Self-repulsion fix (Latter tail): an electron no longer repels its own charge</label><label class="chk" style="min-height:36px"><input type="checkbox" id="gMom" checked>Momentum acceleration (the “heavy-ball” trick from training neural networks)</label>
+      <label class="chk" style="min-height:36px"><input type="checkbox" id="gWarm" checked>Warm start from the last solution when you change a setting</label><label class="chk" style="min-height:36px"><input type="checkbox" id="gOnGpu" checked>Keep the whole solve on the GPU: the potential is cached there, the picture is drawn straight from GPU memory, the workload is paced to a steady level, and each finished state is copied back without stalling</label><label class="chk" style="min-height:36px"><input type="checkbox" id="gUp" checked>Upscale (the FSR trick): on the 128³ grid, solve on 64³ first and enlarge that answer as the starting guess</label>
+      <div class="chips" style="margin-top:10px"><button id="gGo">Solve</button><button id="gStop">Stop</button></div>
+      <div id="gTdBox" style="margin-top:12px"><h3 class="trh">Evolve in real time</h3><p class="note" style="margin:0 0 6px">Solves the time-dependent Schrödinger equation on the GPU and draws straight from graphics memory.</p>
+        <div class="sl"><label for="gKp">Packet speed</label><input type="range" id="gKp" min="0" max="3" step="0.1" value="1"><output id="gKpo">1</output></div>
+        <div class="chips"><button id="gTdPk">Fire a wave packet</button><button id="gTdSup" hidden>Mix states 1 and 2</button></div></div>
+      <p class="note" id="gStat" style="color:var(--ink)"></p>
+      <div class="read" id="gRes"></div>
+    </div>
+    <div id="nucPanel" hidden>
+      <h2>Nucleus simulator</h2>
+      <p class="tbrow"><span class="tb tb-m">Measured</span>binding energies and spins (AME2020, NUBASE2020). <span class="tb tb-g">Rough guess</span>the shape, density profile and shell levels are simple models.</p>
+      <p class="note" style="margin:0 0 8px">Pick any element in the periodic table, or any isotope in its card or the charts, to load it here.</p>
+      <label class="chk"><input type="checkbox" id="nJig" checked>Jiggle (nucleons never sit still)</label>
+      <label class="chk"><input type="checkbox" id="nVal" checked>Highlight the outer-shell (valence) nucleons</label>
+      <div class="read" id="nucRead" style="margin-top:8px"></div>
+      <div class="read" style="margin-top:12px"><h2 style="margin:0 0 4px">Shell model levels</h2><p class="note" style="margin:0 0 6px">Protons and neutrons fill their own ladders of energy levels, two per orbit direction, like electrons. Big gaps after 2, 8, 20, 28, 50, 82 and 126 make those numbers magic.</p><div style="position:relative;height:420px" id="lvlBox"><svg id="lvlSvg" style="position:absolute;inset:0;width:100%;height:100%" role="img" aria-label="Shell model level diagram"></svg></div></div>
+      <div class="read" style="margin-top:12px"><h2 style="margin:0 0 4px">Binding energy per nucleon</h2><p class="note" style="margin:0 0 6px">How tightly each nucleus is held together, for every stable or long-lived isotope. The peak near iron and nickel is why stars stop fusing there.</p><div style="position:relative;height:220px"><svg id="baSvg" style="position:absolute;inset:0;width:100%;height:100%" role="img" aria-label="Binding energy per nucleon against mass number"></svg></div></div>
+    </div>
+    <div id="quarkPanel" hidden>
+      <h2>Inside a nucleon</h2>
+      <div class="chips"><button data-nuc="p" aria-pressed="true">Proton (uud)</button><button data-nuc="n" aria-pressed="false">Neutron (udd)</button></div>
+      <div class="read" style="margin-top:12px" id="quarkRead"></div>
+    </div>
+    <div id="shellPanel" hidden>
+      <h2>Shells</h2>
+      <p class="tbrow"><span class="tb tb-g">Rough guess</span>Shell sizes come from Slater’s screening rules, a simple model. Electron counts per shell are exact.</p>
+      <div class="qn" style="grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);margin-bottom:12px">
+        <div class="step"><div class="k">How many</div><div class="v" id="vK">4</div><div class="b"><button id="kDn" aria-label="Fewer shells">−</button><button id="kUp" aria-label="More shells">+</button></div></div>
+        <div class="step" style="display:flex;flex-direction:column;justify-content:center;gap:6px"><button id="kFit">Fit to element</button><div class="k" id="kInfo">Pick an element to fit</div></div>
+      </div>
+      <h2>Spacing</h2>
+      <div class="chips"><button data-sp="real" aria-pressed="true">Real size (carbon = 4)</button><button data-sp="lin" aria-pressed="false">Even: r ∝ n</button><button data-sp="sq" aria-pressed="false">Hydrogen: r ∝ n²</button></div>
+      <ul class="shells" id="shellList"></ul>
+      <p class="note" id="shellNote"></p>
+    </div>
+    <div>
+      <h2>Layers</h2>
+      <label class="chk"><input type="checkbox" data-layer="rays" checked>32 rays at 11.25°</label>
+      <label class="chk"><input type="checkbox" data-layer="square" checked>Square and N₁–N₄</label>
+      <label class="chk"><input type="checkbox" data-layer="circles" checked>Circles r = 4 and r = 5.7</label>
+      <label class="chk"><input type="checkbox" data-layer="rosette">8-circle rosette</label>
+      <label class="chk"><input type="checkbox" data-layer="planes">Same circles in the two upright planes</label>
+      <label class="chk"><input type="checkbox" data-layer="nucleus" checked>Nucleus of the selected isotope (enlarged)</label>
+      <label class="chk"><input type="checkbox" id="autoRot" checked>Slow spin</label>
+    </div>
+  </aside>
+</div>
+<section class="ptband" id="pt">
+  <h2>Periodic table</h2>
+  <p class="lede">Hover over an element to preview it, or tap it to load its highest-energy orbital into the 3D view. The full breakdown appears under the table, where you can load any of its subshells. Colours show the block (the type of subshell the element fills last) until you pick a property to colour and chart by.</p>
+  <div class="tools">
+    <label for="ptq" class="sr" style="position:absolute;left:-9999px">Find an element</label>
+    <input type="search" id="ptq" placeholder="Find: iron, Fe or 26" autocomplete="off">
+    <button data-bf="s" aria-pressed="false"><i class="bs" style="display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px"></i>s block</button>
+    <button data-bf="p" aria-pressed="false"><i class="bp" style="display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px"></i>p block</button>
+    <button data-bf="d" aria-pressed="false"><i class="bd" style="display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px"></i>d block</button>
+    <button data-bf="f" aria-pressed="false"><i class="bf" style="display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px"></i>f block</button>
+    <button id="resBtn" aria-pressed="false">Superheavy research (104–120)</button>
+  </div>
+  <div class="tools"><label for="cby" style="font-weight:600">Colour and chart by</label>
+    <select id="cby"><option value="block">Block (s, p, d, f)</option><option value="state">State of matter (temperature and pressure)</option><option value="cov">Atomic size</option><option value="ie">Ionization energy</option><option value="en">Electronegativity</option><option value="ea">Electron affinity</option><option value="mp">Melting point</option><option value="den">Density</option><option value="zeff">Effective nuclear charge (model)</option><option value="shell">Outer shell size (model)</option><option value="iepy">Ionization energy (computed, DFT)</option><option value="iem">Ionization energy (model prediction)</option><option value="val">Outer-shell electrons</option><option value="nst">Number of stable isotopes</option></select>
+    <span class="chips" id="scaleCtl" hidden><button data-sc="lin" aria-pressed="true">Linear</button><button data-sc="rank" aria-pressed="false">Rank</button><button id="valBtn" aria-pressed="false">Values on tiles</button><button id="aiBtn" aria-pressed="false">AI gap-fill</button></span></div>
+  <div class="legendbar" id="scale" hidden></div>
+  <div class="cond" id="cond" hidden>
+    <div class="presets chips"><button data-pre="273.15,0.98692,1,0">STP (0 °C, 100 kPa, 1 g)</button><button data-pre="298.15,1,1,0">Room (25 °C, 1 atm)</button><button data-pre="373.15,1,1,0">Boiling water</button><button data-pre="277,1,1,10.9,1">Ocean floor (10.9 km of water)</button><button data-pre="210,0.006,0.38,0">Mars surface</button><button data-pre="737,92,0.9,0">Venus surface</button><button data-pre="165,1,2.53,0">Jupiter, 1 bar level</button><button data-pre="1500,1,1,0">Lava (1500 K)</button></div>
+    <div class="sl"><label for="tSl">Temperature</label><input type="range" id="tSl" min="0" max="1000" step="1"><output id="tOut"></output></div>
+    <div class="sl"><label for="pSl">Surface pressure</label><input type="range" id="pSl" min="-3" max="3" step="0.01"><output id="pOut"></output></div>
+    <div class="sl"><label for="gSl">Gravity</label><input type="range" id="gSl" min="-2" max="11" step="0.01"><output id="gOut"></output></div>
+    <div class="sl"><label for="hSl">Depth below surface</label><input type="range" id="hSl" min="0" max="1000" step="1"><output id="hOut"></output></div>
+    <div class="sl"><label for="matSel">Material above</label><select id="matSel"><option value="0.0012">Air (0.0012 g/cm³)</option><option value="1" selected>Water (1 g/cm³)</option><option value="3">Rock (3 g/cm³)</option><option value="7.9">Iron (7.9 g/cm³)</option></select><output id="peOut" style="font-weight:600"></output></div>
+    <p class="note" id="regime" style="color:var(--ink)"></p>
+    <div class="phkey" id="phKey"></div>
+    <details class="grav"><summary>What extreme gravity does to elements</summary>
+      <p><b>Gravity works through pressure and heat.</b> Inside planets and stars, gravity squeezes the material underneath it. That raises the pressure and the temperature, and those are what change an element's state. This tool shows that link: pressure at depth = density × gravity × depth.</p>
+      <p><b>Hypergravity in the lab.</b> ESA's Large Diameter Centrifuge spins experiments at up to 20 times Earth's gravity for weeks or months. Researchers have used it to study how molten metals such as titanium aluminide solidify under high gravity. Gravity changes how the melt flows and settles, and so the alloy's structure, not which element it is.</p>
+      <p><b>Neutron stars.</b> Gravity is strong enough to crush matter to nuclear density. Deeper into the crust, nuclei become increasingly neutron-rich and exotic, then neutrons start to leak out, and near the base nuclei merge into shapes nicknamed “nuclear pasta”. Simulations suggest the crust is the strongest material known, about ten billion times stronger than steel.</p>
+      <p><b>Where heavy elements are made.</b> About half the elements heavier than iron form by rapid neutron capture (the r-process). In 2019, astronomers identified freshly made strontium in the glow after the neutron-star merger GW170817. That was the first direct sighting of a heavy element forming in one of these extreme-gravity collisions.</p>
+      <p class="note">Sources: ESA Large Diameter Centrifuge pages; Caplan and Horowitz, “Astromaterial Science and Nuclear Pasta” (2017); Watson et al., Nature 574, 497 (2019).</p>
+    </details>
+  </div>
+  <p class="swipe">Swipe the table sideways to see all 18 groups.</p>
+  <div class="ptlay">
+    <div class="scroll"><div class="ptgrid" id="ptg"></div></div>
+    <div class="trend" id="trend" hidden>
+      <div class="trhead"><div><h3 id="trName"></h3><p id="trWhat" class="trw"></p></div>
+        <div class="cmp"><label for="cmp">Compare with</label><select id="cmp"><option value="">Nothing</option><option value="zeff">Effective nuclear charge</option><option value="shell">Outer shell size</option><option value="cov">Atomic size</option><option value="ie">Ionization energy</option><option value="iepy">Ionization energy (computed, DFT)</option><option value="iem">Ionization energy (model)</option><option value="en">Electronegativity</option></select></div></div>
+      <p class="trw" id="trAxis" style="font-size:13px"></p>
+      <div class="tfig"><svg id="trSvg" role="img" aria-label="Property plotted against atomic number"></svg></div>
+      <div class="why"><b>Why it happens</b><p id="trWhy"></p><p id="trCorr" class="trw"></p></div>
+    </div>
+    <div class="elcard" id="elc"><p style="margin:0;color:var(--mut)">Pick an element to see its electron configuration.</p></div>
+  </div>
+</section>
+<section class="ptband" id="spec">
+  <h2>Spectrum: the light an element gives off</h2>
+  <p class="lede">Heat an element or run electricity through its gas and it glows in its own exact colours, like a fingerprint. Each line is light from an electron dropping between two energy levels. Pick an element in the periodic table to see its lines.</p>
+  <div class="tools"><span style="font-weight:600">Show</span><span class="chips"><button data-sp="ref" aria-pressed="true">Measured lines of the atom</button><button data-sp="h" aria-pressed="false">One-electron ion (exact)</button><button data-sp="both" aria-pressed="false">Both, stacked</button></span></div>
+  <div class="specfig"><canvas id="specCv" aria-label="Emission spectrum from violet at 380 nanometres to red at 780 nanometres"></canvas></div>
+  <div class="read" id="specOut" style="margin-top:10px;max-width:900px" aria-live="polite"></div>
+</section>
+<section class="ptband" id="nuc">
+  <h2>Chart of nuclides</h2>
+  <p class="lede"><span class="tb tb-m">Measured</span>Every known isotope (half-lives from NUBASE2020), plotted by its neutrons (across) and protons (up). Black squares are stable, and the colour shows how long the rest last. Outlined squares are predicted isotopes nobody has made yet, and the shaded oval is the predicted island of stability near 184 neutrons. Stable nuclei hug a curved “valley of stability” that bends away from the dashed N = Z line, because heavy nuclei need extra neutrons to hold their protons together. The thin lines mark the magic numbers (2, 8, 20, 28, 50, 82, 126), where nuclei are extra stable. Hover to inspect, and tap to select.</p>
+  <div class="tools"><span style="font-weight:600">Go to</span><span class="chips"><button data-nz="whole" aria-pressed="true">Whole chart</button><button data-nz="island" aria-pressed="false">Island of stability</button><button data-nz="og" aria-pressed="false">Heaviest ever made</button><button data-nz="fl" aria-pressed="false">Heart of the island</button><button data-nz="next" aria-pressed="false">Next new elements</button></span></div>
+  <p class="note" id="nucZoomNote" hidden style="max-width:860px">Drag to move, pinch or scroll to zoom, and tap any square or the island itself to learn about it. Each square is one nucleus, numbered by its mass number (protons + neutrons). Faint dotted squares are this page’s rough guesses inside the island, coloured by how long the model thinks they would last. Filled squares have been made; outlined squares are predictions nobody has made yet. The thick line is the edge of what has been made so far: the most neutron-rich nucleus of each element. The island sits beyond it, around 184 neutrons and 114–126 protons, where predicted shell closures (dashed coral lines) could make nuclei last far longer than their neighbours. Reaching it needs more neutrons than today’s beams and targets can deliver.</p>
+  <div class="nuclegend" id="nucLegend"></div>
+  <p class="nucinfo" id="nucInfo">Hover over the chart to see an isotope.</p>
+  <div class="nucfig" id="nucFig"><canvas id="nucCv" aria-label="Chart of nuclides: neutrons against protons, coloured by half-life" style="touch-action:pan-y"></canvas><div class="nuczb"><button data-nzb="+" aria-label="Zoom in">+</button><button data-nzb="-" aria-label="Zoom out">−</button><button data-nzb="r" aria-label="Show whole chart">⤢</button></div><div class="nuctip" id="nucTip" hidden></div></div>
+</section>
+<section class="ptband" id="stab">
+  <h2>Map of stable isotopes</h2>
+  <p class="lede">Only 253 isotopes never decay. Here each row is an element, and each square is one of its stable isotopes, placed by how many extra neutrons it carries beyond its protons. Light nuclei sit near zero extra neutrons; lead needs over 40. A coral underline marks isotopes with a magic number of neutrons, and horizontal lines mark magic proton numbers. Magic rows and columns collect extra stable isotopes: tin, with a magic 50 protons, has the most (10). Hover to inspect, and tap to select.</p>
+  <div class="stats" id="stStats"></div>
+  <div class="tools"><span style="font-weight:600">Colour by</span><span class="chips"><button data-stc="ab" aria-pressed="true">Natural abundance</button><button data-stc="par" aria-pressed="false">Proton and neutron pairing</button><button data-stc="pred" aria-pressed="false">Could it decay? (prediction)</button><button data-stc="exp" aria-pressed="false">Stability experiment (model)</button></span>
+    <label class="chk" style="min-height:44px"><input type="checkbox" id="stPrim">Include 35 long-lived natural radioactive isotopes</label></div>
+  <div class="nuclegend" id="stLegend"></div>
+  <div class="cond" id="expPanel" hidden>
+    <h3 style="margin:0 0 4px;font-size:18px">Stability experiment</h3>
+    <p class="tbrow"><span class="tb tb-g">Rough guess</span>A tunable model, scored against the measured list of stable isotopes so you can see what it gets wrong.</p>
+    <p class="note" style="margin:0 0 6px">A liquid-drop mass model with magic-number shell bonuses, fitted to 2,359 measured masses (average error 2.35 MeV). An isotope counts as stable when it can’t beta-decay, its predicted alpha half-life beats your threshold, and it’s below your fission limit. Change the knobs and watch the score.</p>
+    <div class="sl"><label for="xSh">Shell effect</label><input type="range" id="xSh" min="0" max="3" step="0.05" value="1"><output id="oSh"></output></div>
+    <div class="sl"><label for="xW">Magic sharpness</label><input type="range" id="xW" min="1.5" max="6" step="0.1" value="4"><output id="oW"></output></div>
+    <div class="sl"><label for="xT">Alpha threshold</label><input type="range" id="xT" min="5" max="20" step="0.5" value="10"><output id="oT"></output></div>
+    <div class="sl"><label for="xF">Fission limit</label><input type="range" id="xF" min="0.65" max="0.9" step="0.005" value="0.75"><output id="oF"></output></div>
+    <div class="sl"><label for="xZ">Next magic protons</label><select id="xZ"><option value="114" selected>114 (most models)</option><option value="120">120</option><option value="126">126</option></select></div>
+    <div class="chips" style="margin-top:10px"><button id="xReset">Reset to fitted defaults</button></div>
+    <div class="stats" id="expScore"></div>
+    <div id="expNew" style="margin-top:10px"></div>
+  </div>
+  <p class="nucinfo" id="stInfo">Hover over the map to see an isotope.</p>
+  <div class="scroll"><div class="nucfig" id="stFig" style="height:clamp(720px,90vh,980px);min-width:640px"><canvas id="stCv" aria-label="Map of stable isotopes: extra neutrons across, protons up"></canvas></div></div>
+</section>
+<section class="ptband" id="trans">
+  <h2>Transmutation lab</h2>
+  <p class="lede">The alchemists’ dream, done with nuclear physics. Pick a starting isotope and a target, choose which nuclear steps are allowed, and the lab finds a route through real, known isotopes. Each step’s energy comes from measured masses: positive means the step releases energy, negative means you must supply it (with a neutron beam, a particle accelerator or a gamma ray).</p>
+  <div class="chips" id="trPre" style="margin-top:12px"></div>
+  <div class="trgrid">
+    <div class="cond" style="margin:0"><h3 class="trh">Start</h3><div class="trsel"><select id="trSZ" aria-label="Start element"></select><select id="trSA" aria-label="Start mass number"></select></div>
+      <h3 class="trh" style="margin-top:10px">Target</h3><div class="trsel"><select id="trTZ" aria-label="Target element"></select><select id="trTA" aria-label="Target mass number"></select></div>
+      <h3 class="trh" style="margin-top:10px">Allowed steps</h3><div id="trMoves"></div>
+      <h3 class="trh" style="margin-top:10px">Scale</h3><div class="chips" style="margin-bottom:8px"><button data-trn="abs" aria-pressed="true">Absolute</button><button data-trn="au" aria-pressed="false">Gold = 1</button></div>
+      <h3 class="trh" style="margin-top:10px">Find the route with</h3><div class="chips"><button data-trc="steps" aria-pressed="true">Fewest steps</button><button data-trc="energy" aria-pressed="false">Least energy put in</button></div>
+    </div>
+    <div><div class="stats" id="trStats" style="margin-top:0"></div><div class="nucfig" style="height:300px;margin-top:10px" id="trFig"><svg id="tlSvg" style="position:absolute;inset:0;width:100%;height:100%" role="img" aria-label="Route on a zoomed chart of nuclides"></svg></div></div>
+  </div>
+  <ol class="trsteps" id="trSteps"></ol>
+  <p class="tbrow" id="trTrust"></p><p class="note" id="trNote"></p>
+</section>
+<section class="ptband" id="sm">
+  <h2>Fundamental particles</h2>
+  <p class="lede">Everything on this page is built from a few of these 17 particles. Atoms use only three of them directly: up quarks, down quarks and electrons, held together by gluons and photons. Tap a particle to see what it does.</p>
+  <div class="smgrid" id="smGrid"></div>
+  <div class="read" id="smRead" style="margin-top:14px;max-width:820px"></div>
+  <div class="smsim" id="smSim">
+    <h3 style="margin:0 0 4px;font-size:18px">Particle detector simulation</h3>
+    <p class="tbrow"><span class="tb tb-m">Measured</span>masses, lifetimes and decay odds. <span class="tb tb-x">Exact</span>bending in the magnet and relativity. <span class="tb tb-g">Rough guess</span>the detector is a cartoon and jets are simplified.</p>
+    <p class="note" style="margin:0 0 8px;max-width:820px">Fire the selected particle from the centre of a detector like the ones at CERN. A magnet bends charged particles (positive one way, negative the other; slower ones curl tighter). Each layer stops different particles, which is how physicists tell them apart. Pick a particle above, then change its momentum and the magnet.</p>
+    <div class="smgridsim">
+      <div class="smcvwrap"><canvas id="smCv" aria-label="Simulated particle detector seen end-on, with particle tracks"></canvas></div>
+      <div>
+        <div class="sl"><label for="smP">Momentum</label><input type="range" id="smP" min="-1.3" max="2.3" step="0.05" value="1"><output id="smPo"></output></div>
+        <div class="sl"><label for="smB">Magnet</label><input type="range" id="smB" min="0" max="4" step="0.1" value="2"><output id="smBo"></output></div>
+        <label class="chk" style="min-height:36px"><input type="checkbox" id="smAnti">Fire the antiparticle (opposite charge)</label>
+        <label class="chk" style="min-height:36px"><input type="checkbox" id="smInv" checked>Draw invisible particles (neutrinos) as faint dots</label>
+        <div class="chips" style="margin-top:8px"><button id="smFire">Fire again</button></div>
+        <div class="phkey" id="smKey" style="font-size:14px"></div>
+        <div class="read" id="smOut" style="margin-top:10px" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+  <details class="grav" style="max-width:860px"><summary>The quantum mechanics behind this page</summary>
+    <p><b>The Schrödinger equation.</b> An electron in an atom is a wave, ψ. Solving Ĥψ = Eψ for one particle around a nucleus gives ψ = R<sub>nl</sub>(r) · Y<sub>lm</sub>(θ, φ). The radial part sets the size and the rings (radial nodes), and the angular part sets the lobes. The 3D view draws exactly these solutions.</p>
+    <p><b>Four quantum numbers.</b> n is the shell, l the shape (s, p, d, f), m the orientation, and spin s = ±½. The Pauli exclusion principle allows only one electron per set of four, which is why a subshell holds 2(2l + 1) electrons and a shell holds 2n². That rule builds the whole periodic table.</p>
+    <p><b>Probability, not orbits.</b> |ψ|² gives the chance of finding the particle at each point; each dot in the cloud is one simulated measurement. The uncertainty principle means the particle has no exact path, only this spread.</p>
+    <p><b>Energy and mass.</b> For one particle of reduced mass μ around a nucleus of charge Z: E<sub>n</sub> = −13.6 eV × (μ ⁄ m<sub>e</sub>) × Z² ⁄ n², and the size scales as (m<sub>e</sub> ⁄ μ) ⁄ Z. Swap the electron for a muon and the atom shrinks about 200 times while its energy grows 200 times.</p>
+    <p><b>Down the scale.</b> Atom about 10⁻¹⁰ m → nucleus about 10⁻¹⁴ m → proton about 10⁻¹⁵ m → quarks and electrons, which show no size at all down to at least 10⁻¹⁸ m. The strong force (gluons) holds quarks inside nucleons, and its leftover reach binds nucleons into nuclei. The weak force (W and Z bosons) lets quarks change type, which is beta decay.</p>
+    <p><b>Where this simple picture stops.</b> In heavy atoms, inner electrons move at a large fraction of light speed, so relativity (the Dirac equation) shifts their energies; it is why gold is yellow and mercury is liquid. Quantum electrodynamics adds tiny corrections such as the Lamb shift. These are not included here.</p>
+  </details>
+</section>
+<div class="foot">
+  <p>The math is the exact hydrogen solution, ψ = R<sub>nl</sub>(r) · Y<sub>lm</sub>(θ, φ), using real spherical harmonics and Laguerre polynomials. Each dot is one simulated position measurement. Teal and coral mark the wave's sign, not charge. The cloud is scaled so 99.5% of the probability fits inside your r = 5.7 circle, and the panel shows what your r = 4 corresponds to in Bohr radii (a₀ ≈ 0.053 nm).</p>
+  <p>Rendering runs on the GPU: orbital shapes, dot clouds and the volume view are computed per vertex, per point and per pixel in shaders, and the nucleus jiggle runs in a vertex shader. Changing n, l or m only updates a few numbers sent to the graphics card.</p>
+  <p>Atoms with more than one electron have the same shapes but different sizes and energies. Shells mode estimates those sizes with Slater’s rules. The nucleus at the centre is enlarged thousands of times: a real nucleus is about 100,000 times smaller than its atom.</p>
+</div>
+<span id="probeInk" hidden></span><span id="probeMut" hidden></span><span id="probeAcc" hidden></span>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+{
+/*SCRIPT*/}
+</script>
+</body>
+</html>
