@@ -196,6 +196,18 @@ button.small{min-height:34px;font-size:var(--f2)}
 .helpdlg{width:min(1100px,94vw);max-height:86vh;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);padding:18px 20px 22px}
 .helpdlg::backdrop{background:rgba(0,0,0,.45)}
 .hdhead{display:flex;align-items:center;gap:12px;margin-bottom:6px}.hdhead h2{font-size:var(--f6);margin:0;flex:1}
+/* ---- fuse and split ---- */
+.becurve{position:relative;height:clamp(210px,30vh,300px);background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:10px}
+.becurve canvas{position:absolute;inset:0;width:100%;height:100%}
+.ffgrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;align-items:start;margin-top:12px}
+@media(max-width:860px){.ffgrid{grid-template-columns:minmax(0,1fr)}}
+.ffstage{position:relative;aspect-ratio:16/10;background:light-dark(#101317,#0b0d10);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ffstage canvas{position:absolute;inset:0;width:100%;height:100%}
+.ffcap{position:absolute;left:12px;right:12px;bottom:10px;color:#e9e7e2;font-size:var(--f2);text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.ffbars{display:grid;gap:5px;margin:8px 0 2px}
+.ffbar{display:grid;grid-template-columns:7.5em minmax(0,1fr) auto;gap:8px;align-items:center;font-size:var(--f2)}
+.ffnm::first-letter{text-transform:uppercase}
+.ffbar i{height:9px;border-radius:5px;background:var(--acc);display:block}
 /* ---- primary actions stand out ---- */
 button.go{background:var(--acc);color:var(--onacc);border-color:var(--acc);font-weight:600}
 button.go:hover{filter:brightness(1.08)}
@@ -234,7 +246,7 @@ button.go:hover{filter:brightness(1.08)}
   <div class="tbin">
     <span class="brand">Atomic Modeling</span>
     <nav class="tabs" id="tabs" aria-label="Sections">
-      <button data-tab="atom" aria-pressed="true">Atom</button><button data-tab="pt" aria-pressed="false">Table</button><button data-tab="spec" aria-pressed="false">Light</button><button data-tab="nuc" aria-pressed="false">Nuclei</button><button data-tab="trans" aria-pressed="false">Transmute</button><button data-tab="sm" aria-pressed="false">Particles</button>
+      <button data-tab="atom" aria-pressed="true">Atom</button><button data-tab="pt" aria-pressed="false">Table</button><button data-tab="spec" aria-pressed="false">Light</button><button data-tab="nuc" aria-pressed="false">Nuclei</button><button data-tab="ff" aria-pressed="false">Fuse &amp; split</button><button data-tab="trans" aria-pressed="false">Transmute</button><button data-tab="sm" aria-pressed="false">Particles</button>
     </nav>
     <button class="ctx" id="ctxChip" title="What is loaded right now. Tap to open it in the Atom view."></button>
     <button class="icon" id="helpBtn" aria-label="How to use this page" title="How to use this page">?</button>
@@ -277,6 +289,7 @@ button.go:hover{filter:brightness(1.08)}
         <dt><a href="#pt">Table</a></dt><dd>Colour by any property, see trends, and change temperature, pressure and gravity.</dd>
         <dt><a href="#spec">Light</a></dt><dd>The colours an element gives off: measured lines, and exact lines for one-electron ions.</dd>
         <dt><a href="#nuc">Nuclei</a></dt><dd>Every known isotope, research elements and predicted new ones, plus the 253 that never decay and a tunable experiment that predicts stability.</dd>
+        <dt><a href="#ff">Fuse &amp; split</a></dt><dd>Where nuclear energy comes from: the binding-energy curve, fusion in stars and reactors, and fission with its chain reaction.</dd>
         <dt><a href="#trans">Transmute</a></dt><dd>Cheapest nuclear routes between isotopes (lead → gold, americium → moscovium), on an absolute or Gold = 1 scale.</dd>
         <dt><a href="#sm">Particles</a></dt><dd>Quarks, leptons and bosons, a detector simulation that fires any of them, and the quantum mechanics behind the page.</dd>
       </dl></div>
@@ -506,6 +519,31 @@ button.go:hover{filter:brightness(1.08)}
   </div>
   <p class="nucinfo" id="stInfo">Hover over the map to see an isotope.</p>
   <div class="scroll"><div class="nucfig" id="stFig" style="height:clamp(720px,90vh,980px);min-width:640px"><canvas id="stCv" aria-label="Map of stable isotopes: extra neutrons across, protons up"></canvas></div></div>
+</section>
+</div>
+</div>
+<div class="tabpanel" data-panel="ff" hidden>
+<section class="ptband" id="ff">
+  <h2>Fuse and split</h2>
+  <p class="lede">All nuclear energy comes from one curve. Nuclei in the middle of it, around iron, are held together most tightly. Light nuclei release energy when they are <b>fused</b> together and heavy ones release energy when they are <b>split</b>, because both move toward the middle. Pick an element in the Table tab and this page shows which way releases energy for it.</p>
+  <p class="tbrow"><span class="tb tb-m">Measured</span>Energies come from measured nuclear masses (AME2020), so every number below is what really happens. <span class="tb tb-g">Rough guess</span>Which fragments appear, and how hot a fusion reaction must be, come from simple models.</p>
+  <div class="becurve"><canvas id="beCv" aria-label="Binding energy per nucleon against mass number, peaking at iron and nickel"></canvas></div>
+  <div class="tools" style="margin-top:12px"><span style="font-weight:600">Show</span><span class="chips" id="ffMode"><button data-ff="fuse" aria-pressed="true">Fusion: join two light nuclei</button><button data-ff="split" aria-pressed="false">Fission: split one heavy nucleus</button></span></div>
+  <div class="ffgrid">
+    <div class="ffstage"><canvas id="ffCv" aria-label="Animation of the reaction"></canvas><div class="ffcap" id="ffCap"></div></div>
+    <div>
+      <div id="ffFuseBox">
+        <div class="tools"><span style="font-weight:600">Reaction</span><span class="chips" id="fuPre"></span></div>
+        <p class="note" id="fuNote" style="margin-top:8px"></p>
+      </div>
+      <div id="ffSplitBox" hidden>
+        <div class="tools"><span style="font-weight:600">Nucleus</span><span class="chips" id="fiPre"></span></div>
+        <label class="chk" style="min-height:36px;margin-top:8px"><input type="checkbox" id="fiChain">Show the chain reaction: let the neutrons hit more nuclei</label>
+      </div>
+      <div class="chips" style="margin-top:10px"><button id="ffGo" class="go">Run it again</button><button id="ffSlow" aria-pressed="false">Slow motion</button></div>
+      <div class="read" id="ffOut" style="margin-top:10px" aria-live="polite"></div>
+    </div>
+  </div>
 </section>
 </div>
 <div class="tabpanel" data-panel="trans" hidden>
@@ -857,7 +895,7 @@ function isoList(Z){const all=ISOZ[Z]||[];if(showAllIso)return all;const keep=al
 function isoInit(Z){selIso=null;const all=ISOZ[Z]||[];let pick=null;if(all.length){const ab=all.filter(r=>r[2]!=null).sort((a,b)=>b[2]-a[2]);pick=ab[0]||all.slice().sort((a,b)=>(b[3]??99)-(a[3]??99))[0];}
  selIso=pick?{z:Z,a:pick[1]}:null;renderIso();}
 function predBox(p){const k=p[0]+'-'+p[1];return '<div class="in">'+NAMEZ(p[0])+'-'+p[1]+' <span style="font-size:var(--f3);color:var(--mut);font-weight:400">predicted, not yet observed</span></div><dl><dt>Nucleus</dt><dd>'+p[0]+' protons + '+(p[1]-p[0])+' neutrons</dd><dt>Predicted half-life</dt><dd>about '+fmtHL(p[2])+', by alpha decay</dd><dt>Decay energy</dt><dd>about '+p[3].toFixed(1)+' MeV'+(p[0]>118?', extrapolated from elements 112–118':', from estimated masses')+'</dd>'+(TARGET[k]?'<dt>Search</dt><dd>'+TARGET[k]+'</dd>':'')+'</dl><p class="use2">Estimated with the Viola–Seaborg formula, which links an alpha emitter’s half-life to its decay energy. Tested on 83 measured superheavy isotopes, it shows almost no bias and is typically within a factor of about 6. Some of these nuclei may split apart (fission) instead, which this model ignores.</p>';}
-function renderIso(){try{if(TAB==='spec')drawSpec();ctxUpdate();}catch(e){}const box=$('#isoSec');if(!box||!sel)return;const all=ISOZ[sel]||[],pl=PRED.filter(p=>p[0]===sel);
+function renderIso(){try{if(TAB==='spec')drawSpec();if(TAB==='ff')beDraw();ctxUpdate();}catch(e){}const box=$('#isoSec');if(!box||!sel)return;const all=ISOZ[sel]||[],pl=PRED.filter(p=>p[0]===sel);
  if(!all.length&&!pl.length){box.innerHTML='<p class="note">No isotope data for this element.</p>';buildNucleus();drawNuc();return;}
  if(!all.length&&(!selIso||!selIso.pred)){const t=pl.find(p=>p[4])||pl[0];selIso={z:sel,a:t[1],pred:t};}
  let chips='';
@@ -1815,8 +1853,175 @@ $('#shLink').addEventListener('click',()=>{let base='https://tbirdpower3000.gith
  try{navigator.clipboard.writeText(url).then(()=>done(true),()=>done(false));}catch(e){done(false);}try{if(window.top===window.self)history.replaceState(null,'','#'+viewState());}catch(e){}});
 
 
+
+/* ---- fuse and split: where nuclear energy comes from ---- */
+const uMeV=1.602176634e-13,NAv=6.02214076e23;
+function Btot(z,a){if(z===0&&a===1)return 0;if(z===1&&a===1)return 0;return Bt(z,a);}
+function Qof(re,pr){let q=0;for(const [z,a] of re){const b=Btot(z,a);if(b==null)return null;q-=b;}for(const [z,a] of pr){const b=Btot(z,a);if(b==null)return null;q+=b;}return q;}
+const Vcoul=(z1,a1,z2,a2)=>1.43996*z1*z2/(1.4*(Math.cbrt(a1)+Math.cbrt(a2)));
+const FUSE=[
+ {id:'dt',nm:'D + T',re:[[1,2],[1,3]],pr:[[2,4],[0,1]],T:150,Tsrc:'m',
+  why:'The easiest fusion reaction there is, and the one every fusion reactor on Earth uses. It needs the lowest temperature because both nuclei carry only one proton, so they push each other apart the least.'},
+ {id:'dd1',nm:'D + D → helium-3',re:[[1,2],[1,2]],pr:[[2,3],[0,1]],T:400,Tsrc:'m',
+  why:'Two deuterium nuclei fuse about half the time into helium-3 and a neutron. Deuterium can be taken straight from seawater, but this needs several times the temperature of D + T.'},
+ {id:'dd2',nm:'D + D → tritium',re:[[1,2],[1,2]],pr:[[1,3],[1,1]],T:400,Tsrc:'m',
+  why:'The other half of the time the same collision makes tritium and a proton instead. The two branches are almost equally likely.'},
+ {id:'dhe3',nm:'D + helium-3',re:[[1,2],[2,3]],pr:[[2,4],[1,1]],T:600,Tsrc:'m',
+  why:'Releases more energy than D + T and makes no neutron at all, so nothing around it becomes radioactive. The catch is the temperature, and that helium-3 is rare on Earth.'},
+ {id:'pli',nm:'proton + lithium-7',re:[[1,1],[3,7]],pr:[[2,4],[2,4]],T:600,Tsrc:'g',
+  why:'The first nuclear reaction ever driven by an accelerator, by Cockcroft and Walton in 1932. One proton splits a lithium nucleus into two alpha particles.'},
+ {id:'pb',nm:'proton + boron-11',re:[[1,1],[5,11]],pr:[[2,4],[2,4],[2,4]],T:3000,Tsrc:'g',
+  why:'Three alpha particles and no neutrons: the cleanest fusion known. Boron has five protons, so the push-apart is far stronger and the temperature needed is enormous.'},
+ {id:'3a',nm:'three helium-4 → carbon',re:[[2,4],[2,4],[2,4]],pr:[[6,12]],T:100,Tsrc:'m',
+  why:'The triple-alpha process. Every carbon atom in your body was made this way, inside a red giant star. Three helium nuclei have to meet almost at once, which is why it needs a dense, hot stellar core.'},
+ {id:'cc',nm:'carbon + carbon',re:[[6,12],[6,12]],pr:[[12,23],[0,1]],T:800,Tsrc:'g',
+  why:'Carbon burning, late in the life of a star at least eight times the mass of the Sun. Stars run through heavier and heavier fuels like this until they reach iron, where fusion stops paying.'},
+ {id:'pp',nm:'the Sun: 4 protons → helium-4',re:[[1,1],[1,1],[1,1],[1,1]],pr:[[2,4]],T:15.7,Tsrc:'m',fixedQ:26.73,
+  why:'The proton–proton chain, which powers the Sun. Two of the four protons must turn into neutrons through the weak force, and that is so unlikely that an average proton waits billions of years. That slowness is why the Sun burns steadily instead of exploding.'}];
+const FISS=[
+ {id:'u235',Z:92,A:235,nu:2.42,bar:6.0,nm:'uranium-235 + a slow neutron',
+  why:'The fuel of almost every nuclear reactor. A slow neutron is enough to split it, so a reactor can run a controlled chain reaction.'},
+ {id:'u238',Z:92,A:238,nu:2.7,bar:6.3,nm:'uranium-238 + a fast neutron',
+  why:'Over 99% of natural uranium is this isotope, but a slow neutron cannot split it. It mostly absorbs neutrons instead, which is how plutonium gets made.'},
+ {id:'pu239',Z:94,A:239,nu:2.88,bar:6.0,nm:'plutonium-239 + a slow neutron',
+  why:'Made inside reactors from uranium-238. It splits more easily than uranium-235 and gives out more neutrons per split.'},
+ {id:'th232',Z:90,A:232,nu:2.3,bar:6.5,nm:'thorium-232 + a fast neutron',
+  why:'Three times as common as uranium. On its own it is poor fuel, but absorbing a neutron turns it into uranium-233, which is excellent fuel.'},
+ {id:'cf252',Z:98,A:252,nu:3.76,bar:5.3,spont:true,nm:'californium-252, splitting on its own',
+  why:'So heavy that it splits without being hit at all: about 3% of its decays are spontaneous fission. It is used as a portable neutron source.'}];
+let ffMode='fuse',fuSel='dt',fiSel='u235',ffSlow=false;
+const FF={t:0,ph:0,run:false,vis:false,parts:[],E:0,cap:'',chain:[],last:0};
+function fissility(Z,A){const I=(A-2*Z)/A;return (Z*Z/A)/(50.883*(1-1.7826*I*I));}
+/* which fragments appear: the heavy one sits near mass 140 whatever you split, because 82 neutrons
+   and 50 protons form closed shells there. The light one is whatever is left. */
+function fragments(Z,A,nu){const AH=Math.max(118,Math.round(139+gauss()*5.5)),AL=A-Math.round(nu)-AH;
+ const ZH=Math.round(Z*AH/A),ZL=Z-ZH;return [[ZL,AL],[ZH,AH]];}
+function gauss(){let u=0;while(!u)u=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*Math.random());}
+function ffCur(){return ffMode==='fuse'?FUSE.find(x=>x.id===fuSel):FISS.find(x=>x.id===fiSel);}
+function ffSetup(){const C=ffCur();if(!C||!NUCD)return;FF.t=0;FF.ph=0;FF.parts=[];FF.chain=[];
+ if(ffMode==='fuse'){FF.re=C.re.map(x=>x.slice());FF.pr=C.pr.map(x=>x.slice());FF.Q=C.fixedQ!=null?C.fixedQ:Qof(C.re,C.pr);}
+ else{const [f1,f2]=fragments(C.Z,C.A+(C.spont?0:1),C.nu),n=Math.round(C.nu);
+  FF.re=C.spont?[[C.Z,C.A]]:[[C.Z,C.A],[0,1]];FF.pr=[f1,f2].concat(Array(n).fill([0,1]));FF.Q=Qof(FF.re,FF.pr);}
+ FF.run=true;ffRead();}
+/* ---- the binding energy curve: the one picture behind all of it ---- */
+function beDraw(){const cv=$('#beCv');if(!cv||!NUCD)return;const W=cv.clientWidth,H=cv.clientHeight;if(W<80)return;
+ const dpr=Math.min(window.devicePixelRatio||1,2);cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
+ const pl=44,pr=12,pt=26,pb=26,X=a=>pl+(a/250)*(W-pl-pr),Y=b=>H-pb-(b/9.2)*(H-pt-pb),dk=isDark(),mut=getComputedStyle($('#probeMut')).color,ink=getComputedStyle($('#probeInk')).color;
+ x.fillStyle=dk?'rgba(76,196,186,0.10)':'rgba(11,111,104,0.07)';x.fillRect(pl,pt,X(62)-pl,H-pt-pb);
+ x.fillStyle=dk?'rgba(240,153,123,0.10)':'rgba(222,95,55,0.08)';x.fillRect(X(62),pt,W-pr-X(62),H-pt-pb);
+ if(!beDraw.pts){const m={};for(const k in NUCD){const [z,a]=k.split('-').map(Number),b=NUCD[k][0];if(b>0&&a<=250&&(!m[a]||b>m[a]))m[a]=b;}
+  beDraw.pts=Object.keys(m).map(a=>[+a,m[a]]).sort((p,q)=>p[0]-q[0]);}
+ x.strokeStyle=mut;x.globalAlpha=0.35;x.lineWidth=1;for(let b=2;b<=8;b+=2){x.beginPath();x.moveTo(pl,Y(b));x.lineTo(W-pr,Y(b));x.stroke();}x.globalAlpha=1;
+ x.strokeStyle=ink;x.lineWidth=2;x.beginPath();beDraw.pts.forEach((p,i)=>{const px=X(p[0]),py=Y(p[1]);i?x.lineTo(px,py):x.moveTo(px,py);});x.stroke();
+ const peak=[62,8.7944];x.fillStyle=dk?'#4cc4ba':'#0b6f68';x.beginPath();x.arc(X(peak[0]),Y(peak[1]),4,0,7);x.fill();
+ x.font='600 '+(W<520?11:12)+'px "Instrument Sans",sans-serif';x.textAlign='center';
+ const lab=(t,px,py,col)=>{x.lineWidth=4;x.lineJoin='round';x.strokeStyle=dk?'rgba(11,13,16,.9)':'rgba(255,255,255,.92)';x.strokeText(t,px,py);x.fillStyle=col;x.fillText(t,px,py);};
+ lab(W<520?'nickel-62: most tightly bound':'nickel-62: the most tightly bound nucleus',X(62)+(W<520?34:12),Y(peak[1])-11,ink);
+ lab('fusion releases energy →',X(31),H-pb-10,dk?'#4cc4ba':'#0b6f68');
+ lab('← fission releases energy',X(160),H-pb-10,dk?'#f0997b':'#a9401f');
+ const Z=sel&&sel<=118?sel:null,A=Z?(selIso&&selIso.z===Z?selIso.a:(ISOZ[Z]&&ISOZ[Z].length?ISOZ[Z].slice().sort((p,q)=>(q[2]||0)-(p[2]||0))[0][1]:Math.round(2.2*Z))):null;
+ if(A&&A<=250&&NUCD[Z+'-'+A]){const b=NUCD[Z+'-'+A][0];x.strokeStyle=ink;x.setLineDash([3,3]);x.lineWidth=1.2;x.beginPath();x.moveTo(X(A),pt);x.lineTo(X(A),H-pb);x.stroke();x.setLineDash([]);
+  x.fillStyle=dk?'#f0997b':'#a9401f';x.beginPath();x.arc(X(A),Y(b),5,0,7);x.fill();lab(SYM[Z-1]+'-'+A,X(A),Y(b)-11,ink);}
+ x.fillStyle=mut;x.font=(W<520?11:12)+'px "Instrument Sans",sans-serif';x.textAlign='right';for(let b=2;b<=8;b+=2)x.fillText(b,pl-6,Y(b)+4);
+ x.textAlign='center';for(let a=0;a<=200;a+=50)x.fillText(a,X(a),H-8);x.fillText('mass number',X(233),H-8);
+ x.save();x.translate(12,H/2);x.rotate(-Math.PI/2);x.fillText('MeV per nucleon',0,0);x.restore();
+ }
+/* ---- the animation ---- */
+const NR=a=>Math.max(5,2.6*Math.cbrt(a));
+function ffDrawNuc(x,px,py,z,a,R,alpha){const dk=true;x.globalAlpha=alpha==null?1:alpha;
+ x.beginPath();x.arc(px,py,R,0,7);x.fillStyle='rgba(120,140,160,0.18)';x.fill();
+ const n=Math.min(a,60),rng=(i)=>{const t=Math.sin(i*12.9898+z*78.233)*43758.5453;return t-Math.floor(t);};
+ for(let i=0;i<n;i++){const u=rng(i),v=rng(i+100),rr=R*0.86*Math.sqrt(u),th=v*6.2832;
+  x.beginPath();x.arc(px+rr*Math.cos(th),py+rr*Math.sin(th),Math.max(1.1,R*0.13),0,7);x.fillStyle=i<n*z/Math.max(a,1)?'#4a8fe0':'#9aa3ab';x.fill();}
+ x.globalAlpha=1;}
+function ffDrawPeanut(x,px,py,R,sep,z,a){const d=sep*R;
+ x.fillStyle='rgba(120,140,160,0.18)';x.beginPath();x.arc(px-d,py,R*0.92,0,7);x.fill();x.beginPath();x.arc(px+d,py,R*0.92,0,7);x.fill();
+ if(sep<0.9){x.beginPath();x.rect(px-d,py-R*0.92*(1-sep),2*d,2*R*0.92*(1-sep));x.fill();}
+ const n=Math.min(a,60),rng=i=>{const t=Math.sin(i*12.9898+z*78.233)*43758.5453;return t-Math.floor(t);};
+ for(let i=0;i<n;i++){const u=rng(i),v=rng(i+100),side=i%2?1:-1,rr=R*0.8*Math.sqrt(u),th=v*6.2832;
+  x.beginPath();x.arc(px+side*d+rr*Math.cos(th),py+rr*Math.sin(th),Math.max(1.1,R*0.12),0,7);x.fillStyle=i<n*z/Math.max(a,1)?'#4a8fe0':'#9aa3ab';x.fill();}}
+function ffDraw(){const cv=$('#ffCv');if(!cv)return;const W=cv.clientWidth,H=cv.clientHeight;if(W<80)return;
+ const dpr=Math.min(window.devicePixelRatio||1,MOB?1.5:2);if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);}
+ const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);const cx=W/2,cy=H/2,sp=ffSlow?0.42:1,t=FF.t*sp,C=ffCur();if(!C)return;
+ x.font='600 13px "Instrument Sans",sans-serif';x.textAlign='center';
+ const tag=(t2,px,py)=>{x.fillStyle='rgba(233,231,226,0.92)';x.fillText(t2,px,py);};
+ const nm=(z,a)=>z===0?'n':(SYM[z-1]||'?')+'-'+a;
+ if(ffMode==='fuse'){
+  const R=Math.min(W,H)*0.085,arrive=1.5,merge=2.2,fly=2.2;
+  if(t<arrive){const f=t/arrive,d=W*0.36*(1-f*f);
+   FF.re.forEach((p,i)=>{const sgn=i===0?-1:1,off=FF.re.length>2?(i-(FF.re.length-1)/2)*0.9:sgn*0.5;
+    const px=cx+off*2*d,py=cy+(FF.re.length>2?Math.sin(i*2.1)*H*0.14*(1-f):0);
+    ffDrawNuc(x,px,py,p[0],p[1],R*Math.cbrt(p[1]/3));tag(nm(p[0],p[1]),px,py+R*Math.cbrt(p[1]/3)+16);});
+   FF.cap=f<0.75?'They repel each other: both are positively charged. Only speed (heat) gets them close enough.':'Close enough for the strong force to grab — it wins only at about a million-millionth of a millimetre.';}
+  else if(t<merge){const f=(t-arrive)/(merge-arrive),Rt=R*Math.cbrt(FF.pr.reduce((q,p)=>q+p[1],0)/3);
+   x.globalAlpha=1;ffDrawNuc(x,cx,cy,FF.re.reduce((q,p)=>q+p[0],0),FF.re.reduce((q,p)=>q+p[1],0),Rt*(1+0.18*Math.sin(f*22)));
+   x.globalAlpha=0.35+0.65*Math.sin(f*3.14);x.beginPath();x.arc(cx,cy,Rt*(1.3+f*1.6),0,7);x.strokeStyle='#ffd27f';x.lineWidth=3;x.stroke();x.globalAlpha=1;
+   FF.cap='Fused. The new nucleus is more tightly bound than the pieces were, and the leftover binding energy comes out.';}
+  else{const f=Math.min(1,(t-merge)/fly);
+   FF.pr.forEach((p,i)=>{const ang=i*(6.2832/FF.pr.length)+0.3,sc=p[0]===0?1.9:1,px=cx+Math.cos(ang)*W*0.42*f*sc,py=cy+Math.sin(ang)*H*0.38*f*sc;
+    if(p[0]===0){x.beginPath();x.arc(px,py,5,0,7);x.fillStyle='#9aa3ab';x.fill();}else ffDrawNuc(x,px,py,p[0],p[1],R*Math.cbrt(p[1]/3));
+    tag(nm(p[0],p[1]),px,py+(p[0]===0?16:R*Math.cbrt(p[1]/3)+16));});
+   FF.cap='The products fly apart carrying '+fE(FF.Q*1e6)+'. In a reactor or a star that energy becomes heat and light.';
+   if(f>=1&&t>merge+fly+0.8)FF.t=0;}
+ }else{
+  const A0=C.A+(C.spont?0:1),R=Math.min(W,H)*0.17,hit=C.spont?0:1.1,wob=hit+1.1,neck=wob+1.0,fly=neck+2.2;
+  if(t<hit){const f=t/hit;const px=cx-W*0.45*(1-f);x.beginPath();x.arc(px,cy,5,0,7);x.fillStyle='#9aa3ab';x.fill();tag('neutron',px,cy-14);
+   ffDrawNuc(x,cx,cy,C.Z,C.A,R);tag(nm(C.Z,C.A),cx,cy+R+18);FF.cap='A neutron drifts in. It has no charge, so nothing pushes it away.';}
+  else if(t<wob){const f=(t-hit)/(wob-hit);ffDrawNuc(x,cx,cy,C.Z,A0,R*(1+0.1*Math.sin(f*26)));tag(nm(C.Z,A0)+'*',cx,cy+R+18);
+   FF.cap='Absorbed. The nucleus is now hot and wobbling, with '+(C.spont?'enough energy to climb the barrier by tunnelling':fE((NUCD[C.Z+'-'+A0]?NUCD[C.Z+'-'+A0][1]:0)*1e6)+' of extra energy')+'.';}
+  else if(t<neck){const f=(t-wob)/(neck-wob);ffDrawPeanut(x,cx,cy,R,0.15+f*0.78,C.Z,A0);
+   FF.cap='Stretching. Surface tension pulls it back into a ball, but the protons push the two ends apart. Past a certain stretch the pushing wins.';}
+  else{const f=Math.min(1,(t-neck)/fly),fr=FF.pr.filter(p=>p[0]>0),ns=FF.pr.filter(p=>p[0]===0);
+   fr.forEach((p,i)=>{const sgn=i?1:-1,sc=Math.cbrt((fr[1-i]?fr[1-i][1]:1)/p[1]),px=cx+sgn*W*0.42*f*sc,py=cy;
+    ffDrawNuc(x,px,py,p[0],p[1],R*Math.cbrt(p[1]/A0));tag(nm(p[0],p[1]),px,py+R*Math.cbrt(p[1]/A0)+18);});
+   ns.forEach((p,i)=>{const ang=-0.9+i*(1.8/Math.max(1,ns.length-1)||0.6),px=cx+Math.cos(ang)*W*0.5*f*1.3,py=cy+Math.sin(ang)*H*0.6*f*1.3;
+    x.beginPath();x.arc(px,py,5,0,7);x.fillStyle='#9aa3ab';x.fill();});
+   if($('#fiChain')&&$('#fiChain').checked&&f>0.45){ns.forEach((p,i)=>{const ang=-0.9+i*(1.8/Math.max(1,ns.length-1)||0.6),g=Math.min(1,(f-0.45)/0.55);
+     const tx=cx+Math.cos(ang)*W*0.46,ty=cy+Math.sin(ang)*H*0.52;x.globalAlpha=g*0.85;ffDrawNuc(x,tx,ty,C.Z,C.A,R*0.42);x.globalAlpha=1;});}
+   FF.cap=($('#fiChain')&&$('#fiChain').checked?'Each loose neutron can split another nucleus, and those give out more neutrons again: a chain reaction. ':'')+'The fragments fly apart with '+fE(FF.Q*1e6)+' between them.';
+   if(f>=1&&t>fly+1.0)FF.t=0;}
+ }
+ x.textAlign='left';x.fillStyle='rgba(233,231,226,0.55)';x.font='12px "Instrument Sans",sans-serif';x.fillText(ffMode==='fuse'?'fusion':'fission',12,20);
+ const cap=$('#ffCap');if(cap&&cap.textContent!==FF.cap)cap.textContent=FF.cap;}
+/* ---- the numbers ---- */
+const NUCNM={'0-1':'neutron','1-1':'proton','1-2':'deuterium','1-3':'tritium'};
+function ffRead(){const C=ffCur(),o=$('#ffOut');if(!C||!o||!NUCD)return;const nm=(z,a)=>NUCNM[z+'-'+a]||NAMEZ(z).toLowerCase()+'-'+a;const grp=L=>{const c={},o2=[];L.forEach(p=>{const k=nm(p[0],p[1]);if(!(k in c)){c[k]=0;o2.push(k);}c[k]++;});return o2.map(k=>(c[k]>1?c[k]+' \u00d7 ':'')+k).join(' + ');};
+ const perKg=(Q,A)=>Q*uMeV*NAv/A*1000,fmtJ=j=>j>=1e12?(j/1e12).toPrecision(3)+' TJ':j>=1e9?(j/1e9).toPrecision(3)+' GJ':(j/1e6).toPrecision(3)+' MJ';
+ let h='',Q=FF.Q;
+ if(ffMode==='fuse'){const [z1,a1]=C.re[0],[z2,a2]=C.re[1]||C.re[0],V=Vcoul(z1,a1,z2,a2),Am=C.re.reduce((q,p)=>q+p[1],0);
+  h='<div class="nm" class="ffnm" style="font-size:var(--f5)">'+grp(C.re)+' → '+grp(C.pr)+'</div>';
+  h+='<p style="margin:6px 0">'+C.why+'</p><dl>';
+  h+='<dt>Energy released</dt><dd>'+fE(Q*1e6)+' per reaction'+(C.fixedQ?' <small>(including the weak-force steps and what the neutrinos carry away)</small>':'')+'</dd>';
+  h+='<dt>Per kilogram of fuel</dt><dd>'+fmtJ(perKg(Q,Am))+' — about '+Math.round(perKg(Q,Am)/24e6/1000).toLocaleString()+'× the same mass of coal</dd>';
+  h+='<dt>Push-apart barrier</dt><dd>'+fE(V*1e6)+' <small>(the electrical repulsion they must get through)</small></dd>';
+  h+='<dt>Temperature needed</dt><dd>'+(C.T>=1000?(C.T/1000).toFixed(1)+' billion':C.T<100?C.T+' million':Math.round(C.T)+' million')+' °C'+(C.Tsrc==='g'?' <small>(rough)</small>':'')+'</dd></dl>';
+  const kT=C.T*1e6*8.617e-5;h+='<p class="note">At that temperature an average nucleus carries only about '+fE(kT)+' of heat energy, roughly '+Math.round(V*1e6/kT)+' times less than the barrier. They get through anyway by <b>quantum tunnelling</b>: a wave can leak through a wall it has not the energy to climb. Without tunnelling the Sun would not shine.</p>';}
+ else{const A0=C.A+(C.spont?0:1),xf=fissility(C.Z,A0),Sn=NUCD[C.Z+'-'+A0]?NUCD[C.Z+'-'+A0][1]:null,fr=FF.pr.filter(p=>p[0]>0),nn=FF.pr.length-fr.length;
+  h='<div class="nm" class="ffnm" style="font-size:var(--f5)">'+nm(C.Z,C.A)+(C.spont?'':' + neutron')+' → '+fr.map(p=>nm(p[0],p[1])).join(' + ')+' + '+nn+' neutrons</div>';
+  h+='<p style="margin:6px 0">'+C.why+'</p><dl>';
+  h+='<dt>Energy released</dt><dd>'+fE(Q*1e6)+' this time <small>(the split is different every time; the average is about 200 MeV)</small></dd>';
+  h+='<dt>Per kilogram</dt><dd>'+fmtJ(perKg(200,C.A))+' — about '+Math.round(perKg(200,C.A)/24e6/1000).toLocaleString()+'× the same mass of coal</dd>';
+  h+='<dt>Neutrons per split</dt><dd>'+nn+' now, '+C.nu+' on average</dd>';
+  if(!C.spont&&Sn!=null){const go=Sn>C.bar;
+   h+='<dt>Does a slow neutron work?</dt><dd>'+(go?'<b>Yes.</b> ':'<b>No.</b> ')+'Catching a neutron gives this nucleus '+fE(Sn*1e6)+', and it needs about '+fE(C.bar*1e6)+' to break. '+(go?'The neutron brings enough on its own, so it can be as slow as you like.':'The neutron must arrive carrying the missing '+fE((C.bar-Sn)*1e6)+' as speed.')+'</dd>';}
+  h+='<dt>How close to falling apart</dt><dd>'+xf.toFixed(2)+' of the way <small>(the fissility: at 1.00 a nucleus cannot hold together at all)</small></dd></dl>';
+  h+='<p class="note">The two pieces are almost never equal. One comes out near mass 140 whatever you split, because 82 neutrons and 50 protons fill complete shells there and that shape is cheapest. Whatever is left becomes the lighter piece — which is why heavier fuels give a heavier light fragment.</p>';}
+ o.innerHTML=h;}
+/* ---- wiring ---- */
+$('#fuPre').innerHTML=FUSE.map(f=>'<button data-fu="'+f.id+'" aria-pressed="'+(f.id===fuSel)+'">'+f.nm+'</button>').join('');
+$('#fiPre').innerHTML=FISS.map(f=>'<button data-fi="'+f.id+'" aria-pressed="'+(f.id===fiSel)+'">'+(SYM[f.Z-1]+'-'+f.A)+'</button>').join('');
+$$('[data-fu]').forEach(b=>b.addEventListener('click',()=>{fuSel=b.dataset.fu;$$('[data-fu]').forEach(y=>y.setAttribute('aria-pressed',String(y===b)));ffSetup();}));
+$$('[data-fi]').forEach(b=>b.addEventListener('click',()=>{fiSel=b.dataset.fi;$$('[data-fi]').forEach(y=>y.setAttribute('aria-pressed',String(y===b)));ffSetup();}));
+$$('[data-ff]').forEach(b=>b.addEventListener('click',()=>{ffMode=b.dataset.ff;$$('[data-ff]').forEach(y=>y.setAttribute('aria-pressed',String(y===b)));
+ $('#ffFuseBox').hidden=ffMode!=='fuse';$('#ffSplitBox').hidden=ffMode==='fuse';ffSetup();}));
+$('#ffGo').addEventListener('click',ffSetup);
+$('#fiChain').addEventListener('change',ffSetup);
+$('#ffSlow').addEventListener('click',e=>{ffSlow=!ffSlow;e.currentTarget.setAttribute('aria-pressed',String(ffSlow));});
+new IntersectionObserver(es=>{FF.vis=es[0].isIntersecting;if(FF.vis){beDraw();if(!FF.pr)ffSetup();}},{rootMargin:'200px 0px'}).observe($('#ff'));
+(function ffLoop(){if(FF.vis&&!document.hidden){const now=performance.now();FF.t+=Math.min(0.05,(now-(FF.last||now))/1000);FF.last=now;try{ffDraw();}catch(e){}}else FF.last=0;requestAnimationFrame(ffLoop);})();
+window.addEventListener('resize',()=>{if(FF.vis)beDraw();});
 /* ---- tabs: one instrument, six sections ---- */
-const TABS=['atom','pt','spec','nuc','trans','sm'];
+const TABS=['atom','pt','spec','nuc','ff','trans','sm'];
 let TAB='atom';
 function tabRedraw(t){
  try{
@@ -1824,6 +2029,7 @@ function tabRedraw(t){
   if(t==='pt'){paint();if(!$('#trend').hidden&&PI[cby]&&DATA[cby])drawTrend();}
   if(t==='spec')drawSpec();
   if(t==='nuc'){drawNuc();if(typeof drawStab==='function')drawStab();}
+  if(t==='ff'){beDraw();if(!FF.pr)ffSetup();}
   if(t==='trans'&&NUCD)runTR();
   if(t==='sm'){SIM.dirty=null;if(!SIM.tracks.length)simFire();}
  }catch(e){console.error(e);}
@@ -1858,7 +2064,7 @@ function setLvl(v,save){ULV=v;document.documentElement.classList.toggle('learn',
 $$('[data-lvl]').forEach(b=>b.addEventListener('click',()=>setLvl(b.dataset.lvl,true)));
 /* ---- guided missions ---- */
 const MSF={island:false,spec:false};
-const GOTAB={'#fig':'atom','#pt':'pt','#spec':'spec','#nuc':'nuc','#stab':'nuc','#trans':'trans','#sm':'sm'};
+const GOTAB={'#fig':'atom','#pt':'pt','#spec':'spec','#nuc':'nuc','#stab':'nuc','#ff':'ff','#trans':'trans','#sm':'sm'};
 const go=id=>{const t=GOTAB[id];if(t)setTab(t);const e=document.querySelector(id);if(e&&t&&t!=='atom')setTimeout(()=>e.scrollIntoView({behavior:'smooth',block:'start'}),60);};
 const MS=[
  {id:'atom',t:'Meet an atom',goal:'Find carbon, the element all living things are built from.',steps:['Open the Table tab.','Tap the square marked C (number 6).'],go:()=>go('#pt'),ok:()=>sel===6,
