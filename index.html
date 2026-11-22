@@ -240,7 +240,7 @@ sup{font-size:max(11px,0.72em)}
       <h2>GPU Schrödinger solver</h2>
       <p class="note" style="margin:0 0 8px">Solves for the lowest-energy states numerically on a 64³ or 128³ grid. The graphics card relaxes the wavefunction toward its ground state (imaginary-time evolution); the main processor keeps each new state separate from the ones already found and measures its energy. You can watch it converge.</p>
       <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><label for="gPot">System</label><select id="gPot"><option value="h">Hydrogen-like atom (check vs exact)</option><option value="h2">H₂⁺ molecule ion: two protons, one electron</option><option value="ws">Deformed nucleus: one neutron in a Woods–Saxon well</option><option value="ho">Harmonic oscillator (check vs exact)</option><option value="scf">Many-electron atom, helium to neon (mean field)</option></select></div>
-      <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><span>Grid</span><span class="chips"><button data-gg="64" aria-pressed="true">64³ (fast)</button><button data-gg="128" aria-pressed="false">128³ (8× finer)</button></span></div>
+      <div class="sl" style="grid-template-columns:7em minmax(0,1fr)"><span>Grid</span><span class="chips"><button data-gg="64" aria-pressed="true">64³ (fast)</button><button data-gg="128" aria-pressed="false">128³ (8× finer)</button><button data-gg="256" aria-pressed="false" id="gg256">256³ (big GPUs)</button></span></div>
       <div class="sl" id="gParA"><label for="gA">Parameter</label><input type="range" id="gA"><output id="gAo"></output></div>
       <div class="sl" id="gParB"><label for="gB">Parameter</label><input type="range" id="gB"><output id="gBo"></output></div>
       <div class="sl" id="gKRow" style="grid-template-columns:7em minmax(0,1fr)"><label for="gK">States to find</label><select id="gK"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
@@ -1098,6 +1098,7 @@ function gSetPot(k){gPotK=k;const P=GPOT[k];[['#gA','#gAo','#gParA',P.A],['#gB',
 function gParLabel(id,v){return id==='#gA'&&gPotK==='scf'?v+' ('+SYM[v-1]+')':v;}
 $('#gPot').addEventListener('change',e=>gSetPot(e.target.value));
 [['#gA','#gAo'],['#gB','#gBo']].forEach(([i,o])=>$(i).addEventListener('input',e=>{$(o).textContent=gParLabel(i,e.target.value);gStop();if(GS.states.length)GS.warm={G:GS.G,pot:gPotK,states:GS.states.map(s2=>s2.psi)};GS.states=[];GS.tdse=null;gRender();}));
+(()=>{const b=document.getElementById('gg256');try{const gl=renderer.getContext();if(gl.getParameter(gl.MAX_TEXTURE_SIZE)<4096)b.hidden=true;}catch(e){}})();
 function gSetGrid(G){GS.G=G;gStop();GS.states=[];GS.tdse=null;gDispose();}
 $$('[data-gg]').forEach(b=>b.addEventListener('click',()=>{GS.chain=null;GS.up=null;gSetGrid(+b.dataset.gg);$$('[data-gg]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));gRender();}));
 const gScene=new THREE.Scene(),gCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);let gRT=null,gMat=null,gTd=null,gCopy=null,gQuad=null,gTex=null,gBuf=null,GI=null;
@@ -1128,7 +1129,7 @@ function gInit(){const d=gDims();if(gRT)return;const o={type:THREE.FloatType,for
    if(uPass<0.5){float hi=-uD*lapc(i,j,k,1)+v*c.y;gl_FragColor=vec4((c.x+uDt*hi)*damp,c.y,0.0,1.0);}else{float hr=-uD*lapc(i,j,k,0)+v*c.x;gl_FragColor=vec4(c.x,(c.y-uDt*hr)*damp,0.0,1.0);}}`});
   gCopy=new THREE.ShaderMaterial({uniforms:{uSrc:{value:null}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',fragmentShader:'uniform sampler2D uSrc;varying vec2 vUv;void main(){gl_FragColor=texture2D(uSrc,vUv);}'});
   gQuad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),gMat);gScene.add(gQuad);}
- const u=gMat.uniforms;u.uG.value=d.G;u.uT.value=d.T;u.uWx.value=d.Wx;u.uWy.value=d.Wy;gBuf=new Float32Array(d.Wx*d.Wy*4);
+ const u=gMat.uniforms;u.uG.value=d.G;u.uT.value=d.T;u.uWx.value=d.Wx;u.uWy.value=d.Wy;gBuf=new Float32Array(d.Wx*Math.min(d.Wy,256)*4);
  GI=(()=>{const X=new Int32Array(d.N),Yy=new Int32Array(d.N);for(let k=0;k<d.G;k++)for(let j=0;j<d.G;j++)for(let i=0;i<d.G;i++){const q=(k*d.G+j)*d.G+i;X[q]=(k%d.T)*d.G+i;Yy[q]=Math.floor(k/d.T)*d.G+j;}return {X,Yy};})();}
 function gParams(){const P=GPOT[gPotK],a=+$('#gA').value,b=P.B?+$('#gB').value:0,L=P.L(a,b),h=2*L/GS.G,pt={h:0,h2:1,ws:2,ho:3,scf:4}[gPotK];
  const vmin=gPotK==='h'||gPotK==='scf'?a/(0.2*h):gPotK==='h2'?2/(0.2*h):gPotK==='ws'?50:0.5*a*a*L*L*3;const dt=1.5/(16*P.D/(h*h)+vmin);
@@ -1136,7 +1137,10 @@ function gParams(){const P=GPOT[gPotK],a=+$('#gA').value,b=P.B?+$('#gB').value:0
 function gSetU(pr){const u=gMat.uniforms;u.uMu.value=$('#gMom').checked?0.8:0;u.uH.value=pr.h;u.uDt.value=pr.dt;u.uD.value=pr.P.D;u.uPt.value=pr.pt;u.uA.value=pr.a;u.uB.value=pr.b;}
 function gUpload(re,im){const d=gDims();if(!gTex||gTex.image.width!==d.Wx){if(gTex)gTex.dispose();gTex=new THREE.DataTexture(new Float32Array(d.Wx*d.Wy*4),d.Wx,d.Wy,THREE.RGBAFormat,THREE.FloatType);}const t=gTex.image.data;t.fill(0);for(let q=0;q<d.N;q++){const o=(GI.Yy[q]*d.Wx+GI.X[q])*4;t[o]=re[q];if(im)t[o+1]=im[q];else t[o+2]=re[q];t[o+3]=1;}gTex.needsUpdate=true;
  gQuad.material=gCopy;gCopy.uniforms.uSrc.value=gTex;renderer.setRenderTarget(gRT[0]);renderer.render(gScene,gCam);renderer.setRenderTarget(null);gQuad.material=gMat;}
-function gRead(both){const d=gDims();renderer.readRenderTargetPixels(gRT[0],0,0,d.Wx,d.Wy,gBuf);const re=new Float32Array(d.N),im=both?new Float32Array(d.N):null;for(let q=0;q<d.N;q++){const o=(GI.Yy[q]*d.Wx+GI.X[q])*4;re[q]=gBuf[o];if(both)im[q]=gBuf[o+1];}return both?[re,im]:re;}
+function gRead(both){const d=gDims(),re=new Float32Array(d.N),im=both?new Float32Array(d.N):null,G=d.G,T=d.T,rows=gBuf.length/(4*d.Wx);
+ for(let y0=0;y0<d.Wy;y0+=rows){const nr=Math.min(rows,d.Wy-y0);renderer.readRenderTargetPixels(gRT[0],0,y0,d.Wx,nr,gBuf);
+  for(let y=y0;y<y0+nr;y++){const ty=Math.floor(y/G),j=y-ty*G;for(let x=0;x<d.Wx;x++){const tx=Math.floor(x/G),i=x-tx*G,k=ty*T+tx,q=(k*G+j)*G+i,o=((y-y0)*d.Wx+x)*4;re[q]=gBuf[o];if(both)im[q]=gBuf[o+1];}}}
+ return both?[re,im]:re;}
 function potCPU(pr,x,y,z){const r=Math.hypot(x,y,z),h=pr.h;if(pr.pt===0)return -pr.a/Math.sqrt(r*r+0.04*h*h);if(pr.pt===1){const dz=0.5*pr.a;return -1/Math.sqrt(x*x+y*y+(z-dz)**2+0.04*h*h)-1/Math.sqrt(x*x+y*y+(z+dz)**2+0.04*h*h);}
  if(pr.pt===2){const R0=1.25*Math.cbrt(pr.a),ct=r>1e-6?z/r:1,R=R0*(1+pr.b*0.6307831*(1.5*ct*ct-0.5));return -50/(1+Math.exp((r-R)/0.65));}if(pr.pt===3)return 0.5*pr.a*pr.a*r*r;
  const V=GS.scf.Vtab,f=Math.min(1,r/GS.scf.rmax)*254.999,i=Math.floor(f);return -pr.a/Math.sqrt(r*r+0.04*h*h)+V[i]+(V[i+1]-V[i])*(f-i);}
@@ -1146,23 +1150,24 @@ function gEnergy(psi,pr){const G=GS.G,h=pr.h,D=pr.P.D,c0=0.5*G;let num=0,den=0;c
 function gOrtho(psi,list){(list||GS.states).forEach(st=>{let d=0;for(let q=0;q<psi.length;q++)d+=psi[q]*st.psi[q];for(let q=0;q<psi.length;q++)psi[q]-=d*st.psi[q];});let nn=0;for(let q=0;q<psi.length;q++)nn+=psi[q]*psi[q];nn=Math.sqrt(nn)||1;for(let q=0;q<psi.length;q++)psi[q]/=nn;return psi;}
 function gSeed(idx){const G=GS.G,n=G*G*G,a=new Float32Array(n),c0=G/2-0.5,w=300*(G/64)**2;let sd=12345+idx*7919;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647-0.5;};for(let k=0;k<G;k++)for(let j=0;j<G;j++)for(let i=0;i<G;i++){const x=i-c0,y=j-c0,z=k-c0;a[(k*G+j)*G+i]=Math.exp(-(x*x+y*y+z*z)/w)*(1+rnd());}return a;}
 function gStart(){if(!gpuOK()){$('#gStat').textContent='This browser’s graphics card can’t render to floating-point textures (WebGL 2 with EXT_color_buffer_float is needed), so the solver can’t run here.';return;}
- if(!GS.chain){GS.itTot=0;GS.up=null;if(GS.G===128&&$('#gUp').checked){GS.chain={stage:64,t0:performance.now()};gSetGrid(64);}}
+ if(!GS.chain){GS.itTot=0;GS.up=null;if(GS.G>64&&$('#gUp').checked){const st=GS.G===256?[64,128,256]:[64,128];GS.chain={st,idx:0,its:[],t0:performance.now()};gSetGrid(64);}}
  gInit();GS.states=[];GS.view=-1;GS.tdse=null;GS.run=true;GS.task=gPotK==='scf'?'scf':'eig';if(GS.task==='scf'){scfInit();if(GS.up&&GS.up.vtab){GS.scf.Vtab=Float32Array.from(GS.up.vtab);scfSendV();}}gBegin();}
-function gUpsample(a){const g=64,G=128,o=new Float32Array(G*G*G),cl=v=>v<0?0:v>g-1?g-1:v;for(let k=0;k<G;k++){const z=cl(k/2-0.25),z0=Math.floor(z),z1=Math.min(g-1,z0+1),fz=z-z0;for(let j=0;j<G;j++){const y=cl(j/2-0.25),y0=Math.floor(y),y1=Math.min(g-1,y0+1),fy=y-y0;for(let i=0;i<G;i++){const x=cl(i/2-0.25),x0=Math.floor(x),x1=Math.min(g-1,x0+1),fx=x-x0,A=(zz,yy,xx)=>a[(zz*g+yy)*g+xx];
+function gUpsample(a){const g=Math.round(Math.cbrt(a.length)),G=2*g,o=new Float32Array(G*G*G),cl=v=>v<0?0:v>g-1?g-1:v;for(let k=0;k<G;k++){const z=cl(k/2-0.25),z0=Math.floor(z),z1=Math.min(g-1,z0+1),fz=z-z0;for(let j=0;j<G;j++){const y=cl(j/2-0.25),y0=Math.floor(y),y1=Math.min(g-1,y0+1),fy=y-y0;for(let i=0;i<G;i++){const x=cl(i/2-0.25),x0=Math.floor(x),x1=Math.min(g-1,x0+1),fx=x-x0,A=(zz,yy,xx)=>a[(zz*g+yy)*g+xx];
  o[(k*G+j)*G+i]=(1-fz)*((1-fy)*((1-fx)*A(z0,y0,x0)+fx*A(z0,y0,x1))+fy*((1-fx)*A(z0,y1,x0)+fx*A(z0,y1,x1)))+fz*((1-fy)*((1-fx)*A(z1,y0,x0)+fx*A(z1,y0,x1))+fy*((1-fx)*A(z1,y1,x0)+fx*A(z1,y1,x1)));}}}return o;}
-function gChainNext(){const C=GS.chain;if(!C)return false;
- if(C.stage===64){C.it64=GS.itTot;GS.up={states:GS.states.map(x=>x.psi),vtab:GS.task==='scf'?Float32Array.from(GS.scf.Vtab):null};C.stage=128;gSetGrid(128);GS.itTot=0;$('#gStat').textContent='Coarse 64³ solve done; enlarging it to 128³ and refining…';setTimeout(gStart,30);return true;}
- const msg=' Upscaled from 64³: '+C.it64.toLocaleString()+' GPU steps on the coarse grid, then '+GS.itTot.toLocaleString()+' on the fine grid ('+((performance.now()-C.t0)/1000).toFixed(0)+' s in all).';GS.chain=null;GS.up=null;$('#gStat').textContent+=msg;return true;}
+function gChainNext(){const C=GS.chain;if(!C)return false;C.its.push(GS.itTot);
+ if(C.idx<C.st.length-1){const g0=C.st[C.idx],g1=C.st[C.idx+1];GS.up={G:g0,states:GS.states.map(x=>x.psi),vtab:GS.task==='scf'?Float32Array.from(GS.scf.Vtab):null};C.idx++;gSetGrid(g1);GS.itTot=0;$('#gStat').textContent=g0+'³ solve done; enlarging it to '+g1+'³ and refining…';setTimeout(gStart,30);return true;}
+ const msg=' Upscaled '+C.st.map(g=>g+'³').join(' → ')+': '+C.its.map((n,k)=>n.toLocaleString()+' GPU steps on '+C.st[k]+'³').join(', ')+' ('+((performance.now()-C.t0)/1000).toFixed(0)+' s in all).';GS.chain=null;GS.up=null;$('#gStat').textContent+=msg;return true;}
 function gBegin(seed){const pr=gParams();GS.pr=pr;GS.it=0;GS.lastE=null;GS.stable=0;gSetU(pr);const list=GS.task==='scf'?GS.scf.cur:GS.states;GS.warmUsed=false;
- if(!seed&&GS.up&&GS.G===128&&GS.up.states[list.length]){seed=gUpsample(GS.up.states[list.length]);GS.warmUsed=true;}
+ if(!seed&&GS.up&&GS.up.G*2===GS.G&&GS.up.states[list.length]){seed=gUpsample(GS.up.states[list.length]);GS.warmUsed=true;}
  if(!seed&&GS.task==='eig'&&$('#gWarm').checked&&GS.warm&&GS.warm.G===GS.G&&GS.warm.pot===gPotK&&GS.warm.states[list.length]){seed=GS.warm.states[list.length];GS.warmUsed=true;}
  const s0=gOrtho(seed?Float32Array.from(seed):gSeed(list.length),list);gUpload(s0);gRender();}
 function gStop(){GS.run=false;}
 const ECACHE={};const gKey=()=>gPotK+'|'+$('#gA').value+'|'+($('#gB').value||'');
 function gCacheE(i,E){const k=gKey();(ECACHE[k]=ECACHE[k]||{})[GS.G+':'+i]=E;}
-function gRich(i){const c=ECACHE[gKey()];if(!c||c['64:'+i]==null||c['128:'+i]==null)return null;return (16*c['128:'+i]-c['64:'+i])/15;}
+function gRichPair(i){const c=ECACHE[gKey()];if(!c)return null;for(const [a,b] of [[128,256],[64,128]])if(c[a+':'+i]!=null&&c[b+':'+i]!=null)return [a,b,(16*c[b+':'+i]-c[a+':'+i])/15];return null;}
+function gRich(i){const p=gRichPair(i);return p?p[2]:null;}
 $('#gGo').addEventListener('click',gStart);$('#gStop').addEventListener('click',()=>{gStop();$('#gStat').textContent='Stopped.';});
-function gEig(){const pr=GS.pr,u=gMat.uniforms,batch=GS.G===128?60:40;gQuad.material=gMat;gSetU(pr);
+function gEig(){const pr=GS.pr,u=gMat.uniforms,batch=GS.G===256?120:GS.G===128?60:40;gQuad.material=gMat;gSetU(pr);
  for(let s2=0;s2<batch;s2++){u.uPsi.value=gRT[0].texture;renderer.setRenderTarget(gRT[1]);renderer.render(gScene,gCam);gRT.reverse();}renderer.setRenderTarget(null);GS.it+=batch;GS.itTot=(GS.itTot||0)+batch;
  const list=GS.task==='scf'?GS.scf.cur:GS.states;let psi=gOrtho(gRead(),list);const E=gEnergy(psi,pr);gUpload(psi);gVol(psi);
  const tol=GS.task==='scf'?2e-5:2e-6,conv=GS.lastE!==null&&Math.abs(E-GS.lastE)<Math.max(1e-6,Math.abs(E)*tol);GS.stable=conv?GS.stable+1:0;GS.lastE=E;return {psi,E,done:GS.stable>=(GS.task==='scf'?2:3)||GS.it>=40000};}
@@ -1187,14 +1192,14 @@ function gPacks(list){const key=GS.G+':'+list.map(x=>x.E).join(',');if(gRed.pack
  for(let p=0;p<list.length;p+=4){const a=new Float32Array(d.Wx*d.Wy*4);for(let c=0;c<4&&p+c<list.length;c++){const ps=list[p+c].psi;for(let q=0;q<d.N;q++)a[(GI.Yy[q]*d.Wx+GI.X[q])*4+c]=ps[q];}
   const t=new THREE.DataTexture(a,d.Wx,d.Wy,THREE.RGBAFormat,THREE.FloatType);t.minFilter=t.magFilter=THREE.NearestFilter;t.needsUpdate=true;gRed.packs.push(t);}
  gRed.packKey=key;return gRed.packs;}
-function gEigGPU(){const pr=GS.pr,u=gMat.uniforms,batch=GS.G===128?60:40;gRedInit();gQuad.material=gMat;gSetU(pr);
+function gEigGPU(){const pr=GS.pr,u=gMat.uniforms,batch=GS.G===256?120:GS.G===128?60:40;gRedInit();gQuad.material=gMat;gSetU(pr);
  for(let s2=0;s2<batch;s2++){u.uPsi.value=gRT[0].texture;renderer.setRenderTarget(gRT[1]);renderer.render(gScene,gCam);gRT.reverse();}renderer.setRenderTarget(null);GS.it+=batch;GS.itTot=(GS.itTot||0)+batch;
  const list=GS.task==='scf'?GS.scf.cur:GS.states;
  for(const pk of gPacks(list)){const dt=gProdReduce(1,pk);gAxpy(pk,dt,1);}
  const en=gProdReduce(0),E=en[0]/en[1];gAxpy(gRed.zero,[0,0,0,0],1/Math.sqrt(en[1]));gQuad.material=gMat;
  const tol=GS.task==='scf'?2e-5:2e-6,conv=GS.lastE!==null&&Math.abs(E-GS.lastE)<Math.max(1e-6,Math.abs(E)*tol);GS.stable=conv?GS.stable+1:0;GS.lastE=E;
  const done=GS.stable>=(GS.task==='scf'?2:3)||GS.it>=40000,now=performance.now();let psi=null;
- if(done||now-(GS.lastVolT||0)>900){psi=gOrtho(gRead(),list);gVol(psi);GS.lastVolT=performance.now();}
+ if(done||now-(GS.lastVolT||0)>(GS.G===256?4000:900)){psi=gOrtho(gRead(),list);gVol(psi);GS.lastVolT=performance.now();}
  return {psi,E,done};}
 function gStep(){if(!GS.run||mode!=='gpu')return;
  if(GS.task==='tdse'){tdStep();return;}
@@ -1229,7 +1234,7 @@ function tdStart(kind){if(!gpuOK())return;gInit();const pr=gParams(),G=GS.G,c0=0
   let nn=0;for(let q=0;q<N;q++)nn+=re[q]*re[q]+im[q]*im[q];nn=Math.sqrt(nn);for(let q=0;q<N;q++){re[q]/=nn;im[q]/=nn;}GS.tdInfo='wave packet fired at the centre; the walls absorb what escapes';}
  GS.pr=pr;gSetU(pr);gUpload(re,im);GS.task='tdse';GS.run=true;GS.t=0;GS.frames=0;GS.zt=[];let mx=0;for(let q=0;q<N;q++)mx=Math.max(mx,re[q]*re[q]+im[q]*im[q]);tdU.uDmax.value=mx||1;tdU.uL.value=pr.L;ensureTdMesh();gRender();}
 function fT(s){return s<1e-21?(s*1e24).toPrecision(3)+' ys':s<1e-18?(s*1e21).toPrecision(3)+' zs':s<1e-15?(s*1e18).toPrecision(3)+' as':s<1e-12?(s*1e15).toPrecision(3)+' fs':sci(s,'s');}
-function tdStep(){const pr=GS.pr,u=gMat.uniforms;gQuad.material=gTd;u.uDt.value=pr.dtR;u.uAbs.value=1;const n=GS.G===128?20:40;
+function tdStep(){const pr=GS.pr,u=gMat.uniforms;gQuad.material=gTd;u.uDt.value=pr.dtR;u.uAbs.value=1;const n=GS.G===256?8:GS.G===128?20:40;
  for(let s2=0;s2<n;s2++){for(let ps=0;ps<2;ps++){u.uPass.value=ps;u.uPsi.value=gRT[0].texture;renderer.setRenderTarget(gRT[1]);renderer.render(gScene,gCam);gRT.reverse();}}renderer.setRenderTarget(null);gQuad.material=gMat;u.uAbs.value=0;
  GS.t+=n*pr.dtR;GS.frames++;tdU.uPsi.value=gRT[0].texture;
  if(GS.frames%8===0){const [re,im]=gRead(true),G=GS.G,c0=0.5*G;let nn=0,zz=0;for(let k=0;k<G;k++){const z=(k+0.5-c0)*pr.h;for(let q=k*G*G;q<(k+1)*G*G;q++){const p=re[q]*re[q]+im[q]*im[q];nn+=p;zz+=p*z;}}GS.zt.push([GS.t,zz/(nn||1)]);if(GS.zt.length>200)GS.zt.shift();GS.norm=nn;gRender();}
@@ -1254,9 +1259,9 @@ function gRender(){const pr=gParams(),P=pr.P,un=gPotK==='ws'?' fm':' bohr';let h
   else{h+='<dl>'+S.eps.map((e,i)=>'<dt>'+ORBN[i]+' (holds '+(+S.occ[i].toFixed(2))+')</dt><dd>'+fE(e*27.211386)+'</dd>').join('')+'<dt>Cycles</dt><dd>'+S.cycle+'</dd></dl>';
    const ie=RAW.ie[S.Z-1],hm=-S.eps[S.K-1]*27.211386,rf=SCFREF[S.Z]?SCFREF[S.Z][S.lat?1:0]:null;h+='<p class="note" style="color:var(--ink)"><b>Experiment:</b> the highest orbital energy predicts the ionization energy (Koopmans’ rule): '+fE(hm)+' vs measured '+fE(ie)+' ('+(100*(hm-ie)/ie).toFixed(0)+'%)'+(rf?'. An exact radial solve of the same model gives '+fE(rf)+', so '+(100*(rf-ie)/ie).toFixed(0)+'% is the model and the rest ('+(100*(hm-rf)/rf).toFixed(0)+'%) is the grid':'')+'. Plain local exchange lets each electron repel its own charge, which badly underbinds the outermost one (lithium’s 2s comes out at 2.15 eV instead of 5.39 eV). The Latter tail (1955) fixes this far from the nucleus by making every electron see exactly one unit of nuclear charge out there, and brings lithium to 5.27 eV. Turn it off to compare. Outer orbitals like lithium’s 2s need a box of about 8 bohr; the 128³ grid then resolves the 1s core better.</p>'+rhoChart(S);}
   if(GS.hist.length)h+='<div class="sub" style="margin-top:8px">Runs so far (predicted vs measured ionization energy)</div><dl>'+GS.hist.map(x=>'<dt>'+SYM[x[0]-1]+'</dt><dd>'+fE(x[1])+' vs '+fE(x[2])+'</dd>').join('')+'</dl>';}
- else{if(!GS.states.length)h+='<p class="note">Press Solve. On a typical laptop graphics card each state takes a few seconds'+(GS.G===128?' (several times longer on the 128³ grid)':'')+'.</p>';
+ else{if(!GS.states.length)h+='<p class="note">Press Solve. On a typical laptop graphics card each state takes a few seconds'+(GS.G===256?' (much longer on the 256³ grid: about 64× the work of 64³, so it needs a desktop graphics card with several GB of memory)':GS.G===128?' (several times longer on the 128³ grid)':'')+'.</p>';
   else h+='<dl>'+GS.states.map((st,i)=>{const ex=EX[gPotK]?EX[gPotK](pr.a,i):(gPotK==='h2'&&Math.abs(pr.a-2)<0.05&&i===0?-1.1026:null);const err=ex!=null?' · exact '+fE(ex*P.unit)+' ('+(100*(st.E-ex)/Math.abs(ex)).toFixed(1)+'% off)':'';
-   const rc=gRich(i),rcs=rc!=null?'<br><b>Predicted for a perfect grid</b> (extrapolating 64³ → 128³): '+fE(rc*P.unit)+(ex!=null?' ('+(100*(rc-ex)/Math.abs(ex)).toFixed(1)+'% off)':''):'';
+   const rc=gRich(i),rcs=rc!=null?'<br><b>Predicted for a perfect grid</b> (extrapolating '+gRichPair(i)[0]+'³ → '+gRichPair(i)[1]+'³): '+fE(rc*P.unit)+(ex!=null?' ('+(100*(rc-ex)/Math.abs(ex)).toFixed(1)+'% off)':''):'';
    return '<dt><button data-gv="'+i+'" aria-pressed="'+(GS.view===i)+'" style="min-height:36px;padding:0 10px">State '+(i+1)+'</button></dt><dd>'+fE(st.E*P.unit)+err+'<br><span style="color:var(--mut);font-size:13px">'+(st.steps||0).toLocaleString()+' GPU steps'+(st.mom?', momentum on':', momentum off')+(st.warm?', warm start':'')+'</span>'+rcs+'</dd>';}).join('')+'</dl><p class="note">Solve once on 64³ and once on 128³ with the same settings, and the page extrapolates both to predict the answer on an infinitely fine grid (Richardson extrapolation). Try toggling momentum to compare step counts.</p>';
   h+='<p class="note">'+({h:'Exact energies are −13.6 eV × Z² ⁄ n², with n = 2 four-fold degenerate. The ground state is hardest because its wavefunction has a sharp point at the nucleus: a finer grid (128³) or a smaller box cuts its error, but too small a box squeezes the larger n = 2 states.',h2:'Electronic energy only (add +1/R for the repulsion between the protons). At 2.0 bohr the exact ground state is −1.1026 hartree (−30.0 eV). State 1 is the bonding orbital, with the electron piled up between the protons; state 2 is antibonding, with a node in the middle.',ws:'No spin–orbit force here, so this shows only what deformation does: at β = 0 the p and d levels are degenerate; stretch the nucleus and they split apart. That splitting is why the simple shell model failed for deformed nuclei like uranium.',ho:'Exact energies are (N + 3⁄2)ħω, with levels holding 1, 3, 6, … states.'})[gPotK]+'</p>';}
  $('#gRes').innerHTML=h;simLabel();}
@@ -1266,7 +1271,7 @@ function rhoChart(S){if(!S.rho)return '';const W=300,H=110,pts=S.rho.filter(p=>p
  return '<div class="sub">Radial electron density r²ρ(r): the bumps are the shells</div><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:110px" role="img" aria-label="Radial density"><polyline fill="none" stroke="var(--acc)" stroke-width="2" points="'+pts.map(p=>(p[0]/rM*W).toFixed(1)+','+(H-14-p[1]/mx*(H-20)).toFixed(1)).join(' ')+'"/><text x="'+W+'" y="'+(H-2)+'" font-size="11" text-anchor="end" fill="var(--mut)">'+rM.toFixed(1)+' bohr</text></svg>';}
 $('#gRes').addEventListener('click',e=>{const b=e.target.closest('[data-gv]');if(!b)return;GS.view=+b.dataset.gv;gVol(GS.states[GS.view].psi);if(tdMesh)tdMesh.visible=false;gRender();});
 let gVolMesh=null,gTex3=null;
-function gVol(psi){const G=GS.G;let mx=0;for(let q=0;q<psi.length;q++)mx=Math.max(mx,Math.abs(psi[q]));const d=new Uint8Array(psi.length*4);for(let q=0;q<psi.length;q++){d[q*4]=Math.round(255*Math.abs(psi[q])/mx);d[q*4+1]=psi[q]>=0?255:0;d[q*4+3]=255;}
+function gVol(psi){let G=GS.G;if(G===256){const g=128,o=new Float32Array(g*g*g);for(let k=0;k<g;k++)for(let j=0;j<g;j++)for(let i=0;i<g;i++){let a=0;for(let c=0;c<8;c++)a+=psi[((2*k+(c>>2))*256+2*j+((c>>1)&1))*256+2*i+(c&1)];o[(k*g+j)*g+i]=a/8;}psi=o;G=g;}let mx=0;for(let q=0;q<psi.length;q++)mx=Math.max(mx,Math.abs(psi[q]));const d=new Uint8Array(psi.length*4);for(let q=0;q<psi.length;q++){d[q*4]=Math.round(255*Math.abs(psi[q])/mx);d[q*4+1]=psi[q]>=0?255:0;d[q*4+3]=255;}
  if(gTex3&&gTex3.image.width!==G){gTex3.dispose();gTex3=null;if(gVolMesh){scene.remove(gVolMesh);disposeObj(gVolMesh);gVolMesh=null;}}
  if(!gTex3){gTex3=new THREE.DataTexture3D(d,G,G,G);gTex3.format=THREE.RGBAFormat;gTex3.type=THREE.UnsignedByteType;gTex3.minFilter=gTex3.magFilter=THREE.LinearFilter;gTex3.unpackAlignment=1;}else gTex3.image.data=d;gTex3.needsUpdate=true;
  if(!gVolMesh){gVolMesh=new THREE.Mesh(new THREE.BoxGeometry(10,10,10),new THREE.ShaderMaterial({uniforms:{uTex:{value:gTex3},uPosC:{value:cPosV},uNegC:{value:cNegV},uGain:volU.uGain},transparent:true,depthWrite:false,side:THREE.BackSide,premultipliedAlpha:true,
