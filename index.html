@@ -1371,7 +1371,7 @@ function gUpsample(a){const g=Math.round(Math.cbrt(a.length)),G=2*g,o=new Float3
 function gChainNext(){const C=GS.chain;if(!C)return false;C.its.push(GS.itTot);
  if(C.idx<C.st.length-1){const g0=C.st[C.idx],g1=C.st[C.idx+1];GS.up={G:g0,states:GS.states.map(x=>x.psi),vtab:GS.task==='scf'?Float32Array.from(GS.scf.Vtab):null};C.idx++;gSetGrid(g1);GS.itTot=0;$('#gStat').textContent=g0+'³ solve done; enlarging it to '+g1+'³ and refining…';setTimeout(gStart,30);return true;}
  const msg=' Upscaled '+C.st.map(g=>g+'³').join(' → ')+': '+C.its.map((n,k)=>n.toLocaleString()+' GPU steps on '+C.st[k]+'³').join(', ')+' ('+((performance.now()-C.t0)/1000).toFixed(0)+' s in all).';GS.chain=null;GS.up=null;$('#gStat').textContent+=msg;return true;}
-function gBegin(seed){const pr=gParams();GS.pr=pr;GS.it=0;GS.lastE=null;GS.stable=0;GS.acc=0;GS.await=null;if(!gCpu()){gSetU(pr);gCacheV();}const list=GS.task==='scf'?GS.scf.cur:GS.states;GS.warmUsed=false;
+function gBegin(seed){const pr=gParams();GS.pr=pr;GS.it=0;GS.lastE=null;GS.stable=0;GS.acc=0;GS.ck=null;GS.await=null;if(!gCpu()){gSetU(pr);gCacheV();}const list=GS.task==='scf'?GS.scf.cur:GS.states;GS.warmUsed=false;
  if(!seed&&GS.up&&GS.up.G*2===GS.G&&GS.up.states[list.length]){seed=gUpsample(GS.up.states[list.length]);GS.warmUsed=true;}
  if(!seed&&GS.task==='eig'&&$('#gWarm').checked&&GS.warm&&GS.warm.G===GS.G&&GS.warm.pot===gPotK&&GS.warm.states[list.length]){seed=GS.warm.states[list.length];GS.warmUsed=true;}
  const s0=gOrtho(seed&&seed.length===GS.G**3?Float32Array.from(seed):gSeed(list.length),list);if(gCpu()){GS.cpsi=s0;GS.cprev=Float32Array.from(s0);}else gUpload(s0);gRender();}
@@ -1427,7 +1427,7 @@ function gEigGPU(){const pr=GS.pr,u=gMat.uniforms,t0=performance.now();gRedInit(
   for(let s2=0;s2<sub;s2++){u.uPsi.value=gRT[0].texture;renderer.setRenderTarget(gRT[1]);renderer.render(gScene,gCam);gRT.reverse();}renderer.setRenderTarget(null);GS.it+=sub;GS.itTot=(GS.itTot||0)+sub;tot+=sub;
   for(const pk of packs){const dt=gProdReduce(1,pk);gAxpy(pk,dt,1);}
   en=gProdReduce(0);E=en[0]/en[1];GS.nb=(GS.nb||0)+1;if(GS.nb%6===1)mx=gReduce(true)[1]/en[1];gAxpy(gRed.zero,[0,0,0,0],1/Math.sqrt(en[1]));
-  const conv=GS.lastE!==null&&Math.abs(E-GS.lastE)<Math.max(1e-6,Math.abs(E)*tolB)*sub/base;GS.acc=conv?(GS.acc||0)+sub:0;GS.lastE=E;done=GS.acc>=need||GS.it>=40000;
+  GS.lastE=E;if(!GS.ck||GS.ck.it>GS.it)GS.ck={it:0,E:null,ok:0};if(GS.it-GS.ck.it>=base){const conv=GS.ck.E!==null&&Math.abs(E-GS.ck.E)<Math.max(1e-6,Math.abs(E)*tolB);GS.ck={it:GS.it,E,ok:conv?GS.ck.ok+1:0};}done=GS.ck.ok>=(GS.task==='scf'?2:3)||GS.it>=40000;
   const ms=performance.now()-ts;GS.batch=Math.max(4,Math.min(base,Math.round(sub*Math.max(0.5,Math.min(2,want/Math.max(ms,0.3))))));
  }while(!done&&performance.now()-t0<want);
  gQuad.material=gMat;gLive(mx);GS.prevMs=performance.now()-t0;GS.spf=tot;return {psi:null,E,done};}
